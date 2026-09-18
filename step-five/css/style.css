@@ -219,12 +219,13 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 @keyframes popOut{to{transform:translateX(-50%) scale(1.7);opacity:0;}}
 
 /* ---- hold-note tail (the "long note" body between head and release point) ----
-   a plain square-cornered bar, narrower than the arrow panels themselves so
-   it reads as a stem behind them, with the same outline + woven-texture
-   fill (::before/::after, like .note) so it matches their material */
+   a plain sharp-cornered bar, narrower than the arrow panels themselves so it
+   sits behind them as a stem — purely decorative, drawn behind (z-order) the
+   head/release-marker arrows via DOM order so the arrows visually overlap
+   its ends; it carries no judgement of its own (see game.js: the loop only
+   ever checks note.holdEnd / state.laneHeld, never this element) */
 .holdTail{position:absolute;left:50%;width:calc(var(--panelSize)*0.55);
   transform:translateX(-50%);filter:drop-shadow(0 0 8px currentColor);}
-.holdTail::before,.holdTail::after{border-radius:6px;}
 .holdTail::before{content:"";position:absolute;inset:-5px;background:#08080e;}
 .holdTail::after{content:"";position:absolute;inset:0;background-color:currentColor;opacity:.55;
   background-image:
