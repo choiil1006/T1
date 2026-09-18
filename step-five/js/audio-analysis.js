@@ -40,15 +40,37 @@
       if (onset[i] > onsetMax) onsetMax = onset[i];
     }
 
-    // 3) autocorrelation over plausible tempo range (60-200 BPM)
+    // 3) autocorrelation over plausible tempo range (60-200 BPM), weighted by
+    //    a tempo prior to avoid octave errors. Plain unweighted autocorrelation
+    //    routinely locks onto a harmonic of the true beat period — usually
+    //    double the true period (half the real tempo) — because a lot of
+    //    music accents every OTHER beat more strongly (e.g. kick on 1 & 3,
+    //    snare on 2 & 4), so "strong beat vs strong beat" two beats apart can
+    //    score higher than "beat vs beat" one beat apart. Weighting each
+    //    lag's score by how close it is (in log2/octave terms) to a typical
+    //    song tempo breaks that tie in favor of the musically normal answer,
+    //    same technique real tempo estimators use. Also normalize the raw sum
+    //    by how many terms went into it, so longer lags (fewer terms) aren't
+    //    unfairly penalized relative to shorter ones.
     const minBPM = 60, maxBPM = 200;
     const minLag = Math.max(1, Math.round(fps * 60 / maxBPM));
     const maxLag = Math.min(frames - 1, Math.round(fps * 60 / minBPM));
-    let bestLag = minLag, bestScore = -Infinity;
+    function acScore(lag) {
+      let sum = 0;
+      const n = frames - lag;
+      for (let i = lag; i < frames; i++) sum += onset[i] * onset[i - lag];
+      return n > 0 ? sum / n : 0;
+    }
+    function tempoPriorWeight(candidateBpm) {
+      // broad log-normal prior centered on 120 BPM (~0.6 octave std dev) —
+      // wide enough to not hard-exclude anything, just tips close calls
+      const octavesFromCenter = Math.log2(candidateBpm / 120);
+      return Math.exp(-0.5 * (octavesFromCenter / 0.6) ** 2);
+    }
+    let bestLag = minLag, bestWeightedScore = -Infinity;
     for (let lag = minLag; lag <= maxLag; lag++) {
-      let score = 0;
-      for (let i = lag; i < frames; i++) { score += onset[i] * onset[i - lag]; }
-      if (score > bestScore) { bestScore = score; bestLag = lag; }
+      const weighted = acScore(lag) * tempoPriorWeight(60 * fps / lag);
+      if (weighted > bestWeightedScore) { bestWeightedScore = weighted; bestLag = lag; }
     }
     const bpm = Math.round(60 * fps / bestLag);
 
