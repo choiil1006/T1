@@ -239,19 +239,19 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
     repeating-linear-gradient(-45deg, rgba(0,0,0,.16) 0 3px, transparent 3px 8px),
     linear-gradient(160deg, rgba(255,255,255,.32), rgba(255,255,255,0) 45%, rgba(0,0,0,.22) 100%);}
 
-/* DL/UL arrows lean so their top-right corner is the shallow (pointy) one;
+/* DL/UR lean so their top-right corner is the shallow (pointy) one;
    translating that straight down by S makes the bottom-LEFT corner the
    pointy one, which is what keeps this a parallelogram, not a trapezoid */
 .holdTail.hold-DL::before,.holdTail.hold-DL::after,
-.holdTail.hold-UL::before,.holdTail.hold-UL::after{
+.holdTail.hold-UR::before,.holdTail.hold-UR::after{
   clip-path: polygon(
     0% min(calc(var(--panelSize)*0.55), 100%), 100% 0%,
     100% calc(100% - min(calc(var(--panelSize)*0.55), 100%)), 0% 100%
   );
 }
-/* UR/DR arrows lean the other way — top-LEFT is the shallow corner, so
+/* UL/DR lean the other way — top-LEFT is the shallow corner, so
    bottom-RIGHT is the pointy one */
-.holdTail.hold-UR::before,.holdTail.hold-UR::after,
+.holdTail.hold-UL::before,.holdTail.hold-UL::after,
 .holdTail.hold-DR::before,.holdTail.hold-DR::after{
   clip-path: polygon(
     0% 0%, 100% min(calc(var(--panelSize)*0.55), 100%),
