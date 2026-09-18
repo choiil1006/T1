@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>STEP FIVE — 펌프 리듬게임</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="bgGlow"></div>
+<div id="toastStack"></div>
+<div id="app">
+
+  <!-- ============ SETUP SCREEN ============ -->
+  <div class="screen active" id="setupScreen">
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:36px 0 4px;">
+      <h1 class="logo" style="margin:0;">STEP FIVE</h1>
+      <button class="btn small" id="openSettingsBtn">⚙ 설정</button>
+    </div>
+    <div class="tagline">발판으로 즐기는 5패널 리듬게임</div>
+
+    <div class="card">
+      <h2><span class="num">♪</span>현재 곡</h2>
+      <div class="fname" id="fnameText" style="color:var(--sub);font-size:14px;">아직 곡을 불러오지 않았어요 — 설정에서 불러오세요</div>
+    </div>
+
+    <div class="card" id="songListCard" style="display:none;">
+      <h2><span class="num">♪</span>저장된 곡</h2>
+      <div id="songListContainer"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">1</span>템포 (BPM)</h2>
+      <div class="bpmRow">
+        <input type="number" id="bpmInput" value="120" min="40" max="300">
+      </div>
+      <div id="tapHint">곡을 선택하면 파일 분석으로 BPM이 자동으로 측정됩니다. 추정치이니 다르게 느껴지면 숫자를 직접 수정하세요. 자동 분석 시 채보도 실제 비트 강도에 맞춰 생성됩니다.</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">2</span>난이도</h2>
+      <div class="diffGrid" id="diffGrid">
+        <div class="diffBtn" data-diff="easy"><b>EASY</b><span>느리게, 넓은 판정</span></div>
+        <div class="diffBtn sel" data-diff="normal"><b>NORMAL</b><span>기본 템포</span></div>
+        <div class="diffBtn" data-diff="hard"><b>HARD</b><span>노말과 동일한 채보, 판정만 엄격</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">3</span>동기화 보정</h2>
+      <div class="offsetRow">
+        <button class="btn" id="offsetMinus">−10</button>
+        <input type="number" id="offsetInput" value="0" min="-300" max="300" step="10">
+        <span class="unit">ms</span>
+        <button class="btn" id="offsetPlus">+10</button>
+      </div>
+      <div id="offsetHint">노트가 계속 늦게(빠르게) 맞는 것처럼 느껴지면 조절하세요. 소리가 늦게 들리는 스피커/블루투스 환경이면 양수로, 반대면 음수로 설정합니다.</div>
+    </div>
+
+    <button class="btn primary" id="startBtn" disabled style="width:min(560px,92vw);">음악을 먼저 불러오세요</button>
+    <div id="chartStatus" style="color:var(--sub);font-size:12px;margin:8px 0 40px;text-align:center;">
+      현재: 자동 생성 패턴 사용 중
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS SCREEN ============ -->
+  <div class="screen" id="settingsScreen">
+    <div style="width:min(560px,92vw);display:flex;align-items:center;gap:14px;margin:30px 0 6px;">
+      <button class="btn small" id="settingsBackBtn">← 나가기</button>
+      <h1 class="logo" style="margin:0;font-size:26px;">설정</h1>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">1</span>음악 불러오기</h2>
+      <label id="fileLabel">
+        <span class="fname" id="fnameTextSettings">MP3 / WAV 파일 선택…</span>
+        <span class="btn small">파일 선택</span>
+        <input type="file" id="audioFile" accept="audio/*" style="display:none">
+      </label>
+      <div style="font-size:12px;color:var(--sub);margin-top:8px;">
+        불러온 곡은 이 브라우저에 자동으로 저장돼서, 메인 화면의 저장된 곡 목록에서 다시 선택할 수 있어요.
+      </div>
+    </div>
+
+    <div class="card" id="songManageCard" style="display:none;">
+      <h2><span class="num">2</span>저장된 곡 관리</h2>
+      <div id="songManageContainer"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">3</span>발판 / 키 설정</h2>
+      <div class="padGrid" id="padGrid">
+        <div class="padSlot" data-lane="DL"><div class="lbl">DOWN-LEFT</div><div class="key">Num1</div></div>
+        <div class="padSlot" data-lane="UL"><div class="lbl">UP-LEFT</div><div class="key">Num7</div></div>
+        <div class="padSlot" data-lane="CN"><div class="lbl">CENTER</div><div class="key">Num5</div></div>
+        <div class="padSlot" data-lane="UR"><div class="lbl">UP-RIGHT</div><div class="key">Num9</div></div>
+        <div class="padSlot" data-lane="DR"><div class="lbl">DOWN-RIGHT</div><div class="key">Num3</div></div>
+      </div>
+      <div id="padStatus">각 칸을 클릭한 뒤, 해당 발판을 밟거나 키를 누르면 자동 등록됩니다. (게임패드로 연결된 발판 자동 인식, 화면의 레인을 직접 클릭/터치해도 플레이할 수 있어요)</div>
+    </div>
+
+    <div class="card" style="margin-bottom:40px;">
+      <h2><span class="num">4</span>패턴 에디터</h2>
+      <button class="btn" id="openEditorBtn" disabled style="width:100%;">패턴 에디터 열기</button>
+    </div>
+  </div>
+
+  <!-- ============ GAME SCREEN ============ -->
+  <div class="screen" id="gameScreen">
+    <div id="hud">
+      <div class="block">
+        <div class="label">SCORE</div>
+        <div class="value" id="scoreVal">0</div>
+      </div>
+      <div class="block right">
+        <div class="label">ACCURACY</div>
+        <div class="value" id="accVal">100%</div>
+      </div>
+    </div>
+    <div id="comboWrap"><div id="comboNum">0</div><div id="comboLbl">COMBO</div></div>
+
+    <div id="arena">
+      <div id="lanes">
+        <div class="lane" data-lane="DL"><div class="judgeLine"></div><div class="receptor"></div></div>
+        <div class="lane" data-lane="UL"><div class="judgeLine"></div><div class="receptor"></div></div>
+        <div class="lane" data-lane="CN"><div class="judgeLine"></div><div class="receptor"></div></div>
+        <div class="lane" data-lane="UR"><div class="judgeLine"></div><div class="receptor"></div></div>
+        <div class="lane" data-lane="DR"><div class="judgeLine"></div><div class="receptor"></div></div>
+      </div>
+      <div id="judgeText"></div>
+      <div id="countdown"></div>
+      <div id="pauseOverlay">
+        <div style="font-family:'Orbitron';font-size:28px;letter-spacing:3px;">PAUSED</div>
+        <div class="row">
+          <button class="btn primary" id="resumeBtn">계속하기</button>
+          <button class="btn" id="quitBtn">그만두기</button>
+        </div>
+      </div>
+    </div>
+    <div id="footerHint">ESC — 일시정지 · 발판/키 없이도 화면의 패널을 클릭/터치해서 플레이할 수 있어요</div>
+  </div>
+
+  <!-- ============ PATTERN EDITOR SCREEN ============ -->
+  <div class="screen" id="editorScreen">
+    <div id="editorTop">
+      <button class="btn small" id="edBackBtn">← 나가기</button>
+      <div class="grp">BPM
+        <input type="number" id="edBpmInput" value="120" min="40" max="300" style="width:70px;background:var(--bg2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:5px;font-family:'JetBrains Mono';">
+      </div>
+      <div class="grp">그리드
+        <select id="edGridSelect">
+          <option value="1">1/4 (박자)</option>
+          <option value="2" selected>1/8</option>
+          <option value="4">1/16</option>
+          <option value="8">1/32</option>
+        </select>
+      </div>
+      <div class="grp">확대
+        <select id="edZoomSelect">
+          <option value="80">작게</option>
+          <option value="140" selected>보통</option>
+          <option value="220">크게</option>
+        </select>
+      </div>
+      <button class="btn small" id="edPlayBtn">▶ 재생</button>
+      <span id="editTimeVal">0.00s</span>
+      <button class="btn small" id="recBtn">● REC</button>
+      <span style="font-size:12px;color:var(--sub);">REC 중 발판/키 입력 시 현재 위치에 노트 기록</span>
+    </div>
+    <div id="editorBody">
+      <div id="editorRuler"></div>
+      <div id="editorTimeline">
+        <div id="editPlayhead"></div>
+        <div class="edLaneRow" data-lane="DL"><div class="edLaneLabel">DOWN-LEFT</div><div class="edLaneTrack"></div></div>
+        <div class="edLaneRow" data-lane="UL"><div class="edLaneLabel">UP-LEFT</div><div class="edLaneTrack"></div></div>
+        <div class="edLaneRow" data-lane="CN"><div class="edLaneLabel">CENTER</div><div class="edLaneTrack"></div></div>
+        <div class="edLaneRow" data-lane="UR"><div class="edLaneLabel">UP-RIGHT</div><div class="edLaneTrack"></div></div>
+        <div class="edLaneRow" data-lane="DR"><div class="edLaneLabel">DOWN-RIGHT</div><div class="edLaneTrack"></div></div>
+      </div>
+    </div>
+    <div id="editorBottom">
+      <button class="btn" id="edClearBtn">전체 지우기</button>
+      <button class="btn" id="edSaveBtn">차트 저장(JSON)</button>
+      <label class="btn" style="cursor:pointer;">차트 불러오기
+        <input type="file" id="edLoadInput" accept="application/json" style="display:none">
+      </label>
+      <button class="btn" id="edUseAutoBtn">자동 생성으로 전환</button>
+      <button class="btn primary" id="edPlayTestBtn">이 패턴으로 플레이</button>
+    </div>
+  </div>
+
+  <!-- ============ RESULT SCREEN ============ -->
+  <div class="screen" id="resultScreen">
+    <h1 class="logo" style="margin-top:60px;">RESULT</h1>
+    <div class="card" id="resultCard">
+      <div class="gradeLetter" id="gradeLetter">S</div>
+      <div id="newRecordBadge">NEW RECORD</div>
+      <div class="statGrid">
+        <div class="stat"><div class="l">SCORE</div><div class="v" id="rScore">0</div></div>
+        <div class="stat"><div class="l">MAX COMBO</div><div class="v" id="rCombo">0</div></div>
+        <div class="stat"><div class="l">ACCURACY</div><div class="v" id="rAcc">0%</div></div>
+        <div class="stat"><div class="l">DIFFICULTY</div><div class="v" id="rDiff">-</div></div>
+      </div>
+      <div class="judgeBreak"><span style="color:var(--cn)">PERFECT</span><span id="bPerfect">0</span></div>
+      <div class="judgeBreak"><span style="color:var(--good)">GREAT</span><span id="bGreat">0</span></div>
+      <div class="judgeBreak"><span style="color:#8fb4ff">GOOD</span><span id="bGood">0</span></div>
+      <div class="judgeBreak"><span style="color:#c98fff">BAD</span><span id="bBad">0</span></div>
+      <div class="judgeBreak"><span style="color:var(--warn)">MISS</span><span id="bMiss">0</span></div>
+      <div class="judgeBreak"><span style="color:var(--sub)">EMPTY PRESS</span><span id="bEmpty">0</span></div>
+      <div class="row" style="margin-top:20px;justify-content:center;">
+        <button class="btn primary" id="retryBtn">다시 플레이</button>
+        <button class="btn" id="backBtn">곡 다시 선택</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/constants.js"></script>
+<script src="js/state.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/audio-analysis.js"></script>
+<script src="js/chart-generator.js"></script>
+<script src="js/input.js"></script>
+<script src="js/game.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
