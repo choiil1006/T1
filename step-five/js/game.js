@@ -139,16 +139,15 @@
             const tailAppearAt = note.holdEnd - approach;
             let tailProgress = (now - tailAppearAt) / approach;
             tailProgress = Math.max(0, Math.min(1, tailProgress));
-            // the trail spans exactly the gap between the two panels' own
-            // boxes — zero overlap into either one — so it can never show
-            // through a panel's transparent corners or poke out past its
-            // edge; the panels themselves (drawn on top, see DOM order) are
-            // what visually meet it at each end
+            // the trail reaches a little way into each panel's own box (the
+            // panels are drawn on top — see DOM order — so they simply paint
+            // over it there, like layer order in an image editor)
             const laneH = laneEls[note.lane].clientHeight || 1;
             const panelH = receptorEls[note.lane].clientHeight || 0;
             const panelPct = (panelH / laneH) * 100;
-            const topPct = tailProgress * 87 + panelPct;
-            const bottomPct = headProgress * 87;
+            const insertPct = panelPct * 0.35;
+            const topPct = tailProgress * 87 + panelPct - insertPct;
+            const bottomPct = headProgress * 87 + insertPct;
             note.tailEl.style.top = topPct + "%";
             note.tailEl.style.height = Math.max(0, bottomPct - topPct) + "%";
             note.tailEl.classList.toggle("holdActive", note.holdState === "holding");
