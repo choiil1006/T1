@@ -219,11 +219,15 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 @keyframes popOut{to{transform:translateX(-50%) scale(1.7);opacity:0;}}
 
 /* ---- hold-note tail (the "long note" body between head and release point) ----
-   a plain sharp-cornered bar, narrower than the arrow panels themselves so it
-   sits behind them as a stem — purely decorative, drawn behind (z-order) the
-   head/release-marker arrows via DOM order so the arrows visually overlap
-   its ends; it carries no judgement of its own (see game.js: the loop only
-   ever checks note.holdEnd / state.laneHeld, never this element) */
+   a parallelogram with vertical left/right sides and a slanted top/bottom —
+   the slant matches the lane's own arrow angle, so it reads as a continuation
+   of that arrow's edge instead of a generic box. It's narrower than the arrow
+   panels and, in game.js, sized to span exactly the gap between the head and
+   release-marker panels' own boxes (zero overlap into either), so it can
+   never show through a panel's transparent corners or poke out past its
+   edge — the panels themselves (drawn on top, see DOM order) are what
+   visually meet it at each end. It carries no judgement of its own (see
+   game.js: the loop only ever checks note.holdEnd / state.laneHeld). */
 .holdTail{position:absolute;left:50%;width:calc(var(--panelSize)*0.55);
   transform:translateX(-50%);filter:drop-shadow(0 0 8px currentColor);}
 .holdTail::before{content:"";position:absolute;inset:-5px;background:#08080e;}
@@ -232,6 +236,25 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
     repeating-linear-gradient(45deg, rgba(255,255,255,.22) 0 3px, transparent 3px 8px),
     repeating-linear-gradient(-45deg, rgba(0,0,0,.16) 0 3px, transparent 3px 8px),
     linear-gradient(160deg, rgba(255,255,255,.32), rgba(255,255,255,0) 45%, rgba(0,0,0,.22) 100%);}
+
+/* DL/UL arrows lean so their right edge sits higher than their left —
+   the trail's right side is shallow (0) and left side is a full slant (S)
+   deep, both at top and bottom, keeping the sides vertical */
+.holdTail.hold-DL::before,.holdTail.hold-DL::after,
+.holdTail.hold-UL::before,.holdTail.hold-UL::after{
+  clip-path: polygon(
+    0% min(calc(var(--panelSize)*0.55), 100%), 100% 0%,
+    100% 100%, 0% calc(100% - min(calc(var(--panelSize)*0.55), 100%))
+  );
+}
+/* UR/DR arrows lean the other way — left edge shallow, right edge deep */
+.holdTail.hold-UR::before,.holdTail.hold-UR::after,
+.holdTail.hold-DR::before,.holdTail.hold-DR::after{
+  clip-path: polygon(
+    0% 0%, 100% min(calc(var(--panelSize)*0.55), 100%),
+    100% calc(100% - min(calc(var(--panelSize)*0.55), 100%)), 0% 100%
+  );
+}
 .holdTail.holdActive{filter:drop-shadow(0 0 14px currentColor);}
 .holdTail.holdActive::after{opacity:.9;}
 
