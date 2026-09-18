@@ -146,7 +146,13 @@
             const panelH = receptorEls[note.lane].clientHeight || 0;
             const panelPct = (panelH / laneH) * 100;
             const insertPct = panelPct * 0.7;
-            const topPct = tailProgress * 87 + panelPct - insertPct;
+            // until the release marker actually enters its own approach
+            // window, there's nothing yet to cut the trail's top edge against
+            // — rather than show that edge floating in mid-lane, run the top
+            // off past the visible arena so the lane's own clipping (see
+            // .lane{overflow:hidden}) is what cuts it, like the ribbon is
+            // simply continuing down from off-screen
+            const topPct = now < tailAppearAt ? -60 : (tailProgress * 87 + panelPct - insertPct);
             const bottomPct = headProgress * 87 + insertPct;
             note.tailEl.style.top = topPct + "%";
             note.tailEl.style.height = Math.max(0, bottomPct - topPct) + "%";
