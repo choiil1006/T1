@@ -153,10 +153,16 @@
             // .lane{overflow:hidden}) is what cuts it, like the ribbon is
             // simply continuing down from off-screen
             const topPct = now < tailAppearAt ? -60 : (tailProgress * 87 + panelPct - insertPct);
-            const bottomPct = headProgress * 87 + insertPct;
+            const holding = note.holdState === "holding";
+            // once actually held, the head panel is hidden (see .note.held)
+            // and the judge line is the only thing left to justify a bottom
+            // edge — stop exactly there (no insertion past it) and use a
+            // flat cut (see the .holdActive clip-path override) instead of
+            // the normal slanted corner poking below it
+            const bottomPct = holding ? (headProgress * 87) : (headProgress * 87 + insertPct);
             note.tailEl.style.top = topPct + "%";
             note.tailEl.style.height = Math.max(0, bottomPct - topPct) + "%";
-            note.tailEl.classList.toggle("holdActive", note.holdState === "holding");
+            note.tailEl.classList.toggle("holdActive", holding);
 
             // the release-point arrow only enters once we're actually inside
             // its own approach window (same timing rule as any other note) —

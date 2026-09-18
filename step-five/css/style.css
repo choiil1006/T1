@@ -258,6 +258,23 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
     100% 100%, 0% calc(100% - min(calc(var(--panelSize)*0.55), 100%))
   );
 }
+/* while actually held, the head panel is hidden and the judge line is the
+   only edge left to read against — flatten the bottom corner instead of
+   showing the normal slanted point jutting past it */
+.holdTail.holdActive.hold-DL::before,.holdTail.holdActive.hold-DL::after,
+.holdTail.holdActive.hold-UR::before,.holdTail.holdActive.hold-UR::after{
+  clip-path: polygon(
+    0% min(calc(var(--panelSize)*0.55), 100%), 100% 0%,
+    100% 100%, 0% 100%
+  );
+}
+.holdTail.holdActive.hold-UL::before,.holdTail.holdActive.hold-UL::after,
+.holdTail.holdActive.hold-DR::before,.holdTail.holdActive.hold-DR::after{
+  clip-path: polygon(
+    0% 0%, 100% min(calc(var(--panelSize)*0.55), 100%),
+    100% 100%, 0% 100%
+  );
+}
 .holdTail.holdActive{filter:drop-shadow(0 0 14px currentColor);}
 .holdTail.holdActive::after{opacity:.9;}
 
