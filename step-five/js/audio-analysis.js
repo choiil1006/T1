@@ -97,5 +97,39 @@
     return Math.min(1, o.envelope[idx] / o.max);
   }
 
-  SF.audioAnalysis = { analyzeBPM, onsetStrengthAt };
+  // the tallest onset value within +-halfWindowMs of `ms` — used for
+  // "is there really a hit near this beat-grid slot" checks, which is more
+  // forgiving of small phase/quantization error than sampling one instant
+  function onsetPeakNear(ms, halfWindowMs) {
+    const o = SF.state.onset;
+    if (!o) return 0.5;
+    const half = Math.max(1, Math.round((halfWindowMs / 1000) * o.fps));
+    const center = Math.round((ms / 1000) * o.fps);
+    let peak = 0;
+    for (let i = center - half; i <= center + half; i++) {
+      if (i < 0 || i >= o.envelope.length) continue;
+      const v = o.envelope[i] / o.max;
+      if (v > peak) peak = v;
+    }
+    return Math.min(1, peak);
+  }
+
+  // the average onset strength over a wide window around `ms` (several
+  // seconds) — a smoothed read of "how busy is this section of the song",
+  // for verse/chorus-scale density decisions rather than single-beat ones
+  function onsetWindowAvg(ms, windowMs) {
+    const o = SF.state.onset;
+    if (!o) return 0.5;
+    const half = Math.max(1, Math.round((windowMs / 2 / 1000) * o.fps));
+    const center = Math.round((ms / 1000) * o.fps);
+    let sum = 0, count = 0;
+    for (let i = center - half; i <= center + half; i++) {
+      if (i < 0 || i >= o.envelope.length) continue;
+      sum += o.envelope[i] / o.max;
+      count++;
+    }
+    return count > 0 ? sum / count : 0;
+  }
+
+  SF.audioAnalysis = { analyzeBPM, onsetStrengthAt, onsetPeakNear, onsetWindowAvg };
 })();

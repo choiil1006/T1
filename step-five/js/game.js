@@ -30,7 +30,7 @@
           time: n.time, lane: n.lane, hold: false, holdEnd: null, hit: false, judged: false, el: null, tailEl: null, holdState: null,
         }));
       } else {
-        state.notes = SF.chartGenerator.generateChart(state.bpm, state.difficulty, dur, state.phaseOffsetMs);
+        state.notes = SF.chartGenerator.generateChart(state.bpm, state.difficulty, dur, state.phaseOffsetMs, state.currentSongId);
       }
       beginCountdown();
     }, { once: true });
