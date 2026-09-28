@@ -131,9 +131,15 @@
             }
           }
           let headProgress = (now - appearAt) / approach;
-          headProgress = Math.max(0, Math.min(1, headProgress));
-          note.el.style.top = (headProgress * 87) + "%";
-          note.el.classList.toggle("held", note.holdState === "holding");
+          headProgress = Math.max(0, headProgress);
+          const pinned = note.holdState === "holding"; // actively held -> stays put at the judge line
+          // an unpressed note doesn't stop dead at the judge line and then
+          // pop out of existence — it keeps sliding on past it, off the
+          // bottom of the lane (which clips it — see .lane{overflow:hidden})
+          // exactly like it would if you'd just let it fall through
+          const headVisualProgress = pinned ? Math.min(1, headProgress) : headProgress;
+          note.el.style.top = (headVisualProgress * 87) + "%";
+          note.el.classList.toggle("held", pinned);
 
           if (note.hold && note.tailEl) {
             const tailAppearAt = note.holdEnd - approach;
@@ -153,13 +159,16 @@
             // .lane{overflow:hidden}) is what cuts it, like the ribbon is
             // simply continuing down from off-screen
             const topPct = now < tailAppearAt ? -60 : (tailProgress * 87 + panelPct - insertPct);
-            const holding = note.holdState === "holding";
+            const holding = pinned;
             // once actually held, the head panel is hidden (see .note.held)
             // and the judge line is the only thing left to justify a bottom
             // edge — stop exactly there (no insertion past it) and use a
             // flat cut (see the .holdActive clip-path override) instead of
-            // the normal slanted corner poking below it
-            const bottomPct = holding ? (headProgress * 87) : (headProgress * 87 + insertPct);
+            // the normal slanted corner poking below it. If it was never
+            // pressed at all, headVisualProgress is the same unclamped value
+            // driving the head above, so the tail keeps sliding down with it
+            // instead of the head sliding on alone while the tail freezes.
+            const bottomPct = holding ? (headVisualProgress * 87) : (headVisualProgress * 87 + insertPct);
             note.tailEl.style.top = topPct + "%";
             note.tailEl.style.height = Math.max(0, bottomPct - topPct) + "%";
             note.tailEl.classList.toggle("holdActive", holding);
