@@ -1,0 +1,11 @@
+{
+  "plcModel": "FX3U-32M",
+  "note": "Pad -> PLC input mapping. Device names are the PLC's own labels (octal numbering: X7 is followed by X10). Lanes are listed in the game's left-to-right order; reassigning a lane is just editing its device string here, no rewiring needed on the software side. Nothing reads this file yet.",
+  "lanes": {
+    "DL": "X10",
+    "UL": "X11",
+    "CN": "X12",
+    "UR": "X13",
+    "DR": "X14"
+  }
+}
