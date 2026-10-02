@@ -1100,7 +1100,7 @@ partSvg('pC','-70 -55 520 435',a=>{
   box(14,330,170,40,'모니터·스피커');
   box(200,330,166,40,'27W USB-C 전원');
   ar(99,54,99,84,'접점',106,73);ar(99,130,99,160,'신호 5선 + GND',106,149);ar(99,206,99,246,'USB 키보드 (HID)',106,230);
-  ar(283,54,283,84,'접점',290,73);ar(345,130,345,246,'게임패드',352,190);ar(184,184,200,184,'',0,0);o+=`<text x="192" y="176" font-size="10" fill="var(--ink2)" text-anchor="middle">옵토</text>`;
+  ar(283,54,283,84,'접점',290,73);ar(345,130,345,246,'게임패드',352,190);ar(184,184,200,184,'',0,0);
   ar(99,292,99,328,'HDMI',106,314);ar(283,328,283,294,'전원',290,314);
   const s=document.getElementById('dSys');s.setAttribute('viewBox','0 0 430 380');s.innerHTML=o;
 })();
@@ -1154,7 +1154,7 @@ partSvg('pC','-70 -55 520 435',a=>{
   o+=`<line x1="775" y1="${yy(0)}" x2="775" y2="${yy(4)}" stroke="${RD}" stroke-width="2.4"/>`+T(775,yy(4)+18,'+24V','middle',11,RD);
   o+=T(525,372,'S/S → +24V (싱크 입력)','middle',11,RD)+T(525,390,'출력 COM → 0V','middle',11,'var(--ink2)');
   o+=Bx(640,350,150,56)+T(715,374,'24V SMPS 5A','middle',12)+T(715,392,'조명 전원, 0V만 PLC와 공통','middle',10,'var(--ink2)');
-  o+=T(85,372,'Pi 5 ↔ Pico: USB (키보드 + 시리얼)','middle',11,'var(--ink2)');
+  o+=T(10,372,'Pi 5 ↔ Pico: USB (키보드 + 시리얼)','start',11,'var(--ink2)');
   document.getElementById('wPlc').innerHTML=o;
 })();
 /* ---------- build-step isometric drawings ---------- */
