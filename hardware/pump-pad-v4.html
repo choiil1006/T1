@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>1인 펌프 발판 통합 설계도 v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--paper:#E6EBF0;--sheet:#F6F8FA;--ink:#1B2833;--ink2:#56636F;--line:#BCC6CF;--blue:#1F5FA8;--grid:rgba(31,95,168,.08);--warn:#B5541B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0E141A;--sheet:#151D25;--ink:#E2E8EE;--ink2:#97A5B2;--line:#2B3744;--blue:#63A2EA;--grid:rgba(255,255,255,.045);--warn:#E89A62}}
+:root[data-theme="dark"]{--paper:#0E141A;--sheet:#151D25;--ink:#E2E8EE;--ink2:#97A5B2;--line:#2B3744;--blue:#63A2EA;--grid:rgba(255,255,255,.045);--warn:#E89A62}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 56px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.65;-webkit-text-size-adjust:100%}
+.wrap{max-width:1120px;margin:0 auto;padding:16px 16px 64px}
+.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+.toc div{max-width:1120px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:8px 12px;scrollbar-width:none}
+.toc a{flex:none;color:var(--ink);text-decoration:none;font-size:14px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--sheet)}
+.toc a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.tb{display:grid;grid-template-columns:1fr;border:1.5px solid var(--ink);background:var(--sheet);margin-top:8px}
+.tb .t1{padding:18px;border-bottom:1px solid var(--ink)}
+.tb h1{font-size:clamp(24px,5.4vw,34px);font-weight:600;margin:0;line-height:1.25;letter-spacing:-.015em}
+.tb p{margin:6px 0 0;color:var(--ink2);font-size:15px;max-width:60ch}
+.tb dl{display:grid;grid-template-columns:1fr 1fr;margin:0}
+.tb dl div{padding:8px 12px;border-bottom:1px solid var(--line)}
+.tb dl div:nth-child(odd){border-right:1px solid var(--line)}
+.tb dt{font-size:12.5px;color:var(--ink2)}
+.tb dd{margin:0;font-weight:500;font-variant-numeric:tabular-nums}
+@media(min-width:780px){.tb{grid-template-columns:1.2fr 1fr}.tb .t1{border-bottom:0;border-right:1px solid var(--ink);display:flex;flex-direction:column;justify-content:flex-end}}
+section{margin-top:40px}
+h2{font-size:22px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+h3{font-size:17px;font-weight:600;margin:26px 0 4px}
+.lead{color:var(--ink2);margin:0 0 12px;font-size:15px;max-width:70ch}
+.viewer{position:relative;height:min(64vh,580px);min-height:330px;background-color:var(--sheet);border:1px solid var(--line);
+background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+canvas:active{cursor:grabbing}
+.nogl{display:none;position:absolute;inset:0;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--ink2)}
+.viewer.fail .nogl{display:flex}
+.controls{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.controls .sep{width:1px;background:var(--line);margin:0 4px}
+button{font:inherit;font-size:14px;padding:7px 12px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:6px;cursor:pointer}
+button[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:13px;color:var(--ink2)}
+.legend span{white-space:nowrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.sheets{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:780px){.sheets{grid-template-columns:1fr 1fr}.sheets .wide{grid-column:1/-1}}
+figure{margin:0;background:var(--sheet);border:1px solid var(--line);padding:10px 10px 8px;display:flex;flex-direction:column}
+figure svg{width:100%;height:auto;display:block;max-height:640px}
+figcaption{font-size:13px;color:var(--ink2);display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:6px;margin-top:6px}
+figcaption b{font-weight:600;color:var(--ink)}
+.fnote{font-size:13.5px;color:var(--ink2);margin:6px 0 0}
+ol.callouts{margin:8px 0 0;padding-left:22px;font-size:13.5px;color:var(--ink2);columns:2;column-gap:18px}
+ol.callouts li{break-inside:avoid}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);background:var(--sheet)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;vertical-align:top;padding:8px 12px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font-weight:500;color:var(--ink2);font-size:13px;background:var(--paper);white-space:nowrap}
+td.p{font-weight:500;min-width:8em}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-size:12.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.tag.own{border-color:#3F9C6B;color:#3F9C6B}
+.tag.buy{border-color:var(--warn);color:var(--warn)}
+.cols{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:780px){.cols{grid-template-columns:1fr 1fr}}
+.card{background:var(--sheet);border:1px solid var(--line);padding:14px 16px}
+.card h4{font-size:16px;font-weight:600;margin:0 0 6px}
+.card ul,.card ol{margin:0;padding-left:20px;font-size:14.5px}
+.card li{margin:4px 0}
+.card p{margin:0;font-size:14.5px}
+.note{font-size:14px;color:var(--ink);border-left:3px solid var(--warn);padding:6px 0 6px 12px;margin:14px 0 0;max-width:74ch}
+.steps{display:grid;gap:14px;margin-top:14px}
+.step{display:grid;grid-template-columns:1fr;gap:14px;background:var(--sheet);border:1px solid var(--line);padding:16px}
+@media(min-width:820px){.step{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:start}}
+.step svg{width:100%;height:auto;display:block}
+.step h3{margin:0 0 4px;font-size:19px}
+.step h3 .n{display:inline-block;min-width:1.6em;color:var(--blue);font-variant-numeric:tabular-nums}
+.step .need{font-size:13.5px;color:var(--ink2);margin:0 0 10px}
+.step ol{margin:0;padding-left:22px;font-size:14.5px}
+.step li{margin:5px 0}
+.step .chk{margin-top:12px;font-size:14px;border-left:3px solid #3F9C6B;padding:4px 0 4px 10px}
+.step .ref{font-size:13.5px;color:var(--ink2);margin-top:8px}
+.step a{color:var(--blue)}
+.keyline{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin-top:6px}
+.keyline i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<nav class="toc" aria-label="목차"><div>
+  <a href="#overview">개요</a><a href="#model">3D 모델</a><a href="#mech">기구 설계도</a><a href="#partdwg">부품도</a><a href="#wiring">배선도</a><a href="#bom">부품 목록</a><a href="#buy">구입 목록</a><a href="#steps">제작 순서</a><a href="#build">점검·소프트웨어</a>
+</div></nav>
+<div class="wrap">
+
+<header class="tb" id="overview">
+  <div class="t1">
+    <h1>1인 펌프 발판 통합 설계도</h1>
+    <p>v3의 로드셀 센서를 마이크로스위치로 바꿔 다시 정리했습니다. 프레임·데크·발판 치수는 그대로입니다. 치수 단위는 mm, 높이는 바닥 기준입니다.</p>
+  </div>
+  <dl>
+    <div><dt>전체 크기 (폭×깊이×높이)</dt><dd class="num">957 × 1,247 × 965</dd></div>
+    <div><dt>발판 윗면 높이</dt><dd class="num">80 (조절발 15 포함)</dd></div>
+    <div><dt>모서리 발판</dt><dd class="num">277 × 337, 4장</dd></div>
+    <div><dt>중앙 발판</dt><dd class="num">277 × 277, 1장</dd></div>
+    <div><dt>센서</dt><dd>마이크로스위치 20 (발판당 4 병렬)</dd></div>
+    <div><dt>제어</dt><dd>Pico(키보드 HID) + Pi 5(게임)</dd></div>
+  </dl>
+</header>
+
+<section>
+  <h2>v3에서 바뀐 점</h2>
+  <div class="cols">
+    <div class="card">
+      <h4>센서: 로드셀 → 마이크로스위치</h4>
+      <p>발판마다 네 모서리에 소형 레버 마이크로스위치를 달고 병렬로 묶어 신호선 하나로 만듭니다. 영점·감도·HX711 개조가 모두 없어지고, 판정 지연은 약 3~5ms(추정)입니다. v3 로드셀 방식은 샘플 간격만 12.5ms이고 필터 안정까지 더 걸립니다.</p>
+      <p style="margin-top:8px">Pico는 스위치 5개를 GPIO로 읽어 <b>USB 키보드</b>(넘패드 1·7·5·9·3)로 Pi 5에 보냅니다. step-five 기본 키 매핑과 같아서 게임 코드를 고치지 않아도 되고, 이벤트로 바로 들어와 게임패드 방식의 프레임 폴링 지연(최대 약 16ms)도 없습니다.</p>
+    </div>
+    <div class="card">
+      <h4>기구부에서 달라진 점</h4>
+      <ul>
+        <li>로드셀 자리에 <b>압축 스프링</b>(발판을 받침)과 <b>마이크로스위치</b>가 들어갑니다. 발판은 스프링 위에 떠 있다가 약 0.5mm 눌리면 스위치가 닫히고, 1.0mm에서 레일에 닿는 하드스톱은 v3와 같습니다.</li>
+        <li>코너 플레이트(K1)는 그대로 둡니다. 스프링 윗면과 스위치 레버가 닿는 면 역할을 합니다.</li>
+        <li>K2는 L브래킷에서 <b>스위치 마운트</b>로 이름만 바뀌고, 로드셀 Ø16 구멍 대신 스위치 나사 구멍을 뚫습니다. 길이는 45에서 40으로 줄입니다.</li>
+        <li>HX711 기판과 4심 차폐선이 빠지고, 발판 아래에는 WAGO 레버 커넥터 두 개(GND, 신호)만 둡니다. 케이블은 2심입니다.</li>
+        <li>PLC(FX3U-32M)는 입력 경로에서 뺐습니다. 이유와 쓸 수 있는 자리는 맨 아래 <a href="#build">점검·소프트웨어</a>에 적었습니다.</li>
+      </ul>
+    </div>
+  </div>
+  <figure style="margin-top:14px">
+    <svg id="dSys" role="img" aria-label="시스템 구성도"></svg>
+    <figcaption><b>시스템 구성도</b><span>신호와 전원 흐름</span></figcaption>
+  </figure>
+</section>
+
+<section id="model">
+  <h2>3D 모델</h2>
+  <p class="lead">드래그해서 돌리고, 두 손가락이나 휠로 확대합니다. 분해도를 켜면 발판이 층별로 떠오르고, 외장을 끄면 전장 박스 안과 단자대 위치가 보입니다.</p>
+  <div class="viewer" id="viewer">
+    <canvas id="cv" aria-label="발판 3D 모델, 드래그로 회전"></canvas>
+    <div class="nogl">3D 모델을 불러오지 못했습니다. 아래 도면에서 같은 구조를 확인할 수 있습니다.</div>
+  </div>
+  <div class="controls" role="group" aria-label="보기 전환">
+    <button data-view="iso" aria-pressed="true">입체</button>
+    <button data-view="rear" aria-pressed="false">후면 입체</button>
+    <button data-view="front" aria-pressed="false">정면</button>
+    <button data-view="side" aria-pressed="false">측면</button>
+    <button data-view="top" aria-pressed="false">평면</button>
+    <span class="sep" aria-hidden="true"></span>
+    <button id="bExplode" aria-pressed="false">분해도</button>
+    <button id="bSkin" aria-pressed="true">외장</button>
+  </div>
+  <div class="legend" id="legend"></div>
+</section>
+
+<section id="mech">
+  <h2>기구 설계도</h2>
+  <p class="lead">원점은 발판 프레임의 왼쪽 앞 모서리입니다. x는 오른쪽, z는 뒤쪽(안전바 쪽), 평면도는 화면 쪽이 위입니다. 측면 커버는 내부가 보이도록 빼고 그렸습니다.</p>
+  <div class="sheets">
+    <figure class="wide"><svg id="vTop" role="img" aria-label="평면도"></svg><figcaption><b>평면도</b><span>전장 박스 덮개 생략</span></figcaption></figure>
+    <figure><svg id="vFront" role="img" aria-label="정면도"></svg><figcaption><b>정면도</b><span>화면 쪽에서 본 모습</span></figcaption></figure>
+    <figure><svg id="vSide" role="img" aria-label="우측면도"></svg><figcaption><b>우측면도</b><span>오른쪽에서 본 모습</span></figcaption></figure>
+  </div>
+
+  <h3 id="framepos">프레임 평면도와 부재 위치</h3>
+  <p class="lead">부재 번호는 재단 목록과 같습니다. 발판 위치는 점선입니다.</p>
+  <div class="sheets">
+    <figure><svg id="vFrame" role="img" aria-label="프레임 평면도"></svg><figcaption><b>프레임 평면도</b><span>3030, 4040</span></figcaption></figure>
+    <div class="tablewrap" style="align-self:start"><table>
+      <thead><tr><th>번호</th><th>중심선 위치</th><th>범위</th></tr></thead>
+      <tbody>
+        <tr><td>F1</td><td class="num">x = 15, 862</td><td class="num">z −120 ~ 1,127</td></tr>
+        <tr><td>F2</td><td class="num">z = −105, 15, 862, 1,112</td><td class="num">x 30 ~ 847</td></tr>
+        <tr><td>F3</td><td class="num">x = 298, 579</td><td class="num">z 30 ~ 847</td></tr>
+        <tr><td>F4</td><td class="num">z = 358, 438, 519</td><td class="num">x 30 ~ 283, 594 ~ 847</td></tr>
+        <tr><td>F5</td><td class="num">z = 150, 299, 578, 715</td><td class="num">x 313 ~ 564</td></tr>
+        <tr><td>F6</td><td>기둥 뒷면 높이 315~378에서 F1 윗면 z 1,065~1,099로</td><td>약 62°</td></tr>
+        <tr><td>B1</td><td class="num">x = 20, 857, z = 900</td><td class="num">F1 위, 높이 45 ~ 965</td></tr>
+        <tr><td>B2</td><td class="num">높이 925 ~ 965, z = 900</td><td class="num">x 40 ~ 837</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <h3>상판 데크 가공도</h3>
+  <p class="lead">5t 알루미늄 체커판 한 장을 레이저로 가공합니다. 구멍은 발판보다 사방 2mm 크고, 작은 원은 스페이서 고정용 M6 접시머리 구멍입니다.</p>
+  <div class="sheets">
+    <figure><svg id="vDeck" role="img" aria-label="상판 데크 가공도"></svg><figcaption><b>상판 데크</b><span>877 × 877 × 5t</span></figcaption></figure>
+    <div class="tablewrap" style="align-self:start"><table>
+      <thead><tr><th>구멍</th><th>시작 좌표 (x, z)</th><th>크기</th></tr></thead>
+      <tbody>
+        <tr><td>좌상</td><td class="num">18, 18</td><td class="num">281 × 341</td></tr>
+        <tr><td>우상</td><td class="num">578, 18</td><td class="num">281 × 341</td></tr>
+        <tr><td>좌하</td><td class="num">18, 518</td><td class="num">281 × 341</td></tr>
+        <tr><td>우하</td><td class="num">578, 518</td><td class="num">281 × 341</td></tr>
+        <tr><td>중앙</td><td class="num">298, 298</td><td class="num">281 × 281</td></tr>
+        <tr><td>M6 접시</td><td>스페이서 20곳 중심</td><td class="num">Ø6.6, 90°</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <h3>스위치 장착 상세</h3>
+  <p class="lead">스위치 본체와 레버, 스프링의 크기는 구입할 제품의 실측으로 확정합니다. 도면은 소형 힌지 레버형(본체 약 20 × 10 × 6.4)을 가정한 값입니다.</p>
+  <div class="sheets">
+    <figure>
+      <svg id="vSec" role="img" aria-label="단면 A-A"></svg>
+      <figcaption><b>단면 A-A</b><span>좌상 발판 왼쪽 앞 모서리, 스위치·스프링 중심선</span></figcaption>
+      <ol class="callouts">
+        <li>PC 발판 10t</li><li>2020 캐리어</li><li>코너 플레이트 4t</li><li>마이크로스위치 (힌지 레버형)</li><li>K2 스위치 마운트 4t</li><li>3030 레일 (F1)</li><li>상판 데크 5t</li><li>스페이서 (단면 뒤쪽)</li><li>하드스톱 간극 1.0</li><li>압축 스프링</li>
+      </ol>
+    </figure>
+    <figure>
+      <svg id="vCorner" role="img" aria-label="스위치 장착 평면 상세"></svg>
+      <figcaption><b>모서리 평면 상세</b><span>위에서 본 같은 모서리</span></figcaption>
+      <ol class="callouts">
+        <li>3030 레일 (F1)</li><li>가로 프레임 (F2)</li><li>K2 스위치 마운트, M6 볼트 2개</li><li>마이크로스위치</li><li>코너 플레이트 (위, 점선)</li><li>2020 캐리어 (위, 점선)</li><li>POM 가이드, 간극 1</li><li>하드스톱 접촉면</li><li>상판 데크 경계</li><li>압축 스프링</li>
+      </ol>
+    </figure>
+  </div>
+
+  <h3>안전바와 전장 박스</h3>
+  <div class="sheets">
+    <figure><svg id="vBar" role="img" aria-label="안전바 측면 상세"></svg><figcaption><b>안전바 측면 상세</b><span>오른쪽에서 본 뒤쪽</span></figcaption></figure>
+    <figure><svg id="vBox" role="img" aria-label="전장 박스 배치도"></svg><figcaption><b>전장 박스 배치</b><span>덮개를 연 평면</span></figcaption>
+      <p class="fnote">덮개(3t)에는 쿨러 위 환기 구멍을 뚫고, 앞면 커버에 HDMI·전원 케이블 구멍을 냅니다. Pi 5는 3.5mm 오디오 단자가 없어서 소리는 HDMI나 USB 오디오로 냅니다.</p>
+    </figure>
+  </div>
+</section>
+
+<section id="partdwg">
+  <h2>부품도</h2>
+  <p class="lead">직접 가공하거나 가공 업체에 맡길 부품입니다.</p>
+  <div class="sheets">
+    <figure><svg id="pL" role="img" aria-label="스위치 마운트 부품도"></svg><figcaption><b>K2 스위치 마운트</b><span>알루미늄 4t, 20개</span></figcaption>
+      <p class="fnote">스위치 나사 구멍 2개(M2.5)는 구입한 스위치의 구멍 간격을 캘리퍼스로 재서 뚫습니다. 구멍을 길게(슬롯) 내면 눌림 지점을 조정하기 쉽습니다. 스프링 자리는 Ø10 얕은 홈이나 얇은 고무 시트로 잡습니다.</p></figure>
+    <figure><svg id="pG" role="img" aria-label="코너 플레이트 부품도"></svg><figcaption><b>K1 코너 플레이트</b><span>알루미늄 4t, 20개</span></figcaption>
+      <p class="fnote">그림은 왼쪽 앞 모서리용입니다. 다른 모서리는 대칭으로 뒤집어 씁니다. 스프링 윗면이 받치고 스위치 레버가 눌리는 면입니다. 60 × 4 알루미늄 평철을 60mm로 잘라 구멍만 뚫어도 됩니다.</p></figure>
+    <figure class="wide"><svg id="pC" role="img" aria-label="캐리어 조립도"></svg><figcaption><b>캐리어 조립도</b><span>모서리 발판용 277×337, 중앙용은 옆변만 277</span></figcaption>
+      <p class="fnote">안쪽 모서리는 2020 L브래킷으로 잇습니다. PC 발판은 M5 접시머리 6개로 캐리어 윗면 슬롯에 고정합니다.</p></figure>
+  </div>
+</section>
+
+<section id="wiring">
+  <h2>배선도</h2>
+  <div class="sheets">
+    <figure><svg id="wPanel" role="img" aria-label="발판 하나의 스위치 결선도" viewBox="0 0 380 365"></svg><figcaption><b>발판 결선도</b><span>스위치 4개 병렬 → 2심 케이블</span></figcaption>
+      <p class="fnote">스위치의 COM끼리, NO끼리 묶습니다. COM 4개는 GND용 WAGO 5구 커넥터 하나에, NO 4개는 신호용 WAGO 5구 커넥터 하나에 넣으면 남는 구멍 하나가 케이블입니다. 어느 모서리를 밟아도 신호가 하나로 나옵니다. 스위치는 NC 단자를 쓰지 않습니다.</p></figure>
+    <figure><svg id="wPico" role="img" aria-label="발판 5개와 Pico 배선도" viewBox="0 0 380 385"></svg><figcaption><b>발판 5개 → Pico</b><span>괄호는 물리 핀 번호</span></figcaption>
+      <p class="fnote">전원선이 없습니다. 신호선은 Pico 내부 풀업을 쓰고, 케이블이 길거나 오입력이 있으면 3V3(36번)에 4.7kΩ 풀업을 GPIO마다 하나씩 답니다. 5V를 GPIO에 넣지 마세요.</p></figure>
+    <figure class="wide"><svg id="vRoute" role="img" aria-label="배선 경로도"></svg><figcaption><b>배선 경로도</b><span>케이블은 조절발로 생긴 바닥 틈 15mm로 지나갑니다</span></figcaption></figure>
+  </div>
+  <h3 id="pins">핀 배정</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>연결</th><th>스위치 묶음 / 부품 핀</th><th>Pico 핀</th><th>보내는 키 (step-five 기본)</th></tr></thead>
+    <tbody>
+      <tr><td class="p">좌하 (DL)</td><td>신호 / GND</td><td class="num">GP2 (4) / GND</td><td>넘패드 1</td></tr>
+      <tr><td class="p">좌상 (UL)</td><td>신호 / GND</td><td class="num">GP3 (5) / GND</td><td>넘패드 7</td></tr>
+      <tr><td class="p">중앙 (CN)</td><td>신호 / GND</td><td class="num">GP4 (6) / GND</td><td>넘패드 5</td></tr>
+      <tr><td class="p">우상 (UR)</td><td>신호 / GND</td><td class="num">GP5 (7) / GND</td><td>넘패드 9</td></tr>
+      <tr><td class="p">우하 (DR)</td><td>신호 / GND</td><td class="num">GP6 (9) / GND</td><td>넘패드 3</td></tr>
+      <tr><td class="p">GND 공통</td><td>발판 5개의 GND선</td><td class="num">GND (3), (8) 등</td><td></td></tr>
+      <tr><td class="p">풀업 (권장)</td><td>4.7kΩ × 5</td><td class="num">GPIO ↔ 3V3 (36)</td><td></td></tr>
+      <tr><td class="p">Pico → Pi 5</td><td>마이크로 USB</td><td>Pi 5 USB 포트</td><td>USB 키보드</td></tr>
+      <tr><td class="p">메뉴 버튼 4개</td><td>이전, 다음, 선택, 뒤로</td><td>인코더 버튼 단자 1~4</td><td>인코더 버튼 1~4</td></tr>
+      <tr><td class="p">인코더 → Pi 5</td><td>인코더 USB</td><td>Pi 5 USB 포트</td><td>게임패드</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">발판 쪽 케이블은 2심(신호, GND)이면 됩니다. 전원이 없어 차폐선은 필수가 아니지만, Pi 5 전원선 옆으로 지나가는 구간이 길면 차폐 2심선을 쓰고 차폐는 Pico 쪽 GND 한 곳에만 연결하세요. 스위치 사이 배선은 짧게 끝냅니다.</p>
+</section>
+
+<section id="bom">
+  <h2>부품 목록</h2>
+  <h3>전자부 재구성</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>부품</th><th>수량</th><th>상태</th><th>역할, 비고</th></tr></thead>
+    <tbody>
+      <tr><td class="p">Raspberry Pi 5</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>게임 실행, 모니터 출력</td></tr>
+      <tr><td class="p">제로딜레이 인코더</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>메뉴 버튼 4개용</td></tr>
+      <tr><td class="p">소형 힌지 레버 마이크로스위치 (Omron SS-5GL2급)</td><td class="num">24</td><td><span class="tag buy">추가</span></td><td>발판 모서리 20개 + 여유 4개</td></tr>
+      <tr><td class="p">압축 스프링 모음 키트</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>발판 받침. 눌림 감각에 따라 교체하며 시험</td></tr>
+      <tr><td class="p">Raspberry Pi Pico H</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>스위치 읽기, USB 키보드</td></tr>
+      <tr><td class="p">Pico 스크류 터미널 확장 보드</td><td class="num">1</td><td><span class="tag">선택</span></td><td>나사로 전선을 물리는 보드. 없으면 Pico 헤더에 직접 납땜</td></tr>
+      <tr><td class="p">WAGO 221-415 5구 레버 커넥터</td><td class="num">12</td><td><span class="tag buy">추가</span></td><td>발판당 2개(GND, 신호), 여유 2개</td></tr>
+      <tr><td class="p">실리콘 전선 24AWG 세트</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>스위치 사이 배선</td></tr>
+      <tr><td class="p">2심 케이블 0.3sq</td><td class="num">약 10m</td><td><span class="tag buy">추가</span></td><td>발판 → 전장 박스</td></tr>
+      <tr><td class="p">저항 4.7kΩ 1/4W</td><td class="num">5</td><td><span class="tag">선택</span></td><td>GPIO 풀업. 오입력이 있을 때</td></tr>
+      <tr><td class="p">M2.5 나사 + 너트</td><td class="num">약 50세트</td><td><span class="tag buy">추가</span></td><td>스위치 고정. 구멍 크기는 스위치 실측</td></tr>
+      <tr><td class="p">Pi 5용 27W USB-C 전원</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>정품 권장, 없으면 USB 장치가 불안정</td></tr>
+      <tr><td class="p">Pi 5 액티브 쿨러</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>밀폐된 전장 박스 안 발열</td></tr>
+      <tr><td class="p">microSD 32GB 이상</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>이미 있으면 불필요</td></tr>
+      <tr><td class="p">마이크로 HDMI–HDMI 케이블</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>모니터 연결, 길이는 설치에 맞게</td></tr>
+      <tr><td class="p">USB-A–마이크로 B 케이블 30cm</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>Pico ↔ Pi 5</td></tr>
+      <tr><td class="p">USB 연장 케이블 약 2m</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>인코더 기본 선이 짧을 때</td></tr>
+      <tr><td class="p">30mm 아케이드 버튼</td><td class="num">4</td><td><span class="tag buy">확인</span></td><td>인코더 키트에 들어 있으면 불필요</td></tr>
+      <tr><td class="p">모니터, 스피커</td><td class="num">1</td><td><span class="tag">선택</span></td><td>HDMI 스피커 내장 모니터면 간단</td></tr>
+      <tr><td class="p">50kg 하프브리지 로드셀 20, HX711 5</td><td class="num">—</td><td><span class="tag">미사용</span></td><td>v3 방식으로 돌아갈 때를 위해 보관</td></tr>
+      <tr><td class="p">Mitsubishi FX3U-32M PLC</td><td class="num">1</td><td><span class="tag">미사용</span></td><td>입력 경로에서 제외. 아래 점검·소프트웨어 참조</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>재단 목록</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>번호</th><th>규격</th><th>치수</th><th>수량</th><th>용도</th></tr></thead>
+    <tbody>
+      <tr><td>F1</td><td>3030</td><td class="num">1,247</td><td class="num">2</td><td>측면 레일, 전장부부터 후면 연장부까지</td></tr>
+      <tr><td>F2</td><td>3030</td><td class="num">817</td><td class="num">4</td><td>가로 프레임 (전장 앞, 발판 앞, 발판 뒤, 후면 끝)</td></tr>
+      <tr><td>F3</td><td>3030</td><td class="num">817</td><td class="num">2</td><td>내부 세로 레일</td></tr>
+      <tr><td>F4</td><td>3030</td><td class="num">253</td><td class="num">6</td><td>좌우열 보강재 (3줄씩)</td></tr>
+      <tr><td>F5</td><td>3030</td><td class="num">251</td><td class="num">4</td><td>중앙열 보강재 2, 데크 받침 2</td></tr>
+      <tr><td>F6</td><td>3030</td><td class="num">약 340</td><td class="num">2</td><td>사선 브레이스, 양끝 각도 절단</td></tr>
+      <tr><td>B1</td><td>4040</td><td class="num">920</td><td class="num">2</td><td>안전바 기둥</td></tr>
+      <tr><td>B2</td><td>4040</td><td class="num">797</td><td class="num">1</td><td>안전바 손잡이</td></tr>
+      <tr><td>C1</td><td>2020</td><td class="num">337</td><td class="num">8</td><td>모서리 발판 캐리어 옆변</td></tr>
+      <tr><td>C2</td><td>2020</td><td class="num">277</td><td class="num">2</td><td>중앙 발판 캐리어 옆변</td></tr>
+      <tr><td>C3</td><td>2020</td><td class="num">237</td><td class="num">15</td><td>캐리어 앞뒤변, 가운데 리브</td></tr>
+      <tr><td>P1</td><td>PC 10t</td><td class="num">277 × 337</td><td class="num">4</td><td>모서리 발판</td></tr>
+      <tr><td>P2</td><td>PC 10t</td><td class="num">277 × 277</td><td class="num">1</td><td>중앙 발판</td></tr>
+      <tr><td>D1</td><td>체커판 5t</td><td class="num">877 × 877</td><td class="num">1</td><td>상판 데크, 가공도 참조</td></tr>
+      <tr><td>D2</td><td>알루미늄 3t</td><td class="num">877 × 120</td><td class="num">2</td><td>전장판, 전장 박스 덮개</td></tr>
+      <tr><td>D3</td><td>알루미늄 3t</td><td>측면 커버</td><td>1식</td><td>좌우 1,247×65, 앞 883×65, 뒤 877×35</td></tr>
+      <tr><td>K1</td><td>알루미늄 4t</td><td class="num">60 × 60</td><td class="num">20</td><td>코너 플레이트 (60×4 평철을 잘라 사용 가능)</td></tr>
+      <tr><td>K2</td><td>알루미늄 4t 절곡</td><td class="num">40 × 40, 높이 17</td><td class="num">20</td><td>스위치 마운트 (L브래킷에서 구멍만 변경)</td></tr>
+      <tr><td>S1</td><td>알루미늄 블록</td><td class="num">30 × 30 × 30</td><td class="num">8</td><td>데크 받침 (가운데)</td></tr>
+      <tr><td>S2</td><td>알루미늄 블록</td><td class="num">18 × 30 × 30</td><td class="num">12</td><td>데크 받침 (테두리)</td></tr>
+      <tr><td>G1</td><td>POM</td><td class="num">14 × 20 × 20</td><td class="num">20</td><td>발판 가이드</td></tr>
+      <tr><td>E1</td><td>버튼 박스</td><td class="num">80 × 70 × 70</td><td class="num">1</td><td>알루미늄 케이스나 3D 프린트</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>체결 부품 (여유 10% 포함 권장)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>부품</th><th>수량</th><th>쓰는 곳</th></tr></thead>
+    <tbody>
+      <tr><td>3030 코너 브래킷</td><td class="num">32</td><td>F2~F5 양끝</td></tr>
+      <tr><td>3030용 M6 T너트 + M6×12 볼트</td><td class="num">약 150</td><td>코너 브래킷, 스위치 마운트, POM 가이드</td></tr>
+      <tr><td>4040 코너 브래킷</td><td class="num">8</td><td>기둥 아래, 손잡이 양끝</td></tr>
+      <tr><td>3030 각도 조인트</td><td class="num">4</td><td>브레이스 양끝</td></tr>
+      <tr><td>2020 L브래킷 + M5 T너트·볼트</td><td class="num">30</td><td>캐리어 안쪽 모서리와 리브</td></tr>
+      <tr><td>M5 접시머리 볼트 + T너트</td><td class="num">70</td><td>코너 플레이트 40, PC 발판 30</td></tr>
+      <tr><td>M6 접시머리 볼트</td><td class="num">20</td><td>상판 데크 → 스페이서 (스페이서에 M6 탭)</td></tr>
+      <tr><td>M6 볼트 + T너트</td><td class="num">20</td><td>스페이서 → 프레임</td></tr>
+      <tr><td>고무 조절발 M8 (3030 바닥 장착형)</td><td class="num">16</td><td>프레임 아래</td></tr>
+      <tr><td>슬롯 커버</td><td>필요 길이</td><td>손 닿는 안전바, 노출 슬롯</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="buy">
+  <h2>구입 목록</h2>
+  <p class="lead">링크는 쿠팡·네이버쇼핑의 검색 결과 페이지입니다. 개별 상품 링크는 재고와 가격이 자주 바뀌고 제가 상품 페이지를 확인할 수 없어서, 검색어를 넣어 두었습니다. 가격은 대략적인 추정이라 구매 전에 확인하세요.</p>
+  <h3>센서 부품 (v4에서 새로 사는 것)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>품목</th><th>수량</th><th>고를 때 확인</th><th>예상가(추정)</th><th>검색</th></tr></thead>
+    <tbody>
+      <tr><td class="p">옴론 SS-5GL2 마이크로스위치</td><td class="num">24</td><td>정품이 오래 갑니다. 본체 약 20×10×6.4, 힌지 레버형. 받으면 높이와 구멍 간격을 먼저 실측하세요.</td><td class="num">개당 2~5천</td><td><a href="https://www.coupang.com/np/search?q=%EC%98%B4%EB%A1%A0%20SS-5GL2%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%EC%8A%A4%EC%9C%84%EC%B9%98" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%98%B4%EB%A1%A0%20SS-5GL2%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%EC%8A%A4%EC%9C%84%EC%B9%98" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">소형 마이크로스위치 (SS-5GL 호환)</td><td class="num">24</td><td>정품 대신 쓸 저가형. 수명이 짧을 수 있어 정품과 같은 형태인지 사진으로 확인.</td><td class="num">개당 0.5~1천</td><td><a href="https://www.coupang.com/np/search?q=%EC%86%8C%ED%98%95%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%EC%8A%A4%EC%9C%84%EC%B9%98%20SS-5GL%20%ED%9E%8C%EC%A7%80%20%EB%A0%88%EB%B2%84" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%86%8C%ED%98%95%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%EC%8A%A4%EC%9C%84%EC%B9%98%20SS-5GL%20%ED%9E%8C%EC%A7%80%20%EB%A0%88%EB%B2%84" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">압축 스프링 모음 키트</td><td class="num">1</td><td>선 지름 0.8~1.2, 외경 8~10, 길이 8~15가 섞인 키트. 눌림 감각을 시험하며 고릅니다.</td><td class="num">1~2만</td><td><a href="https://www.coupang.com/np/search?q=%EC%95%95%EC%B6%95%20%EC%8A%A4%ED%94%84%EB%A7%81%20%EC%84%B8%ED%8A%B8%20%EB%AA%A8%EC%9D%8C%20%EB%B0%95%EC%8A%A4" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%95%95%EC%B6%95%20%EC%8A%A4%ED%94%84%EB%A7%81%20%EC%84%B8%ED%8A%B8%20%EB%AA%A8%EC%9D%8C%20%EB%B0%95%EC%8A%A4" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">WAGO 221-415 5구 레버 커넥터</td><td class="num">12</td><td>2.5mm² 규격이지만 0.3~0.5mm² 전선도 물립니다. 호환품도 됩니다.</td><td class="num">개당 0.5~1.5천</td><td><a href="https://www.coupang.com/np/search?q=%EC%99%80%EA%B3%A0%20221-415%20%EB%A0%88%EB%B2%84%20%EC%BB%A4%EB%84%A5%ED%84%B0%205%EA%B5%AC" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%99%80%EA%B3%A0%20221-415%20%EB%A0%88%EB%B2%84%20%EC%BB%A4%EB%84%A5%ED%84%B0%205%EA%B5%AC" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">실리콘 전선 24AWG 세트</td><td class="num">1</td><td>스위치 사이 배선용. 빨강·검정 포함.</td><td class="num">1~1.5만</td><td><a href="https://www.coupang.com/np/search?q=%EC%8B%A4%EB%A6%AC%EC%BD%98%20%EC%A0%84%EC%84%A0%2024AWG%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%8B%A4%EB%A6%AC%EC%BD%98%20%EC%A0%84%EC%84%A0%2024AWG%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">2심 케이블 0.3sq</td><td class="num">10m</td><td>발판 → 전장 박스. 차폐형이면 더 좋습니다.</td><td class="num">1~1.5만</td><td><a href="https://www.coupang.com/np/search?q=2%EC%8B%AC%20%EC%BC%80%EC%9D%B4%EB%B8%94%200.3SQ%2010m" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=2%EC%8B%AC%20%EC%BC%80%EC%9D%B4%EB%B8%94%200.3SQ%2010m" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">M2.5 나사 너트 세트</td><td class="num">1</td><td>스위치 구멍(보통 M2~M2.5)을 실측하고 사세요.</td><td class="num">0.5~1만</td><td><a href="https://www.coupang.com/np/search?q=M2.5%20%EB%82%98%EC%82%AC%20%EB%84%88%ED%8A%B8%20%EC%84%B8%ED%8A%B8%20%EB%AA%A8%EC%9D%8C" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=M2.5%20%EB%82%98%EC%82%AC%20%EB%84%88%ED%8A%B8%20%EC%84%B8%ED%8A%B8%20%EB%AA%A8%EC%9D%8C" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">4.7kΩ 저항</td><td class="num">1팩</td><td>오입력이 있을 때만 쓰므로 팩으로 구입.</td><td class="num">0.5~1천</td><td><a href="https://www.coupang.com/np/search?q=%EC%A0%80%ED%95%AD%204.7K%201/4W%20100%EA%B0%9C" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%A0%80%ED%95%AD%204.7K%201/4W%20100%EA%B0%9C" target="_blank" rel="noopener">네이버</a></td></tr>
+    </tbody>
+  </table></div>
+  <h3>제어·전장 부품</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>품목</th><th>수량</th><th>고를 때 확인</th><th>예상가(추정)</th><th>검색</th></tr></thead>
+    <tbody>
+      <tr><td class="p">라즈베리파이 피코 H</td><td class="num">1</td><td>Pico H(헤더 납땜된 제품). Pico W가 아니어도 됩니다.</td><td class="num">0.7~1만</td><td><a href="https://www.coupang.com/np/search?q=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%20%ED%94%BC%EC%BD%94%20H%20%ED%97%A4%EB%8D%94" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%20%ED%94%BC%EC%BD%94%20H%20%ED%97%A4%EB%8D%94" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">피코 스크류 터미널 확장 보드</td><td class="num">1</td><td>나사식 전선 연결. 맞는 제품이 없으면 Pico 헤더에 듀폰선이나 납땜.</td><td class="num">0.5~1만</td><td><a href="https://www.coupang.com/np/search?q=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%20%ED%94%BC%EC%BD%94%20%EC%8A%A4%ED%81%AC%EB%A5%98%20%ED%84%B0%EB%AF%B8%EB%84%90%20%ED%99%95%EC%9E%A5%EB%B3%B4%EB%93%9C" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%20%ED%94%BC%EC%BD%94%20%EC%8A%A4%ED%81%AC%EB%A5%98%20%ED%84%B0%EB%AF%B8%EB%84%90%20%ED%99%95%EC%9E%A5%EB%B3%B4%EB%93%9C" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">라즈베리파이 5 27W 전원</td><td class="num">1</td><td>정품 권장.</td><td class="num">2~2.5만</td><td><a href="https://www.coupang.com/np/search?q=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%205%2027W%20USB-C%20%EC%A0%84%EC%9B%90%20%EC%96%B4%EB%8C%91%ED%84%B0%20%EC%A0%95%ED%92%88" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%205%2027W%20USB-C%20%EC%A0%84%EC%9B%90%20%EC%96%B4%EB%8C%91%ED%84%B0%20%EC%A0%95%ED%92%88" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">라즈베리파이 5 액티브 쿨러</td><td class="num">1</td><td>밀폐된 전장 박스용.</td><td class="num">0.8~1만</td><td><a href="https://www.coupang.com/np/search?q=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%205%20%EC%95%A1%ED%8B%B0%EB%B8%8C%20%EC%BF%A8%EB%9F%AC" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%205%20%EC%95%A1%ED%8B%B0%EB%B8%8C%20%EC%BF%A8%EB%9F%AC" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">마이크로 HDMI to HDMI 케이블</td><td class="num">1</td><td>Pi 5는 마이크로 HDMI(D타입). 길이는 설치에 맞게.</td><td class="num">0.8~1.5만</td><td><a href="https://www.coupang.com/np/search?q=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%205%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%20HDMI%20HDMI%20%EC%BC%80%EC%9D%B4%EB%B8%94" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EB%9D%BC%EC%A6%88%EB%B2%A0%EB%A6%AC%ED%8C%8C%EC%9D%B4%205%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%20HDMI%20HDMI%20%EC%BC%80%EC%9D%B4%EB%B8%94" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">마이크로SD 32GB</td><td class="num">1</td><td>이미 있으면 불필요.</td><td class="num">0.8~1만</td><td><a href="https://www.coupang.com/np/search?q=%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9CSD%2032GB%20A1" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9CSD%2032GB%20A1" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">USB-A 마이크로 B 케이블 30cm</td><td class="num">1</td><td>데이터 지원 케이블인지 확인(충전 전용 주의).</td><td class="num">0.3~0.5만</td><td><a href="https://www.coupang.com/np/search?q=USB%20A%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%205%ED%95%80%20%EC%BC%80%EC%9D%B4%EB%B8%94%2030cm" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=USB%20A%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%205%ED%95%80%20%EC%BC%80%EC%9D%B4%EB%B8%94%2030cm" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">USB 연장 케이블 2m</td><td class="num">1</td><td>인코더 연결용.</td><td class="num">0.3~0.6만</td><td><a href="https://www.coupang.com/np/search?q=USB%20%EC%97%B0%EC%9E%A5%20%EC%BC%80%EC%9D%B4%EB%B8%94%202m" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=USB%20%EC%97%B0%EC%9E%A5%20%EC%BC%80%EC%9D%B4%EB%B8%94%202m" target="_blank" rel="noopener">네이버</a></td></tr>
+    </tbody>
+  </table></div>
+  <h3>프레임·기구 (v3와 같음, 가공은 업체에 재단 목록을 보내 견적)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>품목</th><th>수량</th><th>고를 때 확인</th><th>예상가(추정)</th><th>검색</th></tr></thead>
+    <tbody>
+      <tr><td class="p">알루미늄 평철 60×4t</td><td class="num">1m</td><td>K1 코너 플레이트 20개용. 60mm로 20개 절단 요청.</td><td class="num">1~2만</td><td><a href="https://www.coupang.com/np/search?q=%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%8F%89%EC%B2%A0%2060x4%201m%20%EC%A0%88%EB%8B%A8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%8F%89%EC%B2%A0%2060x4%201m%20%EC%A0%88%EB%8B%A8" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">알루미늄 판금 절곡 (K2)</td><td class="num">20개</td><td>K2: 40×40, 높이 17의 L자. 도면 요청 시 구멍은 실측 후 직접 뚫는 쪽이 낫습니다.</td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%204t%20%ED%8C%90%EA%B8%88%20%EC%A0%88%EA%B3%A1%20%EA%B0%80%EA%B3%B5%20%EC%86%8C%EB%9F%89%20%EC%A0%9C%EC%9E%91" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%204t%20%ED%8C%90%EA%B8%88%20%EC%A0%88%EA%B3%A1%20%EA%B0%80%EA%B3%B5%20%EC%86%8C%EB%9F%89%20%EC%A0%9C%EC%9E%91" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">POM 판</td><td class="num">1</td><td>G1 가이드 20개용.</td><td class="num">0.5~1.5만</td><td><a href="https://www.coupang.com/np/search?q=POM%20%ED%8C%90%2014T%2020x20%20%EC%A0%88%EB%8B%A8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=POM%20%ED%8C%90%2014T%2020x20%20%EC%A0%88%EB%8B%A8" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">3030 알루미늄 프로파일 (재단)</td><td class="num">약 10.6m</td><td>재단 목록(F1~F6)대로 주문. 재단 서비스가 있는 곳이 편합니다.</td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=3030%20%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%9E%AC%EB%8B%A8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=3030%20%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%9E%AC%EB%8B%A8" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">4040 알루미늄 프로파일 (재단)</td><td class="num">약 2.6m</td><td>안전바(B1·B2).</td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=4040%20%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%9E%AC%EB%8B%A8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=4040%20%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%9E%AC%EB%8B%A8" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">2020 알루미늄 프로파일 (재단)</td><td class="num">약 6.8m</td><td>캐리어(C1~C3).</td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=2020%20%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%9E%AC%EB%8B%A8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=2020%20%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%9E%AC%EB%8B%A8" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">3030 코너 브래킷 · T너트 · 볼트</td><td class="num">1식</td><td>체결 부품 표 수량 기준.</td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=3030%20%EC%BD%94%EB%84%88%20%EB%B8%8C%EB%9E%98%ED%82%B7%20T%EB%84%88%ED%8A%B8%20%EB%B3%BC%ED%8A%B8%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=3030%20%EC%BD%94%EB%84%88%20%EB%B8%8C%EB%9E%98%ED%82%B7%20T%EB%84%88%ED%8A%B8%20%EB%B3%BC%ED%8A%B8%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">M8 조절발 (3030 바닥 장착형)</td><td class="num">16</td><td></td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=3030%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%A1%B0%EC%A0%88%EB%B0%9C%20M8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=3030%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%A1%B0%EC%A0%88%EB%B0%9C%20M8" target="_blank" rel="noopener">네이버</a></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">로드셀 20개와 HX711 5개는 이번 방식에서 쓰지 않으므로 사지 않고 보관합니다. 로드셀 방식에 필요했던 만능기판, 4심 차폐선도 사지 않습니다.</p>
+</section>
+
+<section id="steps">
+  <h2>제작 순서</h2>
+  <p class="lead">그림에서 주황색이 그 단계에 새로 다는 부품입니다. 발판을 덮기 전에 센서 동작을 먼저 확인하도록 순서를 짰습니다.</p>
+  <div class="card">
+    <h4>미리 준비할 공구</h4>
+    <p>육각렌치 세트(M5, M6, M8), 전동 드릴과 M6 탭, 줄자와 직각자, 수평계, 필러 게이지(0.5, 1.0mm), 멀티미터(도통 부저), 인두기와 수축튜브, 케이블 타이. 캘리퍼스, 3D 프린터가 있으면 스프링 시트와 버튼 박스를 뽑을 수 있습니다.</p>
+  </div>
+  <div class="keyline"><span><i style="background:#E8742C"></i>이번 단계 부품</span><span><i style="background:#A6B0BA;opacity:.55"></i>이미 단 부품</span></div>
+  <div class="steps">
+  <article class="step">
+    <div><svg id="iso1" role="img" aria-label="1단계 그림: 바닥 프레임 조립"></svg></div>
+    <div>
+      <h3><span class="n">1</span>바닥 프레임 조립</h3>
+      <p class="need">준비: 육각렌치, 3030 코너 브래킷 32개, 줄자, 직각자, 수평계</p>
+      <ol><li>F1 두 개를 바닥에 877mm 간격(바깥 기준)으로 평행하게 놓습니다.</li><li>F2 네 개를 z −105, 15, 862, 1,112 위치에 코너 브래킷으로 연결합니다. 볼트는 손으로 돌아가지 않을 정도로만 가조임합니다.</li><li>F3 두 개를 x 298, 579에 넣어 발판 앞뒤 F2 사이를 잇습니다.</li><li>F4 여섯 개(좌우 z 358, 438, 519)와 F5 네 개(z 150, 299, 578, 715)를 위치표대로 연결합니다.</li><li>발판 영역(z 0~877)의 두 대각선 길이 차가 1mm 이내가 되도록 두드려 맞춘 뒤 본조임합니다.</li><li>조절발 16개를 프레임 바닥 슬롯에 달고, 설치할 자리에서 수평계로 네 모서리와 가운데 수평을 맞춥니다.</li></ol>
+      <p class="chk">확인: 대각선 차 1mm 이내, 수평계 기포 중앙, 모서리를 눌러도 흔들림 없음</p>
+      <p class="ref">참고: <a href="#framepos">프레임 평면도와 부재 위치</a></p>
+    </div>
+  </article>
+  <article class="step">
+    <div><svg id="iso2" role="img" aria-label="2단계 그림: 스위치 마운트와 가이드 장착"></svg></div>
+    <div>
+      <h3><span class="n">2</span>스위치 마운트, 스프링, 가이드 장착</h3>
+      <p class="need">준비: 마이크로스위치 20개, K2 마운트 20개, 압축 스프링 20개, POM 가이드 20개, 캘리퍼스, 멀티미터, 필러 게이지 0.5·1.0mm, 금속 자</p>
+      <ol><li>스위치마다 나사 구멍 간격을 캘리퍼스로 재서 K2 윗면에 M2.5 구멍(슬롯)을 뚫고, 스위치를 가조임합니다. 레버가 위를 향하고 레버 끝이 발판 안쪽으로 오게 합니다.</li><li>멀티미터 도통 모드로 COM–NO가 레버를 손으로 누를 때만 닫히는지 스위치 20개 모두 확인하고, 이상이 있는 것은 여유 4개로 교체합니다.</li><li>K2를 레일 옆면 T슬롯에 M6 T너트로 가조임합니다. 마운트 윗면이 레일 윗면보다 7mm 낮고, 스프링 중심은 발판 모서리에서 안쪽으로 약 39mm, 스위치는 그보다 레일 쪽(바깥)에 놓입니다.</li><li>스프링을 K2 윗면 스프링 자리에 올립니다. 스프링 높이가 8mm 틈보다 1mm 안팎 높도록 하고, 낮으면 아래에 와셔나 고무 시트를 깝니다.</li><li>금속 자를 레일 윗면에 걸치고 스프링 윗면과 자 사이가 1.0~1.5mm 위가 되는지 봅니다. 높이가 모서리마다 다르면 스프링이나 심으로 맞춥니다.</li><li>POM 가이드를 발판 각 변에 하나씩, 모서리에서 90~110mm 지점의 레일 윗면에 고정합니다.</li></ol>
+      <p class="chk">확인: 스위치 20개 모두 레버를 누를 때만 도통하고, 스프링 윗면 높이 편차 ±0.3mm 이내</p>
+      <p class="ref">참고: <a href="#vSec">단면 A-A</a>, <a href="#vCorner">모서리 평면 상세</a>, <a href="#pL">스위치 마운트 부품도</a></p>
+    </div>
+  </article>
+  <article class="step">
+    <div><svg id="iso3" role="img" aria-label="3단계 그림: 발판 결선"></svg></div>
+    <div>
+      <h3><span class="n">3</span>발판 결선</h3>
+      <p class="need">준비: WAGO 5구 커넥터 10개, 실리콘 전선, 2심 케이블, 인두기(선택), 멀티미터</p>
+      <ol><li>발판마다 WAGO 커넥터 둘(GND, 신호)을 레일 옆면에 케이블 타이나 양면테이프로 고정합니다.</li><li>스위치 COM 4개를 GND 커넥터에, NO 4개를 신호 커넥터에 전선으로 연결합니다. 전선은 스위치 쪽에서 레일 따라 짧게 끝내고 발판 영역 밖으로 나가지 않게 합니다.</li><li>2심 케이블의 한 선을 GND 커넥터에, 다른 선을 신호 커넥터에 넣습니다. 케이블 색과 발판 이름을 라벨로 붙입니다.</li><li>케이블은 조절발로 생긴 바닥 틈을 따라 전장 박스까지 보냅니다. 끝에는 20cm 여유를 남깁니다.</li><li>케이블 끝에서 도통을 재면서 스위치 네 개를 하나씩 눌러 신호–GND가 닫히는지 봅니다.</li></ol>
+      <p class="chk">확인: 발판마다 네 모서리 중 어느 스위치를 눌러도 케이블 끝에서 도통, 모두 뗐을 때 개방, 케이블이 프레임 아래에서 눌리지 않음</p>
+      <p class="ref">참고: <a href="#wPanel">발판 결선도</a>, <a href="#vRoute">배선 경로도</a></p>
+    </div>
+  </article>
+  <article class="step">
+    <div><svg id="iso4" role="img" aria-label="4단계 그림: 전장부 조립과 1차 동작 확인"></svg></div>
+    <div>
+      <h3><span class="n">4</span>전장부 조립과 1차 동작 확인</h3>
+      <p class="need">준비: 전장판, Pi 5와 쿨러, Pico, M2.5 스페이서, 고무 그로밋, USB 케이블, 컴퓨터(펌웨어 업로드용)</p>
+      <ol><li>전장판에 케이블 구멍을 뚫고 고무 그로밋을 끼웁니다.</li><li>Pi 5(액티브 쿨러 장착)와 Pico를 M2.5 스페이서로 전장판에 고정하고, 전장판을 앞쪽 프레임 위에 올립니다.</li><li>컴퓨터에서 Pico에 펌웨어(hardware/pico-pad/pico-pad.ino)를 올립니다.</li><li>발판 케이블 다섯 가닥을 핀 배정표대로 Pico에 연결하고 Pico를 USB로 Pi 5에 연결합니다.</li><li>메모장이나 터미널을 열고 발판 스위치를 손으로 눌러 1, 7, 5, 9, 3이 찍히는지 봅니다. 발판을 덮기 전에 여기서 다 잡아야 나중에 다시 뜯지 않습니다.</li></ol>
+      <p class="chk">확인: 다섯 발판 모두 눌리는 동안 해당 숫자가 찍히고, 떼면 멈춤. 다른 발판 숫자가 같이 찍히지 않음</p>
+      <p class="ref">참고: <a href="#wPico">발판 → Pico 배선도</a>, <a href="#pins">핀 배정표</a>, <a href="#vBox">전장 박스 배치</a></p>
+    </div>
+  </article>
+  <article class="step">
+    <div><svg id="iso5" role="img" aria-label="5단계 그림: 캐리어 조립과 올리기"></svg></div>
+    <div>
+      <h3><span class="n">5</span>캐리어 조립과 올리기, 눌림 지점 맞추기</h3>
+      <p class="need">준비: 2020 프로파일, 2020 L브래킷, 코너 플레이트 20개, M5 접시머리 볼트, 필러 게이지, 멀티미터</p>
+      <ol><li>캐리어 다섯 개를 조립도대로 짭니다. 모서리 발판용은 옆변 337, 중앙용은 옆변 277입니다.</li><li>대각선을 재서 직각을 맞추고, 코너 플레이트 네 개를 캐리어 아래에 M5 접시머리로 고정합니다.</li><li>캐리어를 올려 코너 플레이트가 스프링 위에 앉고 스위치 레버가 플레이트 아래면 쪽에 오게 합니다.</li><li>캐리어와 POM 가이드 사이가 사방 1mm 정도인지, 캐리어가 레일이나 옆 부품에 닿지 않는지 확인합니다.</li><li>Pico를 연결한 상태에서 캐리어 모서리를 천천히 눌러 숫자가 찍히는 지점을 찾습니다. 플레이트가 0.4~0.6mm 내려갔을 때 찍히고, 1.0mm에서 레일에 닿도록 스위치 아래 심(0.2~0.5mm)이나 스프링 높이를 조정합니다.</li><li>모서리를 체중으로 눌러 레버가 끝까지 눌리기 전에 코너 플레이트가 레일 윗면에 먼저 닿는지 확인합니다.</li></ol>
+      <p class="chk">확인: 빈 캐리어 상태에서 아무 입력도 찍히지 않고, 네 모서리와 가운데 어디를 눌러도 입력이 나오며, 뗄 때 되돌아옴</p>
+      <p class="ref">참고: <a href="#pC">캐리어 조립도</a>, <a href="#pG">코너 플레이트 부품도</a></p>
+    </div>
+  </article>
+  <article class="step">
+    <div><svg id="iso6" role="img" aria-label="6단계 그림: 스페이서와 상판 데크"></svg></div>
+    <div>
+      <h3><span class="n">6</span>스페이서와 상판 데크</h3>
+      <p class="need">준비: 스페이서 블록 20개, M6 탭, 상판 데크, M6 접시머리 볼트 20개, 2mm 판</p>
+      <ol><li>스페이서 블록 위에 M6 탭을 내고 가공도 위치대로 프레임에 고정합니다.</li><li>상판 데크를 올려 발판 구멍 다섯 개가 캐리어와 맞는지 먼저 봅니다.</li><li>M6 접시머리 볼트로 데크를 스페이서에 고정합니다.</li><li>2mm 판을 발판 둘레에 한 바퀴 돌려 걸리는 곳이 없는지 확인합니다.</li></ol>
+      <p class="chk">확인: 데크를 밟아도 발판 입력이 찍히지 않음 (힘이 새지 않는다는 뜻)</p>
+      <p class="ref">참고: <a href="#vDeck">상판 데크 가공도</a></p>
+    </div>
+  </article>
+  <article class="step">
+    <div><svg id="iso7" role="img" aria-label="7단계 그림: 안전바와 메뉴 버튼 박스"></svg></div>
+    <div>
+      <h3><span class="n">7</span>안전바와 메뉴 버튼 박스</h3>
+      <p class="need">준비: 4040 기둥 2개, 손잡이, 브레이스 2개, 4040 코너 브래킷, 각도 조인트, 폼 그립, 버튼 박스</p>
+      <ol><li>기둥(B1)을 F1 위 z 880~920 위치에 세우고 4040 코너 브래킷을 앞뒤에 하나씩 답니다.</li><li>손잡이(B2)에 폼 그립을 먼저 끼운 뒤 두 기둥 위를 연결합니다.</li><li>브레이스(F6)를 각도 조인트로 기둥 뒷면과 F1 윗면 사이에 겁니다.</li><li>버튼 박스에 30mm 버튼 네 개와 인코더를 넣고 결선한 뒤, 왼쪽 기둥 바깥에 고정합니다.</li><li>인코더 USB 케이블을 기둥 슬롯과 프레임 아래를 거쳐 전장 박스의 Pi 5에 연결하고, 노출된 슬롯은 슬롯 커버로 막습니다.</li></ol>
+      <p class="chk">확인: 손잡이를 앞뒤로 세게 당겨도 흔들리거나 프레임이 들리지 않음</p>
+      <p class="ref">참고: <a href="#vBar">안전바 측면 상세</a></p>
+    </div>
+  </article>
+  <article class="step">
+    <div><svg id="iso8" role="img" aria-label="8단계 그림: 감도 확인과 발판 얹기"></svg></div>
+    <div>
+      <h3><span class="n">8</span>감도 확인과 발판 얹기</h3>
+      <p class="need">준비: PC 발판 5장, 인쇄지와 확산 필름(선택), M5 접시머리 볼트 30개</p>
+      <ol><li>PC 발판 아래에 화살표 인쇄지와 확산 필름을 깔고, M5 접시머리 6개로 캐리어에 고정합니다.</li><li>발판 무게가 늘었으므로 빈 상태에서 입력이 찍히지 않는지 다시 봅니다. 찍히면 스프링을 한 단계 센 것으로 바꿉니다.</li><li>실제로 밟으면서 가볍게 얹은 발에도 반응하는지, 발을 떼면 바로 풀리는지 봅니다. 반응이 과하거나 둔하면 스프링을 바꿉니다.</li><li>Pi 5에서 step-five를 열어 키 설정 화면에서 다섯 레인이 맞는 발판에 반응하는지 봅니다. 다르면 레인을 눌러 발판을 밟아 다시 지정합니다.</li><li>step-five의 싱크 보정으로 오디오 오프셋을 맞춥니다.</li></ol>
+      <p class="chk">확인: 다섯 발판이 같은 세기에 반응하고, 빠르게 연타해도 입력이 빠지거나 뭉치지 않음</p>
+      <p class="ref">참고: <a href="#build">점검 항목과 소프트웨어</a></p>
+    </div>
+  </article>
+  <article class="step">
+    <div><svg id="iso9" role="img" aria-label="9단계 그림: 마감"></svg></div>
+    <div>
+      <h3><span class="n">9</span>마감</h3>
+      <p class="need">준비: 측면 커버, 전장 박스 덮개, 슬롯 커버</p>
+      <ol><li>좌우와 앞뒤 측면 커버를 프레임 옆 슬롯에 고정합니다.</li><li>쿨러 위치에 환기 구멍을 낸 덮개로 전장 박스를 닫고, 앞면으로 HDMI와 전원 케이블을 뺍니다.</li><li>손이나 발이 닿는 곳의 노출 슬롯과 모서리를 정리합니다.</li><li>아래 점검 항목을 처음부터 끝까지 한 번 더 확인합니다.</li></ol>
+      <p class="chk">확인: 30분 정도 플레이한 뒤 Pi 5 온도와 스위치 반응 확인</p>
+      <p class="ref">참고: <a href="#vFront">정면도</a>, <a href="#vSide">우측면도</a></p>
+    </div>
+  </article>
+  </div>
+</section>
+
+<section id="build">
+  <h2>점검과 소프트웨어</h2>
+  <div class="cols">
+    <div class="card">
+      <h4>점검 항목</h4>
+      <ul>
+        <li>스위치 20개 모두 COM–NO가 레버를 누를 때만 도통하는가</li>
+        <li>발판마다 네 모서리 어디를 눌러도 신호가 나오는가</li>
+        <li>빈 캐리어와 PC 발판을 얹은 상태에서 입력이 찍히지 않는가</li>
+        <li>종이 한 장을 발판 둘레로 돌렸을 때 걸리는 곳이 없는가</li>
+        <li>체중을 실어 뛰었을 때 코너 플레이트가 레버가 끝까지 눌리기 전에 레일에 먼저 닿는가</li>
+        <li>GPIO에 5V나 전원선이 닿지 않았는가</li>
+        <li>다른 발판을 밟았을 때 이웃 발판 입력이 같이 찍히지 않는가</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Pico 펌웨어</h4>
+      <ul>
+        <li>파일: hardware/pico-pad/pico-pad.ino (초안, 실기 미검증)</li>
+        <li>Arduino-Pico 코어에서 USB 스택을 Adafruit TinyUSB로 고릅니다.</li>
+        <li>눌림은 디바운스 없이 바로, 뗌만 4ms 안정 후에 보냅니다.</li>
+        <li>USB 폴링 간격 1ms, 키는 넘패드 1·7·5·9·3입니다.</li>
+        <li>CircuitPython은 HID 폴링이 느려서(기본 8ms) 권하지 않습니다.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Pi 5 게임</h4>
+      <ul>
+        <li>Raspberry Pi OS 64비트의 Chromium으로 step-five를 엽니다.</li>
+        <li>Pico는 키보드로, 인코더는 게임패드로 인식됩니다. 코드 수정은 필요 없습니다.</li>
+        <li>레인 매핑이 다르면 게임의 키 설정 화면에서 레인을 누르고 발판을 밟아 다시 지정합니다.</li>
+        <li>오디오는 HDMI나 USB 오디오로 냅니다. 싱크 보정으로 오프셋을 맞춥니다.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>PLC (FX3U-32M)의 자리</h4>
+      <ul>
+        <li>입력 경로에서는 뺐습니다. 브라우저는 PLC와 직접 통신하지 못해서 RS-422 케이블과 중계 프로그램이 따로 필요하고, 입력 필터와 통신 주기 때문에 지연이 커집니다.</li>
+        <li>PLC를 꼭 쓰려면 센서를 24V NPN 근접센서로 바꾸고 S/S 단자를 +24V에 연결해 X10~X14에 받습니다. plc/pad-map.json의 매핑이 그대로 맞습니다.</li>
+        <li>나중에 발판 조명(Y 출력, 트랜지스터 출력형 -MT일 때)에 쓰는 것이 더 자연스럽습니다.</li>
+      </ul>
+    </div>
+  </div>
+  <h3>Pico 펌웨어 초안</h3>
+  <pre style="margin:0;padding:12px 14px;overflow-x:auto;background:var(--sheet);border:1px solid var(--line);font-size:12.5px;line-height:1.5;tab-size:2"><code>// 펌프 발판 v4 - Pico 펌웨어 초안 (실기 미검증)
+// 보드: Raspberry Pi Pico (Arduino-Pico 코어), Tools &gt; USB Stack &gt; Adafruit TinyUSB
+// 발판 5개 → GPIO 5개 → USB 키보드(HID). step-five 기본 매핑(넘패드 1·7·5·9·3)과 같은 키를 보냅니다.
+//
+// 설계 원칙
+//  - 눌림은 디바운스 없이 첫 신호에서 바로 보냅니다 (지연 0).
+//  - 뗌만 4ms 동안 안정된 뒤에 보냅니다 (접점 채터링 방지).
+//  - USB 폴링 간격 1ms.
+#include &lt;Adafruit_TinyUSB.h&gt;
+
+const uint8_t PIN[5]  = {2, 3, 4, 5, 6};   // 좌하, 좌상, 중앙, 우상, 우하 (DL, UL, CN, UR, DR)
+const uint8_t KEY[5]  = {HID_KEY_KEYPAD_1, HID_KEY_KEYPAD_7, HID_KEY_KEYPAD_5, HID_KEY_KEYPAD_9, HID_KEY_KEYPAD_3};
+const uint32_t RELEASE_US = 4000;
+
+uint8_t const desc_hid_report[] = { TUD_HID_REPORT_DESC_KEYBOARD() };
+Adafruit_USBD_HID usb_hid;
+
+bool     down[5]      = {false, false, false, false, false};
+uint32_t highSince[5] = {0, 0, 0, 0, 0};
+
+void sendReport() {
+  uint8_t keys[6] = {0, 0, 0, 0, 0, 0};
+  uint8_t n = 0;
+  for (uint8_t i = 0; i &lt; 5; i++) if (down[i]) keys[n++] = KEY[i];
+  while (!usb_hid.ready()) delayMicroseconds(50);
+  usb_hid.keyboardReport(0, 0, keys);
+}
+
+void setup() {
+  for (uint8_t i = 0; i &lt; 5; i++) pinMode(PIN[i], INPUT_PULLUP);  // 외부 4.7kΩ 풀업을 달면 더 안정적
+  usb_hid.setPollInterval(1);
+  usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
+  usb_hid.begin();
+  while (!TinyUSBDevice.mounted()) delay(1);
+}
+
+void loop() {
+  bool changed = false;
+  uint32_t now = micros();
+  for (uint8_t i = 0; i &lt; 5; i++) {
+    bool low = (digitalRead(PIN[i]) == LOW);        // 스위치가 닫히면 LOW
+    if (low) {
+      highSince[i] = 0;
+      if (!down[i]) { down[i] = true; changed = true; }          // 눌림: 즉시
+    } else if (down[i]) {
+      if (highSince[i] == 0) highSince[i] = now ? now : 1;
+      else if ((uint32_t)(now - highSince[i]) &gt;= RELEASE_US) {   // 뗌: 4ms 안정 후
+        down[i] = false; highSince[i] = 0; changed = true;
+      }
+    }
+  }
+  if (changed) sendReport();
+}
+</code></pre>
+  <p class="note">발판 치수는 공식 규격과 같게 맞춘 DIY 실측 자료 기준입니다. 안전바 높이와 앞뒤 연장부 길이는 제안값이니 키와 설치 공간에 맞게 조정하세요. 스프링 상수와 스위치 눌림 지점(0.4~0.6mm)은 시작값이며 발판 한 장을 먼저 만들어 시험한 뒤 확정하세요.</p>
+</section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+/* ---------- geometry (frame coords; shifted by feet later) ---------- */
+const parts=[];
+const B=(c,x0,x1,y0,y1,z0,z1)=>{const p={t:'box',c,x0,x1,y0,y1,z0,z1};parts.push(p);return p;};
+const CY=(c,cx,cz,r,y0,y1)=>{const p={t:'cyl',c,cx,cz,r,y0,y1,x0:cx-r,x1:cx+r,z0:cz-r,z1:cz+r};parts.push(p);return p;};
+const FOOT=15;
+
+B('frame',0,30,0,30,-120,1127).id='F1';B('frame',847,877,0,30,-120,1127).id='F1';
+[-120,0,847,1097].forEach(z=>B('frame',30,847,0,30,z,z+30).id='F2');
+B('frame',283,313,0,30,30,847).id='F3';B('frame',564,594,0,30,30,847).id='F3';
+[[30,283],[594,847]].forEach(([a,b])=>[343,423,504].forEach(z=>B('frame',a,b,0,30,z,z+30).id='F4'));
+[135,284,563,700].forEach(z=>B('frame',313,564,0,30,z,z+30).id='F5');
+
+const rails=[[0,30],[283,313],[564,594],[847,877]];
+const panels=[
+ {n:'좌상',x0:20,x1:297,z0:20,z1:357},{n:'우상',x0:580,x1:857,z0:20,z1:357},
+ {n:'좌하',x0:20,x1:297,z0:520,z1:857},{n:'우하',x0:580,x1:857,z0:520,z1:857},
+ {n:'중앙',x0:300,x1:577,z0:300,z1:577}];
+const srt=(a,b)=>a<b?[a,b]:[b,a];
+panels.forEach(p=>{
+  B('pc',p.x0,p.x1,55,65,p.z0,p.z1);
+  B('carrier',p.x0,p.x0+20,35,55,p.z0,p.z1);B('carrier',p.x1-20,p.x1,35,55,p.z0,p.z1);
+  B('carrier',p.x0+20,p.x1-20,35,55,p.z0,p.z0+20);B('carrier',p.x0+20,p.x1-20,35,55,p.z1-20,p.z1);
+  const zm=(p.z0+p.z1)/2;B('carrier',p.x0+20,p.x1-20,35,55,zm-10,zm+10);
+  [[p.x0,1],[p.x1,-1]].forEach(([cx,sx])=>[[p.z0,1],[p.z1,-1]].forEach(([cz,sz])=>{
+    const gx=srt(cx,cx+60*sx),gz=srt(cz,cz+60*sz);
+    B('gusset',gx[0],gx[1],31,35,gz[0],gz[1]);
+    const lz=cz+35*sz;
+    const r=rails.find(r=>cx>=r[0]-1&&cx<=r[1]+1);const face=sx>0?r[1]:r[0];
+    const px=srt(face,face+40*sx);B('bracket',px[0],px[1],19,23,lz-20,lz+20);
+    const lg=srt(face,face+4*sx);B('bracket',lg[0],lg[1],6,19,lz-20,lz+20);
+    const sw=srt(face+3*sx,face+22*sx);B('sw',sw[0],sw[1],23,29.4,lz-5,lz+5);
+    const lv=srt(face+5*sx,face+21*sx);B('lever',lv[0],lv[1],29.4,30.6,lz-3,lz+3);
+    CY('spring',face+29*sx,lz,5,23,31);
+  }));
+  B('guide',p.x0-15,p.x0-1,30,50,p.z0+90,p.z0+110);B('guide',p.x1+1,p.x1+15,30,50,p.z0+90,p.z0+110);
+  B('guide',p.x0+90,p.x0+110,30,50,p.z0-15,p.z0-1);B('guide',p.x0+90,p.x0+110,30,50,p.z1+1,p.z1+15);
+});
+const D=(x0,x1,z0,z1)=>B('deck',x0,x1,60,65,z0,z1);
+D(0,18,0,877);D(859,877,0,877);D(18,859,0,18);D(18,859,859,877);
+D(299,578,18,298);D(299,578,579,859);D(18,298,359,518);D(579,859,359,518);
+const S=(x0,x1,z0,z1)=>B('spacer',x0,x1,30,60,z0,z1);
+[[175,205],[423,453],[675,705]].forEach(([a,b])=>{S(0,18,a,b);S(859,877,a,b);});
+[[145,175],[423,453],[702,732]].forEach(([a,b])=>{S(a,b,0,18);S(a,b,859,877);});
+[[135,165],[700,730]].forEach(([za,zb])=>[[325,355],[423,453],[522,552]].forEach(([xa,xb])=>S(xa,xb,za,zb)));
+S(135,165,423,453);S(712,742,423,453);
+
+const HX=[['좌상',31,43,150,190],['좌하',31,43,670,710],['우상',834,846,150,190],['우하',834,846,670,710],['중앙',314,326,420,460]];
+HX.forEach(([n,a,b,c,d])=>B('jb',a,b,6,24,c,d).n=n);
+
+B('eplate',0,877,30,33,-120,0);
+B('pcb',150,235,36,38,-98,-42).n='Pi 5';B('cooler',165,220,38,52,-92,-50);
+B('pcb',300,351,36,38,-60,-39).n='Pico';
+B('cover',0,877,62,65,-120,0);
+
+B('skin',-3,0,0,65,-120,877);B('skin',877,880,0,65,-120,877);B('skin',-3,880,0,65,-123,-120);B('skin',0,877,30,65,877,880);
+
+B('bar',0,40,30,950,880,920).id='B1';B('bar',837,877,30,950,880,920).id='B1';B('bar',40,837,910,950,880,920).id='B2';
+parts.push({t:'cylx',c:'grip',x0:120,x1:757,cy:930,cz:900,r:30,y0:900,y1:960,z0:870,z1:930});
+const bp=[[920,300],[920,363],[1099,30],[1065,30]];
+[[0,30],[847,877]].forEach(([a,b])=>parts.push({t:'beam',c:'brace',id:'F6',x0:a,x1:b,pts:bp,y0:30,y1:363,z0:920,z1:1099}));
+B('btnbox',-80,0,760,830,865,935);
+[[-60,882],[-20,882],[-60,918],[-20,918]].forEach(([x,z])=>CY('button',x,z,13,830,838));
+
+[[15,-105],[15,300],[15,600],[15,862],[15,1112],[862,-105],[862,300],[862,600],[862,862],[862,1112],[298,60],[298,438],[298,820],[579,60],[579,438],[579,820]].forEach(([x,z])=>CY('foot',x,z,16,-FOOT,0));
+parts.forEach(p=>{p.y0+=FOOT;p.y1+=FOOT;if(p.cy!=null)p.cy+=FOOT;if(p.pts)p.pts=p.pts.map(([z,y])=>[z,y+FOOT]);});
+
+const COL={frame:'#A6B0BA',carrier:'#56626E',pc:'#74CFE0',deck:'#BCC4CC',spacer:'#8A95A0',gusset:'#35404A',spring:'#E4AE12',sw:'#2E4F8F',lever:'#C9CED3',bracket:'#7B8793',
+ eplate:'#8E98A2',cover:'#4A545E',skin:'#D6DCE2',bar:'#3B444E',grip:'#1D2227',brace:'#8994A0',guide:'#EFEDE4',jb:'#3E8E4F',pcb:'#2F7D4A',cooler:'#2B2F33',
+ btnbox:'#46505A',button:'#E0483E',foot:'#23282D'};
+const OPA={pc:.4,skin:.18};
+const NAMES=[['frame','3030 프레임'],['bar','4040 안전바'],['brace','브레이스'],['carrier','2020 캐리어'],['pc','PC 발판'],['deck','상판 데크'],['spring','압축 스프링'],['sw','마이크로스위치'],['gusset','코너 플레이트'],['bracket','K2 스위치 마운트'],['spacer','스페이서'],['guide','POM 가이드'],['jb','단자대'],['pcb','Pi 5, Pico'],['button','메뉴 버튼']];
+document.getElementById('legend').innerHTML=NAMES.map(([k,n])=>`<span><i style="background:${COL[k]}"></i>${n}</span>`).join('');
+
+/* ---------- 3D ---------- */
+const wrap=document.getElementById('viewer'),canvas=document.getElementById('cv');
+let renderer=null;
+try{if(window.THREE)renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});}catch(e){renderer=null;}
+if(!renderer){wrap.classList.add('fail');}
+else{
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(32,1,10,30000);
+  scene.add(new THREE.HemisphereLight(0xffffff,0x6b7682,0.85));
+  const dl=new THREE.DirectionalLight(0xffffff,0.75);dl.position.set(1200,2400,-1400);scene.add(dl);
+  const dl2=new THREE.DirectionalLight(0xffffff,0.3);dl2.position.set(-1500,900,1800);scene.add(dl2);
+  const mats={};
+  const M=c=>mats[c]||(mats[c]=new THREE.MeshStandardMaterial({color:COL[c],metalness:c==='pc'?0.1:0.35,roughness:c==='pc'?0.2:0.6,transparent:!!OPA[c],opacity:OPA[c]||1,depthWrite:!OPA[c],side:c==='brace'?THREE.DoubleSide:THREE.FrontSide}));
+  const edgeMat=new THREE.LineBasicMaterial({color:0x1b2833,transparent:true,opacity:0.28});
+  const OFF={spring:45,gusset:100,carrier:165,pc:240,deck:330,cover:330};
+  const meshes=[];
+  parts.forEach(p=>{
+    let g,m;
+    if(p.t==='box'){g=new THREE.BoxGeometry(p.x1-p.x0,p.y1-p.y0,p.z1-p.z0);m=new THREE.Mesh(g,M(p.c));m.position.set((p.x0+p.x1)/2,(p.y0+p.y1)/2,(p.z0+p.z1)/2);}
+    else if(p.t==='cyl'){g=new THREE.CylinderGeometry(p.r,p.r,p.y1-p.y0,24);m=new THREE.Mesh(g,M(p.c));m.position.set(p.cx,(p.y0+p.y1)/2,p.cz);}
+    else if(p.t==='cylx'){g=new THREE.CylinderGeometry(p.r,p.r,p.x1-p.x0,28);g.rotateZ(Math.PI/2);m=new THREE.Mesh(g,M(p.c));m.position.set((p.x0+p.x1)/2,p.cy,p.cz);}
+    else{const s=new THREE.Shape();p.pts.forEach(([z,y],i)=>i?s.lineTo(z,y):s.moveTo(z,y));
+      g=new THREE.ExtrudeGeometry(s,{depth:p.x1-p.x0,bevelEnabled:false});
+      g.applyMatrix4(new THREE.Matrix4().set(0,0,1,p.x0,0,1,0,0,1,0,0,0,0,0,0,1));m=new THREE.Mesh(g,M(p.c));}
+    if(!['skin','grip','foot','button'].includes(p.c))m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g,25),edgeMat));
+    m.userData={c:p.c,base:m.position.y};scene.add(m);meshes.push(m);
+  });
+  const target=new THREE.Vector3(400,260,500);
+  const PRE={iso:{th:0.72,ph:1.02},rear:{th:Math.PI-0.75,ph:1.05},front:{th:0,ph:1.53},side:{th:Math.PI/2,ph:1.53},top:{th:0,ph:0.03}};
+  let baseRad=3000;
+  const goal={th:PRE.iso.th,ph:PRE.iso.ph,rad:baseRad},cur={...goal};
+  let ex=0,exGoal=0,skinOn=true;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  function resize(){const w=wrap.clientWidth,h=wrap.clientHeight;renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();baseRad=w/h<0.9?4100:3000;}
+  resize();goal.rad=cur.rad=baseRad;
+  if(window.ResizeObserver)new ResizeObserver(resize).observe(wrap);else window.addEventListener('resize',resize);
+  const ptrs=new Map();let pinch0=0;
+  const vbtns=[...document.querySelectorAll('[data-view]')];
+  const clearPressed=()=>vbtns.forEach(b=>b.setAttribute('aria-pressed','false'));
+  canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});pinch0=0;});
+  canvas.addEventListener('pointermove',e=>{
+    if(!ptrs.has(e.pointerId))return;const pr=ptrs.get(e.pointerId);
+    if(ptrs.size===1){goal.th-=(e.clientX-pr.x)*0.008;goal.ph=clamp(goal.ph-(e.clientY-pr.y)*0.008,0.03,1.56);clearPressed();}
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(ptrs.size===2){const[a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(pinch0)goal.rad=clamp(goal.rad*pinch0/d,700,8000);pinch0=d;}
+  });
+  const up=e=>{ptrs.delete(e.pointerId);pinch0=0;};
+  canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+  canvas.addEventListener('wheel',e=>{e.preventDefault();goal.rad=clamp(goal.rad*(1+e.deltaY*0.001),700,8000);},{passive:false});
+  vbtns.forEach(b=>b.addEventListener('click',()=>{const p=PRE[b.dataset.view];
+    let d=p.th-goal.th;d=Math.atan2(Math.sin(d),Math.cos(d));goal.th+=d;goal.ph=p.ph;goal.rad=baseRad;
+    clearPressed();b.setAttribute('aria-pressed','true');}));
+  const bE=document.getElementById('bExplode'),bS=document.getElementById('bSkin');
+  bE.addEventListener('click',()=>{exGoal=exGoal?0:1;bE.setAttribute('aria-pressed',exGoal?'true':'false');});
+  bS.addEventListener('click',()=>{skinOn=!skinOn;bS.setAttribute('aria-pressed',skinOn?'true':'false');});
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  (function frame(){
+    const k=reduce?1:0.14;
+    cur.th+=(goal.th-cur.th)*k;cur.ph+=(goal.ph-cur.ph)*k;cur.rad+=(goal.rad-cur.rad)*k;ex+=(exGoal-ex)*k;
+    const s=Math.sin(cur.ph);
+    camera.position.set(target.x+cur.rad*s*Math.sin(cur.th),target.y+cur.rad*Math.cos(cur.ph),target.z-cur.rad*s*Math.cos(cur.th));
+    camera.lookAt(target);
+    meshes.forEach(m=>{const c=m.userData.c;if(OFF[c])m.position.y=m.userData.base+OFF[c]*ex;if(c==='skin'||c==='cover')m.visible=skinOn&&ex<0.05;});
+    renderer.render(scene,camera);requestAnimationFrame(frame);
+  })();
+}
+
+/* ---------- 2D orthographic drawings ---------- */
+function proj(p,v){
+  if(v==='top'){if(p.t==='cyl')return{k:'c',u:p.cx,v:p.cz,r:p.r};return{k:'r',u0:p.x0,u1:p.x1,v0:p.z0,v1:p.z1};}
+  if(v==='front')return{k:'r',u0:p.x0,u1:p.x1,v0:-p.y1,v1:-p.y0};
+  if(p.t==='cylx')return{k:'c',u:-p.cz,v:-p.cy,r:p.r};
+  if(p.t==='beam')return{k:'p',pts:p.pts.map(([z,y])=>[-z,-y])};
+  return{k:'r',u0:-p.z1,u1:-p.z0,v0:-p.y1,v1:-p.y0};
+}
+const KEY={top:p=>p.y1,front:p=>-p.z0,side:p=>p.x1};
+const center=(s)=>s.k==='r'?[(s.u0+s.u1)/2,(s.v0+s.v1)/2]:s.k==='c'?[s.u,s.v]:[s.pts.reduce((a,q)=>a+q[0],0)/s.pts.length,s.pts.reduce((a,q)=>a+q[1],0)/s.pts.length];
+function drawView(id,o){
+  const flt=o.filter||(p=>p.c!=='skin'&&p.c!=='cover');
+  const sh=parts.filter(flt).map(p=>({p,s:proj(p,o.view),k:KEY[o.view](p)})).sort((a,b)=>a.k-b.k);
+  let u0=1e9,u1=-1e9,v0=1e9,v1=-1e9;
+  if(o.box){[u0,u1,v0,v1]=o.box;}else{
+    const ext=(u,w)=>{u0=Math.min(u0,u);u1=Math.max(u1,u);v0=Math.min(v0,w);v1=Math.max(v1,w);};
+    sh.forEach(({s})=>{if(s.k==='r'){ext(s.u0,s.v0);ext(s.u1,s.v1);}else if(s.k==='c'){ext(s.u-s.r,s.v-s.r);ext(s.u+s.r,s.v+s.r);}else s.pts.forEach(([a,b])=>ext(a,b));});}
+  const W=u1-u0,H=v1-v0,m=o.margin!=null?o.margin:Math.max(W,H)*0.13,fs=o.fs||Math.max(W+2*m,H+2*m)/30;
+  let body='';
+  sh.forEach(({p,s})=>{
+    const op=(o.op&&o.op[p.c]!=null)?o.op[p.c]:(OPA[p.c]||1);
+    const st=`fill="${COL[p.c]}" fill-opacity="${op}" stroke="var(--ink)" stroke-opacity="${o.faint?.25:.5}" stroke-width=".6" vector-effect="non-scaling-stroke"`;
+    if(s.k==='r')body+=`<rect x="${s.u0}" y="${s.v0}" width="${s.u1-s.u0}" height="${s.v1-s.v0}" ${st}/>`;
+    else if(s.k==='c')body+=`<circle cx="${s.u}" cy="${s.v}" r="${s.r}" ${st}/>`;
+    else body+=`<polygon points="${s.pts.map(q=>q.join(',')).join(' ')}" ${st}/>`;
+  });
+  let ov='';
+  const L=`stroke="var(--blue)" stroke-width=".9" vector-effect="non-scaling-stroke"`;
+  const T=(x,y,t,a='middle',rot=0,col='var(--ink)',sz=1)=>`<text x="${x}" y="${y}" font-size="${fs*sz}" fill="${col}" text-anchor="${a}" paint-order="stroke" stroke="var(--sheet)" stroke-width="${fs*.22}" stroke-linejoin="round"${rot?` transform="rotate(${rot} ${x} ${y})"`:''}>${t}</text>`;
+  const tick=(x,y)=>`<line x1="${x-fs*.3}" y1="${y+fs*.3}" x2="${x+fs*.3}" y2="${y-fs*.3}" ${L}/>`;
+  const api={fs,
+    h:(a,b,y,t)=>{ov+=`<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" ${L}/>`+tick(a,y)+tick(b,y)+T((a+b)/2,y-fs*.4,t);},
+    v:(a,b,x,t)=>{ov+=`<line x1="${x}" y1="${a}" x2="${x}" y2="${b}" ${L}/>`+tick(x,a)+tick(x,b)+T(x-fs*.4,(a+b)/2,t,'middle',-90);},
+    t:(x,y,t,a,sz,col)=>{ov+=T(x,y,t,a||'middle',0,col||'var(--ink)',sz||1);},
+    rect:(a,b,c,d,col,dash)=>{ov+=`<rect x="${a}" y="${c}" width="${b-a}" height="${d-c}" fill="none" stroke="${col||'var(--ink)'}" stroke-width="1" vector-effect="non-scaling-stroke"${dash?' stroke-dasharray="5 4"':''}/>`;},
+    path:(pts,col,w)=>{ov+=`<polyline points="${pts.map(q=>q.join(',')).join(' ')}" fill="none" stroke="${col}" stroke-width="${w||2.2}" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;},
+    dot:(x,y,r,col)=>{ov+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}"/>`;},
+    ids:()=>{const seen={};sh.forEach(({p,s})=>{if(!p.id)return;const[cx,cy]=center(s);ov+=T(cx,cy+fs*.35,p.id,'middle',0,'var(--blue)');});}
+  };
+  o.extra&&o.extra(api);
+  const svg=document.getElementById(id);
+  const vb=[u0-m,v0-m,W+2*m,H+2*m];
+  svg.setAttribute('viewBox',vb.join(' '));
+  const clip=o.box?`<defs><clipPath id="${id}_c"><rect x="${u0}" y="${v0}" width="${W}" height="${H}"/></clipPath></defs>`:'';
+  svg.innerHTML=clip+`<g${o.box?` clip-path="url(#${id}_c)"`:''}>${body}</g>`+ov;
+}
+const noSkin=p=>p.c!=='skin'&&p.c!=='cover';
+
+drawView('vTop',{view:'top',filter:noSkin,margin:240,extra:d=>{
+  d.h(20,297,-140,'277');d.h(299,578,-140,'279');d.h(580,857,-140,'277');d.h(0,877,-205,'877');
+  d.v(20,357,-40,'337');d.v(359,518,-40,'159');d.v(520,857,-40,'337');d.v(-120,1127,-120,'1,247');
+  d.t(438,-305,'앞 (화면 쪽)');
+  panels.forEach(p=>d.t((p.x0+p.x1)/2,(p.z0+p.z1)/2+d.fs*.35,p.n));
+  d.t(438,-50,'전장 박스');d.t(-40,1000,'메뉴 버튼');d.t(438,1010,'안전바');
+}});
+drawView('vFront',{view:'front',filter:noSkin,extra:d=>{
+  d.h(0,877,75,'877');d.h(-80,877,140,'957');d.v(-965,0,947,'965');d.v(-80,0,-145,'80');
+  d.t(438,-1000,'손잡이 (폼 그립)');d.t(-60,-885,'버튼 박스');
+}});
+drawView('vSide',{view:'side',filter:noSkin,extra:d=>{
+  d.h(-1127,123,90,'1,247');d.v(-965,0,-1195,'965');d.v(-80,0,190,'80');
+  d.t(123,-120,'앞','end');d.t(-1127,-250,'뒤','start');d.t(-1135,-110,'62°','end',0.85);
+}});
+drawView('vFrame',{view:'top',filter:p=>['frame','bar','brace','foot'].includes(p.c),extra:d=>{
+  panels.forEach(p=>{d.rect(p.x0,p.x1,p.z0,p.z1,'var(--ink2)',true);});
+  d.ids();d.t(438,-190,'앞 (화면 쪽)');
+}});
+drawView('vRoute',{view:'top',faint:true,op:{frame:.45,bar:.45,brace:.45,eplate:.35,foot:.5},filter:p=>['frame','bar','brace','eplate','pcb','cooler','jb','btnbox','button','foot'].includes(p.c),extra:d=>{
+  panels.forEach(p=>d.rect(p.x0,p.x1,p.z0,p.z1,'var(--ink2)',true));
+  const S='#4A7FC1',U='#D9822B';
+  d.path([[36,167],[70,167],[70,-30],[300,-30]],S);
+  d.path([[36,687],[90,687],[90,-18],[300,-18]],S);
+  d.path([[841,167],[805,167],[805,-30],[351,-30]],S);
+  d.path([[841,687],[785,687],[785,-18],[351,-18]],S);
+  d.path([[319,437],[330,437],[330,-39]],S);
+  d.path([[-40,900],[15,900],[15,-70],[150,-70]],U);
+  d.path([[300,-52],[235,-52]],U);
+  HX.forEach(([n,a,b,c,e])=>d.t(a<400?b+d.fs*.3:a-d.fs*.3,(c+e)/2+d.fs*.35,n+' 단자대',a<400?'start':'end',0.8));
+  d.t(192,-110,'Pi 5',null,0.8);d.t(325,-75,'Pico',null,0.8);
+  d.t(438,-200,'앞 (화면 쪽)');
+  d.path([[40,1190],[110,1190]],S);d.t(120,1202,'센서 케이블 (2심)','start',0.85);
+  d.path([[40,1250],[110,1250]],U);d.t(120,1262,'USB','start',0.85);
+}});
+drawView('vBar',{view:'side',filter:noSkin,box:[-1160,-780,-1010,40],fs:22,margin:60,extra:d=>{
+  d.v(-965,-45,-800,'920');d.v(-965,0,-1140,'965 (바닥 기준)');d.h(-1127,-877,30,'250');
+  d.t(-1070,-250,'62°','middle');d.t(-950,-790,'버튼 박스','end');d.t(-830,-990,'폼 그립 Ø60','start');
+  d.t(-1040,-230,'F6','middle',1,'var(--blue)');d.t(-900,-600,'B1','middle',1,'var(--blue)');
+}});
+drawView('vBox',{view:'top',filter:p=>p.z0<5&&noSkin(p)&&p.c!=='foot',box:[60,450,-135,15],fs:13,margin:22,extra:d=>{
+  d.t(192,-104,'Raspberry Pi 5','middle',0.9);d.t(325,-66,'Pico','middle',0.9);
+  d.path([[300,-50],[235,-50]],'#D9822B');d.t(268,-56,'USB','middle',0.75);
+  [318,333,348].forEach(x=>d.dot(x,-14,3.5,'#4A7FC1'));d.t(360,-10,'센서 케이블 입구','start',0.8);
+  d.path([[70,-70],[150,-70]],'#D9822B');d.t(72,-78,'인코더 USB','start',0.75);
+  d.t(150,-26,'HDMI·전원 → 앞면','start',0.75);d.t(255,-122,'앞 (화면 쪽)','middle',0.75);d.t(255,5,'F2 (발판 앞 가로 프레임 쪽)','middle',0.7);
+}});
+
+/* deck cut drawing */
+(function(){
+  const holes=[[18,299,18,359,'281×341'],[578,859,18,359,'281×341'],[18,299,518,859,'281×341'],[578,859,518,859,'281×341'],[298,579,298,579,'281×281']];
+  const sp=parts.filter(p=>p.c==='spacer').map(p=>[(p.x0+p.x1)/2,(p.z0+p.z1)/2]);
+  const m=170,fs=34;let o='';
+  const L=`stroke="var(--blue)" stroke-width=".9" vector-effect="non-scaling-stroke"`;
+  const T=(x,y,t,rot)=>`<text x="${x}" y="${y}" font-size="${fs}" fill="var(--ink)" text-anchor="middle" paint-order="stroke" stroke="var(--sheet)" stroke-width="${fs*.22}"${rot?` transform="rotate(-90 ${x} ${y})"`:''}>${t}</text>`;
+  const tk=(x,y)=>`<line x1="${x-9}" y1="${y+9}" x2="${x+9}" y2="${y-9}" ${L}/>`;
+  o+=`<rect x="0" y="0" width="877" height="877" fill="${COL.deck}" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+  holes.forEach(([a,b,c,d,t])=>{o+=`<rect x="${a}" y="${c}" width="${b-a}" height="${d-c}" fill="var(--sheet)" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>`+T((a+b)/2,(c+d)/2+fs*.35,t);});
+  sp.forEach(([x,z])=>{o+=`<circle cx="${x}" cy="${z}" r="7" fill="var(--sheet)" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="${x}" cy="${z}" r="3.3" fill="none" stroke="var(--ink)" stroke-width=".6" vector-effect="non-scaling-stroke"/>`;});
+  const chainH=(stops,y)=>{o+=`<line x1="${stops[0]}" y1="${y}" x2="${stops[stops.length-1]}" y2="${y}" ${L}/>`;stops.forEach(s=>o+=tk(s,y));for(let i=0;i<stops.length-1;i++)o+=T((stops[i]+stops[i+1])/2,y-12,stops[i+1]-stops[i]);};
+  const chainV=(stops,x)=>{o+=`<line x1="${x}" y1="${stops[0]}" x2="${x}" y2="${stops[stops.length-1]}" ${L}/>`;stops.forEach(s=>o+=tk(x,s));for(let i=0;i<stops.length-1;i++)o+=T(x-12,(stops[i]+stops[i+1])/2,stops[i+1]-stops[i],1);};
+  chainH([0,18,299,578,859,877],-60);chainV([0,18,359,518,859,877],-60);
+  o+=`<line x1="0" y1="-125" x2="877" y2="-125" ${L}/>`+tk(0,-125)+tk(877,-125)+T(438,-137,'877');
+  o+=`<line x1="-125" y1="0" x2="-125" y2="877" ${L}/>`+tk(-125,0)+tk(-125,877)+T(-137,438,'877',1);
+  o+=`<text x="438" y="${877+60}" font-size="${fs*.85}" fill="var(--ink2)" text-anchor="middle">앞 (화면 쪽)이 위, M6 접시머리 20곳</text>`;
+  const s=document.getElementById('vDeck');s.setAttribute('viewBox',`${-m} ${-m} ${877+m+40} ${877+m+100}`);s.innerHTML=o;
+})();
+
+/* section A-A */
+(function(){
+  const Y=y=>80-y;
+  const st=(c,op=1)=>`fill="${c}" fill-opacity="${op}" stroke="var(--ink)" stroke-opacity=".6" stroke-width=".35"`;
+  const R=(x,y,w,h,c,op)=>`<rect x="${x}" y="${Y(y+h)}" width="${w}" height="${h}" ${st(c,op)}/>`;
+  let o='';
+  o+=`<line x1="-24" y1="${Y(-15)}" x2="146" y2="${Y(-15)}" stroke="var(--ink2)" stroke-width=".5"/>`;
+  o+=`<text x="60" y="${Y(-9)}" font-size="4.2" fill="var(--ink2)" text-anchor="middle">조절발 틈 15 (배선 통로)</text>`;
+  o+=R(-3,0,3,65,COL.skin,.7)+R(0,0,30,30,COL.frame);
+  o+=`<rect x="11" y="${Y(19)}" width="8" height="8" fill="none" stroke="var(--ink)" stroke-opacity=".5" stroke-width=".3"/><circle cx="15" cy="${Y(15)}" r="2.6" fill="var(--sheet)" stroke="var(--ink)" stroke-opacity=".5" stroke-width=".3"/>`;
+  o+=`<rect x="11" y="${Y(30)}" width="8" height="2.2" fill="var(--sheet)"/><rect x="27.8" y="${Y(19)}" width="2.2" height="8" fill="var(--sheet)"/>`;
+  o+=`<rect x="0" y="${Y(60)}" width="18" height="30" fill="none" stroke="var(--ink2)" stroke-width=".35" stroke-dasharray="1.6 1.2"/>`;
+  o+=R(0,60,18,5,COL.deck)+R(20,35,20,20,COL.carrier)+`<circle cx="30" cy="${Y(45)}" r="2" fill="var(--sheet)"/>`;
+  o+=R(20,55,95,10,COL.pc,.55)+`<path d="M115 ${Y(66)} L113 ${Y(62)} L117 ${Y(58)} L115 ${Y(54)}" fill="none" stroke="var(--ink)" stroke-width=".4"/>`;
+  o+=R(20,31,60,4,COL.gusset);
+  o+=R(30,19,40,4,COL.bracket)+R(30,6,4,13,COL.bracket)+R(25,13,9,4,'#4B5561');
+  o+=R(33,23,19,6.4,COL.sw)+R(35,29.4,16,1.2,COL.lever);
+  o+=`<polyline points="54,${Y(23)} 64,${Y(24.6)} 54,${Y(26.2)} 64,${Y(27.8)} 54,${Y(29.4)} 64,${Y(31)}" fill="none" stroke="${COL.spring}" stroke-width="1.3" stroke-linejoin="round"/>`;
+  o+=`<rect x="20" y="${Y(31)}" width="10" height="1" fill="var(--blue)" fill-opacity=".8"/>`;
+  const dim=(x,a,b,t)=>{o+=`<line x1="${x}" y1="${Y(a)}" x2="${x}" y2="${Y(b)}" stroke="var(--blue)" stroke-width=".4"/><line x1="${x-3}" y1="${Y(a)}" x2="${x+3}" y2="${Y(a)}" stroke="var(--blue)" stroke-width=".4"/><line x1="${x-3}" y1="${Y(b)}" x2="${x+3}" y2="${Y(b)}" stroke="var(--blue)" stroke-width=".4"/><text x="${x-1.5}" y="${Y((a+b)/2)+1.5}" font-size="4.4" fill="var(--ink)" text-anchor="end">${t}</text>`;};
+  dim(125,-15,65,'80');dim(107,0,30,'30');
+  const balloons=[[1,[100,60],[137,76]],[2,[40,48],[137,48]],[3,[80,33],[137,37]],[4,[42,26],[137,27]],[5,[66,21],[137,16]],[10,[59,27],[137,62]],[6,[20,5],[137,5]],[7,[9,62.5],[-16,76]],[8,[9,45],[-16,50]],[9,[22,30.5],[-16,32]]];
+  balloons.forEach(([n,[px,py],[bx,by]])=>{
+    const dx=bx-px,dy=by-py,l=Math.hypot(dx,dy),ex=bx-dx/l*4.6,ey=by-dy/l*4.6;
+    o+=`<line x1="${px}" y1="${Y(py)}" x2="${ex}" y2="${Y(ey)}" stroke="var(--blue)" stroke-width=".35"/><circle cx="${px}" cy="${Y(py)}" r=".8" fill="var(--blue)"/>`;
+    o+=`<circle cx="${bx}" cy="${Y(by)}" r="4.6" fill="var(--sheet)" stroke="var(--blue)" stroke-width=".45"/><text x="${bx}" y="${Y(by)+1.8}" font-size="5.2" fill="var(--ink)" text-anchor="middle">${n}</text>`;
+  });
+  const s=document.getElementById('vSec');s.setAttribute('viewBox','-26 -12 172 116');s.innerHTML=o;
+})();
+
+/* corner plan detail */
+(function(){
+  let o='';
+  const st=(c,op=1)=>`fill="${c}" fill-opacity="${op}" stroke="var(--ink)" stroke-opacity=".6" stroke-width=".4"`;
+  const R=(x,z,w,h,c,op)=>`<rect x="${x}" y="${z}" width="${w}" height="${h}" ${st(c,op)}/>`;
+  const Dsh=(x,z,w,h)=>`<rect x="${x}" y="${z}" width="${w}" height="${h}" fill="none" stroke="var(--ink)" stroke-width=".5" stroke-dasharray="2 1.5"/>`;
+  o+=R(0,-5,30,150,COL.frame)+R(30,0,100,30,COL.frame);
+  o+=`<rect x="20" y="20" width="10" height="60" fill="var(--blue)" fill-opacity=".25"/><rect x="30" y="20" width="50" height="10" fill="var(--blue)" fill-opacity=".25"/>`;
+  o+=R(30,35,40,40,COL.bracket)+R(30,35,4,40,'#5E6974');
+  o+=`<rect x="34" y="43" width="4" height="4" fill="#4B5561"/><rect x="34" y="63" width="4" height="4" fill="#4B5561"/>`;
+  o+=R(33,50,19,10,COL.sw)+R(35,52,16,6,COL.lever,.9);
+  o+=`<circle cx="59" cy="55" r="5" ${st(COL.spring)}/><circle cx="59" cy="55" r="2.6" fill="none" stroke="#8a6a00" stroke-width=".5"/>`;
+  o+=Dsh(20,20,60,60)+Dsh(20,20,20,125)+Dsh(40,20,90,20);
+  o+=R(5,110,14,20,COL.guide);
+  o+=`<line x1="18" y1="18" x2="18" y2="145" stroke="var(--ink2)" stroke-width=".5" stroke-dasharray="4 2"/><line x1="18" y1="18" x2="130" y2="18" stroke="var(--ink2)" stroke-width=".5" stroke-dasharray="4 2"/>`;
+  const dim=(a,b,z,t)=>{o+=`<line x1="${a}" y1="${z}" x2="${b}" y2="${z}" stroke="var(--blue)" stroke-width=".4"/><line x1="${a}" y1="${z-2.5}" x2="${a}" y2="${z+2.5}" stroke="var(--blue)" stroke-width=".4"/><line x1="${b}" y1="${z-2.5}" x2="${b}" y2="${z+2.5}" stroke="var(--blue)" stroke-width=".4"/><text x="${(a+b)/2}" y="${z-1.8}" font-size="5" fill="var(--ink)" text-anchor="middle">${t}</text>`;};
+  dim(20,59,92,'39 (스프링)');dim(0,20,152,'20');dim(30,70,100,'40');
+  const bl=[[1,[10,90],[-18,95]],[2,[110,8],[110,-14]],[3,[33,72],[-18,64]],[4,[42,52],[48,-14]],[5,[80,78],[148,96]],[10,[63,57],[148,66]],[6,[125,30],[148,32]],[7,[12,120],[-18,145]],[8,[25,50],[-18,40]],[9,[60,18],[70,-14]]];
+  bl.forEach(([n,[px,pz],[bx,bz]])=>{const dx=bx-px,dz=bz-pz,l=Math.hypot(dx,dz);
+    o+=`<line x1="${px}" y1="${pz}" x2="${bx-dx/l*5.5}" y2="${bz-dz/l*5.5}" stroke="var(--blue)" stroke-width=".4"/><circle cx="${px}" cy="${pz}" r="1" fill="var(--blue)"/><circle cx="${bx}" cy="${bz}" r="5.5" fill="var(--sheet)" stroke="var(--blue)" stroke-width=".5"/><text x="${bx}" y="${bz+2.1}" font-size="6" fill="var(--ink)" text-anchor="middle">${n}</text>`;});
+  o+=`<text x="65" y="168" font-size="5" fill="var(--ink2)" text-anchor="middle">앞 (화면 쪽)이 위, 치수 mm</text>`;
+  const s=document.getElementById('vCorner');s.setAttribute('viewBox','-28 -24 186 198');s.innerHTML=o;
+})();
+
+/* part drawings helpers */
+function partSvg(id,vb,fn){let o='';const api={
+  r:(x,y,w,h,c,dash)=>{o+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c||'none'}" stroke="var(--ink)" stroke-width=".5"${dash?' stroke-dasharray="2 1.5"':''}/>`;},
+  c:(x,y,r,fill)=>{o+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill||'var(--sheet)'}" stroke="var(--ink)" stroke-width=".5"/>`;},
+  cl:(x1,y1,x2,y2)=>{o+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--ink2)" stroke-width=".3" stroke-dasharray="4 1 1 1"/>`;},
+  h:(a,b,y,t,fs=4.6)=>{o+=`<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="var(--blue)" stroke-width=".35"/><line x1="${a}" y1="${y-2}" x2="${a}" y2="${y+2}" stroke="var(--blue)" stroke-width=".35"/><line x1="${b}" y1="${y-2}" x2="${b}" y2="${y+2}" stroke="var(--blue)" stroke-width=".35"/><text x="${(a+b)/2}" y="${y-1.5}" font-size="${fs}" fill="var(--ink)" text-anchor="middle">${t}</text>`;},
+  v:(a,b,x,t,fs=4.6)=>{o+=`<line x1="${x}" y1="${a}" x2="${x}" y2="${b}" stroke="var(--blue)" stroke-width=".35"/><line x1="${x-2}" y1="${a}" x2="${x+2}" y2="${a}" stroke="var(--blue)" stroke-width=".35"/><line x1="${x-2}" y1="${b}" x2="${x+2}" y2="${b}" stroke="var(--blue)" stroke-width=".35"/><text x="${x-1.5}" y="${(a+b)/2}" font-size="${fs}" fill="var(--ink)" text-anchor="middle" transform="rotate(-90 ${x-1.5} ${(a+b)/2})">${t}</text>`;},
+  t:(x,y,t,a='middle',fs=4.4,col='var(--ink2)')=>{o+=`<text x="${x}" y="${y}" font-size="${fs}" fill="${col}" text-anchor="${a}">${t}</text>`;},
+  raw:s=>{o+=s;}};
+  fn(api);const s=document.getElementById(id);s.setAttribute('viewBox',vb);s.innerHTML=o;}
+
+partSvg('pL','0 0 170 128',a=>{
+  a.t(42,10,'정면','middle',4.8,'var(--ink)');
+  a.r(20,23,40,4,COL.bracket);a.r(20,27,4,13,COL.bracket);
+  a.v(23,40,12,'17');a.h(20,60,17,'40');a.h(20,49,48,'29 (스프링 중심)',4);a.cl(49,19,49,44);
+  a.t(42,62,'평면','middle',4.8,'var(--ink)');
+  a.r(20,68,40,40,COL.bracket);a.raw(`<line x1="24" y1="68" x2="24" y2="108" stroke="var(--ink)" stroke-width=".4" stroke-dasharray="2 1.5"/>`);
+  a.c(49,88,5);a.cl(49,78,49,98);a.cl(39,88,59,88);a.t(54,80,'Ø10 스프링 자리','start',3.8,'var(--ink)');
+  a.c(31,88,1.25);a.c(41,88,1.25);a.raw(`<rect x="27" y="83" width="19" height="10" fill="none" stroke="var(--ink)" stroke-width=".35" stroke-dasharray="2 1.5"/>`);
+  a.t(36,102,'2-M2.5 (간격 실측)','middle',3.6,'var(--ink)');
+  a.v(68,108,72,'40');
+  a.t(122,10,'측면 (레일 쪽)','middle',4.8,'var(--ink)');
+  a.r(100,23,40,4,COL.bracket);a.r(100,27,40,13,COL.bracket);a.c(108,31,3.25);a.c(132,31,3.25);
+  a.h(108,132,50,'24');a.h(100,140,58,'40');a.v(31,40,146,'9',4);
+  a.t(120,70,'2-Ø6.5 (M6 T너트)','middle',4.2,'var(--ink)');
+  a.t(120,84,'4t 알루미늄 절곡','middle',4.2);a.t(120,94,'구멍 높이는 3030 옆 슬롯 중심','middle',4);
+});
+partSvg('pG','0 0 150 120',a=>{
+  a.r(40,20,60,60,COL.gusset);
+  a.raw(`<rect x="40" y="20" width="10" height="60" fill="var(--blue)" fill-opacity=".35"/><rect x="50" y="20" width="50" height="10" fill="var(--blue)" fill-opacity=".35"/>`);
+  a.c(50,65,3.3);a.c(50,65,5.2,'none');a.c(85,30,3.3);a.c(85,30,5.2,'none');
+  a.raw(`<circle cx="79" cy="55" r="5" fill="none" stroke="#B98A00" stroke-width=".6" stroke-dasharray="2 1.5"/><rect x="58" y="52" width="16" height="6" fill="none" stroke="#2E4F8F" stroke-width=".6" stroke-dasharray="2 1.5"/>`);
+  a.h(40,100,12,'60');a.v(20,80,32,'60');a.h(40,79,92,'39');a.v(20,55,108,'35');
+  a.t(120,50,'스프링 윗면','start',4.2,'var(--ink)');a.t(120,56,'(점선 원)','start',4.2,'var(--ink)');
+  a.t(120,70,'레버 누름 구역','start',4.2,'var(--ink)');a.t(120,76,'(점선 사각)','start',4.2,'var(--ink)');
+  a.raw(`<line x1="84" y1="55" x2="118" y2="52" stroke="var(--blue)" stroke-width=".35"/><line x1="74" y1="56" x2="118" y2="72" stroke="var(--blue)" stroke-width=".35"/>`);
+  a.t(40,112,'파란 띠: 레일 위 하드스톱 구역 (폭 10), 간극 1.0','start',4);a.t(40,118,'2-M5 접시머리, 캐리어 아래 슬롯 중심','start',4);
+});
+partSvg('pC','-70 -55 520 435',a=>{
+  const X=0,Z=0,w=277,h=337;
+  a.r(X,Z,20,h,COL.carrier);a.r(w-20,Z,20,h,COL.carrier);a.r(20,Z,237,20,COL.carrier);a.r(20,h-20,237,20,COL.carrier);a.r(20,158.5,237,20,COL.carrier);
+  [[0,0,1,1],[w,0,-1,1],[0,h,1,-1],[w,h,-1,-1]].forEach(([x,z,sx,sz])=>{a.r(Math.min(x,x+60*sx),Math.min(z,z+60*sz),60,60,null,true);});
+  [[20,20],[257,20],[20,317],[257,317],[20,158.5],[257,158.5],[20,178.5],[257,178.5]].forEach(([x,z])=>a.raw(`<rect x="${x-3}" y="${z-3}" width="6" height="6" fill="var(--blue)" fill-opacity=".6"/>`));
+  a.h(0,277,-14,'277',13);a.h(20,257,-30,'237 (C3)',11);a.v(0,337,-20,'337 (C1)',13);a.v(0,168.5,-45,'168.5',11);
+  a.raw(`<line x1="0" y1="168.5" x2="-50" y2="168.5" stroke="var(--ink2)" stroke-width=".4" stroke-dasharray="3 2"/>`);
+  a.t(138.5,172.5,'가운데 리브 (C3)','middle',11,'#fff');a.t(138.5,95,'PC 발판이 이 위에','middle',11);
+  a.t(300,30,'점선: 코너 플레이트 60×60','start',11);a.t(300,50,'(아래쪽, 4곳)','start',11);
+  a.raw(`<rect x="300" y="72" width="8" height="8" fill="var(--blue)" fill-opacity=".6"/>`);a.t(314,80,'2020 L브래킷','start',11);
+  a.t(300,110,'중앙 발판용','start',11,'var(--ink)');a.t(300,128,'옆변 C2 277 ×2','start',11);a.t(300,146,'앞뒤변·리브 C3 237 ×3','start',11);
+  a.t(300,176,'모서리 발판용','start',11,'var(--ink)');a.t(300,194,'옆변 C1 337 ×2','start',11);a.t(300,212,'앞뒤변·리브 C3 237 ×3','start',11);
+  a.t(138.5,372,'앞 (화면 쪽)이 위','middle',11);
+});
+
+/* system diagram */
+(function(){
+  let o=`<defs><marker id="ahS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink2)"/></marker></defs>`;
+  const box=(x,y,w,h,t1,t2,hi)=>{o+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="var(--sheet)" stroke="${hi?'var(--blue)':'var(--ink2)'}" stroke-width="${hi?1.6:1}"/><text x="${x+w/2}" y="${y+(t2?h/2-3:h/2+4.5)}" font-size="13" font-weight="500" fill="var(--ink)" text-anchor="middle">${t1}</text>`+(t2?`<text x="${x+w/2}" y="${y+h/2+13}" font-size="11.5" fill="var(--ink2)" text-anchor="middle">${t2}</text>`:'');};
+  const ar=(x1,y1,x2,y2,t,tx,ty,anc='start')=>{o+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--ink2)" stroke-width="1.4" marker-end="url(#ahS)"/>`+(t?`<text x="${tx}" y="${ty}" font-size="11" fill="var(--ink2)" text-anchor="${anc}">${t}</text>`:'');};
+  box(14,10,170,44,'마이크로스위치 20개','발판마다 4개 병렬');
+  box(14,86,170,44,'WAGO 단자대 ×10','발판 아래');
+  box(14,162,170,44,'Pico','GPIO 5개, 전장 박스',true);
+  box(200,10,166,44,'메뉴 버튼 4개','버튼 박스');
+  box(200,86,166,44,'제로딜레이 인코더','버튼 박스 안');
+  box(14,248,352,44,'Raspberry Pi 5','게임 실행, 전장 박스',true);
+  box(14,330,170,40,'모니터·스피커');
+  box(200,330,166,40,'27W USB-C 전원');
+  ar(99,54,99,84,'접점',106,73);ar(99,130,99,160,'신호 5선 + GND',106,149);ar(99,206,99,246,'USB 키보드 (HID)',106,230);
+  ar(283,54,283,84,'접점',290,73);ar(283,130,283,246,'USB 게임패드 2',290,190);
+  ar(99,292,99,328,'HDMI',106,314);ar(283,328,283,294,'전원',290,314);
+  const s=document.getElementById('dSys');s.setAttribute('viewBox','0 0 380 380');s.innerHTML=o;
+})();
+
+/* panel wiring */
+(function(){
+  let o='';const GN='#4A7FC1',SG='#D9822B',GY='#6B7280';
+  const ys=[20,95,170,245];
+  ys.forEach((y,i)=>{o+=`<rect x="10" y="${y}" width="80" height="56" rx="3" fill="var(--sheet)" stroke="var(--ink2)" stroke-width="1.4"/><text x="50" y="${y+34}" font-size="14" font-weight="500" fill="var(--ink)" text-anchor="middle">스위치 ${i+1}</text>`;
+    o+=`<text x="96" y="${y+22}" font-size="10.5" fill="var(--ink2)">COM</text><text x="96" y="${y+42}" font-size="10.5" fill="var(--ink2)">NO</text>`;});
+  o+=`<line x1="150" y1="38" x2="150" y2="263" stroke="${GN}" stroke-width="2.6"/><line x1="200" y1="58" x2="200" y2="283" stroke="${SG}" stroke-width="2.6"/>`;
+  ys.forEach(y=>{o+=`<line x1="90" y1="${y+18}" x2="150" y2="${y+18}" stroke="${GN}" stroke-width="1.8"/><circle cx="150" cy="${y+18}" r="3" fill="${GN}"/>`;
+    o+=`<line x1="90" y1="${y+38}" x2="200" y2="${y+38}" stroke="${SG}" stroke-width="1.8"/><circle cx="200" cy="${y+38}" r="3" fill="${SG}"/>`;});
+  o+=`<polyline points="150,38 150,10 310,10 310,130" fill="none" stroke="${GN}" stroke-width="2.2"/><polyline points="200,283 200,325 340,325 340,200" fill="none" stroke="${SG}" stroke-width="2.2"/>`;
+  o+=`<rect x="250" y="130" width="120" height="70" rx="4" fill="var(--sheet)" stroke="var(--ink)" stroke-width="1"/><text x="310" y="160" font-size="13" font-weight="500" fill="var(--ink)" text-anchor="middle">2심 케이블</text><text x="310" y="180" font-size="11.5" fill="var(--ink2)" text-anchor="middle">→ 전장 박스 Pico</text>`;
+  o+=`<text x="158" y="8" font-size="11" fill="${GN}">GND 묶음 (WAGO 1)</text><text x="208" y="345" font-size="11" fill="${SG}">신호 묶음 (WAGO 2)</text>`;
+  o+=`<text x="190" y="362" font-size="11" fill="var(--ink2)" text-anchor="middle">COM끼리 · NO끼리 병렬, NC는 쓰지 않음</text>`;
+  document.getElementById('wPanel').innerHTML=o;
+})();
+
+/* pads -> Pico */
+(function(){
+  let o='';const GN='#4A7FC1',SG='#D9822B';
+  const names=['좌하','좌상','중앙','우상','우하'],pins=['GP2 (4)','GP3 (5)','GP4 (6)','GP5 (7)','GP6 (9)'],keys=['넘패드 1','넘패드 7','넘패드 5','넘패드 9','넘패드 3'];
+  o+=`<rect x="245" y="12" width="125" height="316" rx="4" fill="var(--sheet)" stroke="var(--blue)" stroke-width="1.6"/>`;
+  o+=`<line x1="150" y1="24" x2="150" y2="304" stroke="${GN}" stroke-width="2.6"/><line x1="150" y1="24" x2="245" y2="24" stroke="${GN}" stroke-width="2"/>`;
+  names.forEach((n,i)=>{const y=40+56*i;
+    o+=`<rect x="10" y="${y}" width="105" height="46" rx="3" fill="var(--sheet)" stroke="var(--ink2)" stroke-width="1"/><text x="62" y="${y+19}" font-size="13" font-weight="500" fill="var(--ink)" text-anchor="middle">${n}</text><text x="62" y="${y+35}" font-size="11" fill="var(--ink2)" text-anchor="middle">스위치 4개 병렬</text>`;
+    o+=`<line x1="115" y1="${y+14}" x2="245" y2="${y+14}" stroke="${SG}" stroke-width="1.6"/><text x="252" y="${y+18}" font-size="11" fill="var(--ink)">${pins[i]}</text><text x="190" y="${y+10}" font-size="10" fill="var(--ink2)" text-anchor="middle">${keys[i]}</text>`;
+    o+=`<line x1="115" y1="${y+32}" x2="150" y2="${y+32}" stroke="${GN}" stroke-width="1.6"/><circle cx="150" cy="${y+32}" r="2.5" fill="${GN}"/>`;});
+  o+=`<text x="252" y="28" font-size="11" fill="var(--ink)">GND (3)</text><text x="340" y="175" font-size="15" font-weight="600" fill="var(--ink)" text-anchor="middle">Pico</text><text x="307" y="346" font-size="11.5" fill="var(--ink2)" text-anchor="middle">USB → Pi 5 (키보드)</text>`;
+  o+=`<line x1="20" y1="366" x2="34" y2="366" stroke="${SG}" stroke-width="2"/><text x="38" y="370" font-size="11.5" fill="var(--ink2)">신호</text><line x1="95" y1="366" x2="109" y2="366" stroke="${GN}" stroke-width="2"/><text x="113" y="370" font-size="11.5" fill="var(--ink2)">GND</text>`;
+  document.getElementById('wPico').innerHTML=o;
+})();
+/* ---------- build-step isometric drawings ---------- */
+(function(){
+  const C30=0.866,S30=0.5,ACC='#E8742C';
+  const P=(x,y,z)=>[(x+z)*C30,(x-z)*S30-y];
+  const shade=(hex,f)=>{const n=parseInt(hex.slice(1),16);const t=v=>Math.round(Math.min(255,Math.max(0,v*f)));return `rgb(${t(n>>16)},${t(n>>8&255)},${t(n&255)})`;};
+  const bbox=p=>{let a=1e9,b=-1e9,c=1e9,d=-1e9;[p.x0,p.x1].forEach(x=>[p.y0,p.y1].forEach(y=>[p.z0,p.z1].forEach(z=>{const[u,v]=P(x,y,z);a=Math.min(a,u);b=Math.max(b,u);c=Math.min(c,v);d=Math.max(d,v);})));return[a,b,c,d];};
+  const key=p=>(p.x0+p.x1)/2-(p.z0+p.z1)/2+(p.y0+p.y1)/2;
+  function order(list){
+    const n=list.length,bb=list.map(bbox),adj=list.map(()=>[]),indeg=new Array(n).fill(0),e=0.01;
+    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+      const A=bb[i],Bb=bb[j];if(A[1]<=Bb[0]||Bb[1]<=A[0]||A[3]<=Bb[2]||Bb[3]<=A[2])continue;
+      const a=list[i],b=list[j];let r=0;
+      if(a.x1<=b.x0+e)r=1;else if(b.x1<=a.x0+e)r=-1;else if(a.z0>=b.z1-e)r=1;else if(b.z0>=a.z1-e)r=-1;else if(a.y1<=b.y0+e)r=1;else if(b.y1<=a.y0+e)r=-1;
+      if(r===1){adj[i].push(j);indeg[j]++;}else if(r===-1){adj[j].push(i);indeg[i]++;}
+    }
+    const done=new Array(n).fill(false),out=[];
+    while(out.length<n){let pk=-1;
+      for(let k=0;k<n;k++)if(!done[k]&&indeg[k]<=0&&(pk<0||key(list[k])<key(list[pk])))pk=k;
+      if(pk<0)for(let k=0;k<n;k++)if(!done[k]&&(pk<0||key(list[k])<key(list[pk])))pk=k;
+      done[pk]=true;out.push(list[pk]);adj[pk].forEach(j=>indeg[j]--);}
+    return out;
+  }
+  const pt=q=>P(q[0],q[1],q[2]).map(n=>n.toFixed(1)).join(',');
+  const poly=(pts,f,op)=>`<polygon points="${pts.map(pt).join(' ')}" fill="${f}" fill-opacity="${op}" stroke="#1b2833" stroke-opacity="${op<1?.25:.45}" stroke-width=".5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`;
+  function draw(p,fill,op){
+    if(p.t==='cyl'){const[u,vt]=P(p.cx,p.y1,p.cz),vb=vt+(p.y1-p.y0),rx=p.r*1.2247,ry=p.r*.7071;
+      return `<path d="M${u-rx} ${vt}L${u-rx} ${vb}A${rx} ${ry} 0 0 0 ${u+rx} ${vb}L${u+rx} ${vt}Z" fill="${shade(fill,.8)}" fill-opacity="${op}" stroke="#1b2833" stroke-opacity=".4" stroke-width=".5" vector-effect="non-scaling-stroke"/><ellipse cx="${u}" cy="${vt}" rx="${rx}" ry="${ry}" fill="${shade(fill,1.08)}" fill-opacity="${op}" stroke="#1b2833" stroke-opacity=".4" stroke-width=".5" vector-effect="non-scaling-stroke"/>`;}
+    if(p.t==='beam'){let o='';const q=p.pts;for(let i=0;i<q.length;i++){const a=q[i],b=q[(i+1)%q.length];o+=poly([[p.x0,a[1],a[0]],[p.x1,a[1],a[0]],[p.x1,b[1],b[0]],[p.x0,b[1],b[0]]],shade(fill,.85),op);}
+      return o+poly(q.map(([z,y])=>[p.x1,y,z]),shade(fill,.68),op);}
+    const{x0,x1,y0,y1,z0,z1}=p;
+    return poly([[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],shade(fill,.85),op)+poly([[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],shade(fill,.68),op)+poly([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],shade(fill,1.08),op);
+  }
+  const STAGES=[['frame','foot'],['bracket','sw','lever','spring','guide'],['jb'],['eplate','pcb','cooler'],['carrier','gusset'],['spacer','deck'],['bar','brace','grip','btnbox','button'],['pc'],['skin','cover']];
+  const MARK={3:1,4:1};
+  const stageOf=c=>STAGES.findIndex(s=>s.includes(c))+1;
+  const all=order(parts.slice());
+  const vbFor=st=>{let U0=1e9,U1=-1e9,V0=1e9,V1=-1e9;parts.forEach(p=>{const s=stageOf(p.c);if(s<1||s>Math.max(st,6))return;const b=bbox(p);U0=Math.min(U0,b[0]);U1=Math.max(U1,b[1]);V0=Math.min(V0,b[2]);V1=Math.max(V1,b[3]);});const m=40;return `${U0-m} ${V0-m} ${U1-U0+2*m} ${V1-V0+2*m}`;};
+  STAGES.forEach((_,i)=>{
+    const st=i+1,svg=document.getElementById('iso'+st);if(!svg)return;
+    let o='';const marks=[];
+    all.forEach(p=>{const s=stageOf(p.c);if(s<1||s>st)return;
+      const isNew=s===st;const base=OPA[p.c]||1;
+      o+=draw(p,isNew?ACC:COL[p.c],isNew?(p.c==='pc'?.6:p.c==='skin'?.45:1):base*(p.c==='skin'?1:.72));
+      if(isNew&&MARK[st]){const bb=bbox(p);if(bb[1]-bb[0]<250)marks.push(bb);}});
+    marks.forEach(b=>{o+=`<circle cx="${(b[0]+b[1])/2}" cy="${(b[2]+b[3])/2}" r="${Math.max(b[1]-b[0],b[3]-b[2])/2+38}" fill="none" stroke="${ACC}" stroke-width="1.6" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/>`;});
+    svg.setAttribute('viewBox',vbFor(st));svg.innerHTML=o;
+  });
+})();
+})();
+</script>
+</body>
+</html>
