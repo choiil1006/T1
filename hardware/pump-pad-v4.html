@@ -92,7 +92,7 @@ td.p{font-weight:500;min-width:8em}
 </head>
 <body>
 <nav class="toc" aria-label="목차"><div>
-  <a href="#overview">개요</a><a href="#model">3D 모델</a><a href="#mech">기구 설계도</a><a href="#partdwg">부품도</a><a href="#wiring">배선도</a><a href="#bom">부품 목록</a><a href="#buy">구입 목록</a><a href="#steps">제작 순서</a><a href="#build">점검·소프트웨어</a>
+  <a href="#overview">개요</a><a href="#model">3D 모델</a><a href="#mech">기구 설계도</a><a href="#partdwg">부품도</a><a href="#wiring">배선도</a><a href="#plc">PLC 연동</a><a href="#bom">부품 목록</a><a href="#buy">구입 목록</a><a href="#steps">제작 순서</a><a href="#build">점검·소프트웨어</a>
 </div></nav>
 <div class="wrap">
 
@@ -107,7 +107,7 @@ td.p{font-weight:500;min-width:8em}
     <div><dt>모서리 발판</dt><dd class="num">277 × 337, 4장</dd></div>
     <div><dt>중앙 발판</dt><dd class="num">277 × 277, 1장</dd></div>
     <div><dt>센서</dt><dd>마이크로스위치 20 (발판당 4 병렬)</dd></div>
-    <div><dt>제어</dt><dd>Pico(키보드 HID) + Pi 5(게임)</dd></div>
+    <div><dt>제어</dt><dd>Pico(키보드 HID) + Pi 5(게임) + PLC(조명·모터)</dd></div>
   </dl>
 </header>
 
@@ -126,7 +126,7 @@ td.p{font-weight:500;min-width:8em}
         <li>코너 플레이트(K1)는 그대로 둡니다. 스프링 윗면과 스위치 레버가 닿는 면 역할을 합니다.</li>
         <li>K2는 L브래킷에서 <b>스위치 마운트</b>로 이름만 바뀌고, 로드셀 Ø16 구멍 대신 스위치 나사 구멍을 뚫습니다. 길이는 45에서 40으로 줄입니다.</li>
         <li>HX711 기판과 4심 차폐선이 빠지고, 발판 아래에는 WAGO 레버 커넥터 두 개(GND, 신호)만 둡니다. 케이블은 2심입니다.</li>
-        <li>PLC(FX3U-32M)는 입력 경로에서 뺐습니다. 이유와 쓸 수 있는 자리는 맨 아래 <a href="#build">점검·소프트웨어</a>에 적었습니다.</li>
+        <li>PLC(FX3U-32MT, 싱크 출력)는 <b>조명과 나중의 모터 확장</b>을 맡습니다. 판정용 입력은 PLC를 거치지 않고, 같은 신호를 Pico가 옵토 모듈로 PLC에 복사해 줍니다. 자세한 구조는 <a href="#plc">PLC 연동</a>에 있습니다.</li>
       </ul>
     </div>
   </div>
@@ -260,6 +260,8 @@ td.p{font-weight:500;min-width:8em}
       <tr><td class="p">중앙 (CN)</td><td>신호 / GND</td><td class="num">GP4 (6) / GND</td><td>넘패드 5</td></tr>
       <tr><td class="p">우상 (UR)</td><td>신호 / GND</td><td class="num">GP5 (7) / GND</td><td>넘패드 9</td></tr>
       <tr><td class="p">우하 (DR)</td><td>신호 / GND</td><td class="num">GP6 (9) / GND</td><td>넘패드 3</td></tr>
+      <tr><td class="p">PLC 복사 ×5</td><td>좌하~우하 → 옵토 → PLC</td><td class="num">GP10~GP14 (14,15,16,17,19)</td><td>PLC X10~X14</td></tr>
+      <tr><td class="p">PLC 명령 ×3</td><td>전체 점등, 조명 끔, 모터 예약</td><td class="num">GP15~GP17 (20,21,22)</td><td>PLC X15~X17</td></tr>
       <tr><td class="p">GND 공통</td><td>발판 5개의 GND선</td><td class="num">GND (3), (8) 등</td><td></td></tr>
       <tr><td class="p">풀업 (권장)</td><td>4.7kΩ × 5</td><td class="num">GPIO ↔ 3V3 (36)</td><td></td></tr>
       <tr><td class="p">Pico → Pi 5</td><td>마이크로 USB</td><td>Pi 5 USB 포트</td><td>USB 키보드</td></tr>
@@ -268,6 +270,77 @@ td.p{font-weight:500;min-width:8em}
     </tbody>
   </table></div>
   <p class="note">발판 쪽 케이블은 2심(신호, GND)이면 됩니다. 전원이 없어 차폐선은 필수가 아니지만, Pi 5 전원선 옆으로 지나가는 구간이 길면 차폐 2심선을 쓰고 차폐는 Pico 쪽 GND 한 곳에만 연결하세요. 스위치 사이 배선은 짧게 끝냅니다.</p>
+</section>
+
+<section id="plc">
+  <h2>PLC 연동</h2>
+  <p class="lead">FX3U-32MT 싱크 출력 PLC를 조명과 나중의 모터 확장에 씁니다. 발판 판정은 PLC를 거치지 않습니다. PLC 입력은 보통 약 10ms 필터와 스캔 주기가 있어서 판정용 경로로는 느리기 때문입니다. 대신 Pico가 같은 스위치 상태를 옵토 모듈로 PLC에 복사해 주면, PLC는 그 신호로 조명과 모터를 움직입니다.</p>
+  <div class="sheets">
+    <figure class="wide"><svg id="wPlc" role="img" aria-label="Pico, 옵토 모듈, PLC 연결도" viewBox="0 0 800 440"></svg><figcaption><b>Pico → 옵토 → PLC → 조명</b><span>싱크 입력(S/S를 +24V에), 싱크 출력(부하는 +24V와 Y 사이)</span></figcaption></figure>
+  </div>
+  <div class="cols" style="margin-top:14px">
+    <div class="card">
+      <h4>입출력 배정</h4>
+      <ul>
+        <li><b>X10~X14</b>: 발판 좌하·좌상·중앙·우상·우하 (<code>plc/pad-map.json</code> 그대로)</li>
+        <li><b>X15</b> 전체 점등, <b>X16</b> 조명 끔, <b>X17</b> 모터 예약 (게임이 보내는 명령)</li>
+        <li><b>X0~X7</b>: 모터 확장용 예약 (원점, 리밋, 엔코더)</li>
+        <li><b>Y10~Y14</b>: 발판 조명 24V LED, <b>Y15</b>: 캐비닛 조명 예약</li>
+        <li><b>Y0~Y3</b>: 모터 펄스·방향, <b>Y4</b>: 인에이블 (Y0~Y2가 펄스 출력 가능, 매뉴얼로 확인)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>래더 (명령어 목록 입력)</h4>
+      <pre style="margin:0;font-size:12.5px;line-height:1.5;overflow-x:auto"><code>LD  X010
+OR  X015
+ANI X016
+OUT Y010
+LD  X011
+OR  X015
+ANI X016
+OUT Y011
+... (X012→Y012, X013→Y013, X014→Y014 반복)
+LD  X017
+OUT M100   ; 모터용 예약
+END</code></pre>
+      <p style="margin-top:8px">GX Works2에서 명령어 목록으로 입력하거나 같은 내용을 래더로 그리면 됩니다. 밟는 발판은 즉시 켜지고, 게임이 X15를 올리면 전체 점등, X16을 올리면 꺼집니다.</p>
+    </div>
+    <div class="card">
+      <h4>결선 요점</h4>
+      <ul>
+        <li>입력 공통 <b>S/S는 +24V</b>에 연결합니다(싱크 입력). 옵토의 트랜지스터가 X를 0V로 끌어내리면 입력이 켜집니다.</li>
+        <li>출력은 <b>싱크</b>라서 LED 스트립의 +를 24V 전원에, −를 Y 단자에 연결하고, 출력 공통 COM은 24V 전원의 0V에 연결합니다.</li>
+        <li>점당 0.5A 안팎이 한계입니다(공통 묶음 합계 제한은 매뉴얼 확인). 발판당 LED 스트립은 그 이하로 합니다.</li>
+        <li>조명 전원은 PLC의 24V 서비스 전원이 아니라 별도 SMPS를 씁니다. 0V만 PLC와 연결합니다.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>PLC 설치 위치</h4>
+      <ul>
+        <li>FX3U-32M은 폭 약 150, 높이 90, 깊이 약 86mm입니다. 전장 박스(상판 아래 높이 약 35mm)에는 들어가지 않습니다.</li>
+        <li>본체 밖 뒤쪽 연장부 아래나 옆에 DIN 레일 박스를 따로 달고, Pico와 연결하는 8선 케이블만 본체 안으로 넣습니다.</li>
+        <li>PLC 전원은 AC 100~240V일 수 있습니다(/ES). 220V 배선은 차단기와 접지를 갖춰 박스 안에서만 하고, 자신이 없으면 전기 기사에게 맡기세요.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>모터 확장 때 추가할 것</h4>
+      <ul>
+        <li>스테핑 드라이버(24V 입력용) + 모터 + 별도 모터용 전원.</li>
+        <li>Y0(펄스), Y1(방향), Y4(인에이블)을 드라이버 입력에 연결합니다. 드라이버 입력이 5V용이면 직렬 저항을 답니다.</li>
+        <li>원점·리밋 센서는 X0~X2에 연결합니다. 비상정지는 PLC 로직과 별개로 모터 전원을 끊는 하드와이어로 구성하세요.</li>
+        <li>래더에서 DRVI·ZRN 같은 위치 명령으로 구동합니다. 게임은 Pico 시리얼로 X17 명령 비트를 올리기만 합니다.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>게임 쪽 작업 (아직 없음)</h4>
+      <ul>
+        <li>step-five는 지금 PLC 명령을 보내지 않습니다. Web Serial로 Pico에 1바이트를 쓰는 모듈을 추가해야 합니다.</li>
+        <li>바이트의 하위 3비트가 X15·X16·X17 상태가 됩니다(예: 1 = 전체 점등, 2 = 조명 끔).</li>
+        <li>Web Serial은 Chromium에서 localhost나 https에서만 쓸 수 있고, 사용자 클릭으로 포트를 한 번 승인해야 합니다.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">조명은 스위치가 눌린 뒤 옵토, PLC 입력 필터, 스캔, 출력을 거쳐 켜져서 판정 입력보다 수 ms~십수 ms 늦습니다. 불빛 용도에서는 문제없지만, 이 신호로 판정하지 마세요.</p>
 </section>
 
 <section id="bom">
@@ -296,7 +369,12 @@ td.p{font-weight:500;min-width:8em}
       <tr><td class="p">30mm 아케이드 버튼</td><td class="num">4</td><td><span class="tag buy">확인</span></td><td>인코더 키트에 들어 있으면 불필요</td></tr>
       <tr><td class="p">모니터, 스피커</td><td class="num">1</td><td><span class="tag">선택</span></td><td>HDMI 스피커 내장 모니터면 간단</td></tr>
       <tr><td class="p">50kg 하프브리지 로드셀 20, HX711 5</td><td class="num">—</td><td><span class="tag">미사용</span></td><td>v3 방식으로 돌아갈 때를 위해 보관</td></tr>
-      <tr><td class="p">Mitsubishi FX3U-32M PLC</td><td class="num">1</td><td><span class="tag">미사용</span></td><td>입력 경로에서 제외. 아래 점검·소프트웨어 참조</td></tr>
+      <tr><td class="p">Mitsubishi FX3U-32MT (싱크 출력)</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>조명과 모터 확장. 판정 입력 경로에는 쓰지 않음</td></tr>
+      <tr><td class="p">PLC 프로그램 케이블, GX Works2</td><td class="num">1</td><td><span class="tag buy">확인</span></td><td>래더를 올릴 때 필요. 있는지 알려주세요</td></tr>
+      <tr><td class="p">절연 모듈 8채널 (3.3V 입력, NPN 24V 출력)</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>Pico → PLC 입력. 대안은 ULN2803 모듈(비절연)</td></tr>
+      <tr><td class="p">24V SMPS 5A</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>조명 전원. PLC 24V 서비스 전원과 분리</td></tr>
+      <tr><td class="p">24V LED 스트립 1m</td><td class="num">5</td><td><span class="tag buy">추가</span></td><td>발판 조명, 발판당 0.5A 이하</td></tr>
+      <tr><td class="p">PLC 박스, DIN 레일, 차단기, 단자대</td><td class="num">1식</td><td><span class="tag buy">추가</span></td><td>PLC는 본체 밖 별도 박스</td></tr>
     </tbody>
   </table></div>
 
@@ -390,6 +468,21 @@ td.p{font-weight:500;min-width:8em}
       <tr><td class="p">2020 알루미늄 프로파일 (재단)</td><td class="num">약 6.8m</td><td>캐리어(C1~C3).</td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=2020%20%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%9E%AC%EB%8B%A8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=2020%20%EC%95%8C%EB%A3%A8%EB%AF%B8%EB%8A%84%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%9E%AC%EB%8B%A8" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">3030 코너 브래킷 · T너트 · 볼트</td><td class="num">1식</td><td>체결 부품 표 수량 기준.</td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=3030%20%EC%BD%94%EB%84%88%20%EB%B8%8C%EB%9E%98%ED%82%B7%20T%EB%84%88%ED%8A%B8%20%EB%B3%BC%ED%8A%B8%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=3030%20%EC%BD%94%EB%84%88%20%EB%B8%8C%EB%9E%98%ED%82%B7%20T%EB%84%88%ED%8A%B8%20%EB%B3%BC%ED%8A%B8%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">M8 조절발 (3030 바닥 장착형)</td><td class="num">16</td><td></td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=3030%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%A1%B0%EC%A0%88%EB%B0%9C%20M8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=3030%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%A1%B0%EC%A0%88%EB%B0%9C%20M8" target="_blank" rel="noopener">네이버</a></td></tr>
+    </tbody>
+  </table></div>
+  <h3>PLC 연동 부품 (조명 먼저, 모터는 나중)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>품목</th><th>수량</th><th>고를 때 확인</th><th>예상가(추정)</th><th>검색</th></tr></thead>
+    <tbody>
+      <tr><td class="p">절연 모듈 8채널 (3.3V 입력, NPN 출력)</td><td class="num">1</td><td>입력이 3.3V 로직이고 출력이 24V·약 10mA 이상 흘릴 수 있는 NPN 출력형인지 사양을 확인. 방향이 반대(24V→3.3V)인 보드는 안 됩니다.</td><td class="num">0.5~1.5만</td><td><a href="https://www.coupang.com/np/search?q=8%EC%B1%84%EB%84%90%20%EC%98%B5%ED%86%A0%EC%BB%A4%ED%94%8C%EB%9F%AC%20%EC%A0%88%EC%97%B0%20%EB%AA%A8%EB%93%88%20PLC%20NPN%2024V%203.3V" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=8%EC%B1%84%EB%84%90%20%EC%98%B5%ED%86%A0%EC%BB%A4%ED%94%8C%EB%9F%AC%20%EC%A0%88%EC%97%B0%20%EB%AA%A8%EB%93%88%20PLC%20NPN%2024V%203.3V" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">ULN2803 8채널 모듈 (대안)</td><td class="num">1</td><td>절연이 없어 Pico GND와 PLC 0V를 연결해야 합니다. 절연 모듈을 못 찾을 때만.</td><td class="num">0.3~0.6만</td><td><a href="https://www.coupang.com/np/search?q=ULN2803%208%EC%B1%84%EB%84%90%20%EB%93%9C%EB%9D%BC%EC%9D%B4%EB%B2%84%20%EB%AA%A8%EB%93%88" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=ULN2803%208%EC%B1%84%EB%84%90%20%EB%93%9C%EB%9D%BC%EC%9D%B4%EB%B2%84%20%EB%AA%A8%EB%93%88" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">24V SMPS 5A</td><td class="num">1</td><td>조명 전원. 모터를 달 때는 별도 전원.</td><td class="num">1.5~2.5만</td><td><a href="https://www.coupang.com/np/search?q=SMPS%2024V%205A%20%ED%8C%8C%EC%9B%8C%EC%84%9C%ED%94%8C%EB%9D%BC%EC%9D%B4" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=SMPS%2024V%205A%20%ED%8C%8C%EC%9B%8C%EC%84%9C%ED%94%8C%EB%9D%BC%EC%9D%B4" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">24V LED 스트립 1m</td><td class="num">5</td><td>발판당 하나, 소비전류가 0.5A 이하인 것.</td><td class="num">개당 0.5~1만</td><td><a href="https://www.coupang.com/np/search?q=24V%20LED%20%EC%8A%A4%ED%8A%B8%EB%A6%BD%20COB%201m%20%EB%B0%B1%EC%83%89" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=24V%20LED%20%EC%8A%A4%ED%8A%B8%EB%A6%BD%20COB%201m%20%EB%B0%B1%EC%83%89" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">DIN 레일 35mm</td><td class="num">1</td><td>PLC·SMPS·단자대 고정.</td><td class="num">0.3~0.6만</td><td><a href="https://www.coupang.com/np/search?q=DIN%20%EB%A0%88%EC%9D%BC%2035mm%20300mm" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=DIN%20%EB%A0%88%EC%9D%BC%2035mm%20300mm" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">DIN 레일 차단기 6A</td><td class="num">1</td><td>AC 입력 보호.</td><td class="num">0.5~1만</td><td><a href="https://www.coupang.com/np/search?q=DIN%20%EB%A0%88%EC%9D%BC%20%EC%B0%A8%EB%8B%A8%EA%B8%B0%201P%206A" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=DIN%20%EB%A0%88%EC%9D%BC%20%EC%B0%A8%EB%8B%A8%EA%B8%B0%201P%206A" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">DIN 레일 단자대 세트</td><td class="num">1</td><td>전원·신호 분배.</td><td class="num">1~2만</td><td><a href="https://www.coupang.com/np/search?q=DIN%20%EB%A0%88%EC%9D%BC%20%EB%8B%A8%EC%9E%90%EB%8C%80%202.5SQ%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=DIN%20%EB%A0%88%EC%9D%BC%20%EB%8B%A8%EC%9E%90%EB%8C%80%202.5SQ%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">PLC 박스 (플라스틱 배전함)</td><td class="num">1</td><td>PLC 깊이 86mm와 배선 여유를 고려한 크기.</td><td class="num">2~4만</td><td><a href="https://www.coupang.com/np/search?q=%ED%94%8C%EB%9D%BC%EC%8A%A4%ED%8B%B1%20%EB%B0%B0%EC%A0%84%ED%95%A8%20300x200x120" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%ED%94%8C%EB%9D%BC%EC%8A%A4%ED%8B%B1%20%EB%B0%B0%EC%A0%84%ED%95%A8%20300x200x120" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">FX3U 프로그램 케이블 (보유 확인)</td><td class="num">1</td><td>이미 있으면 불필요. 호환 케이블은 드라이버 설치가 필요할 수 있습니다.</td><td class="num">1.5~4만</td><td><a href="https://www.coupang.com/np/search?q=%EB%AF%B8%EC%93%B0%EB%B9%84%EC%8B%9C%20FX3U%20USB%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D%20%EC%BC%80%EC%9D%B4%EB%B8%94%20USB-SC09-FX" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EB%AF%B8%EC%93%B0%EB%B9%84%EC%8B%9C%20FX3U%20USB%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D%20%EC%BC%80%EC%9D%B4%EB%B8%94%20USB-SC09-FX" target="_blank" rel="noopener">네이버</a></td></tr>
     </tbody>
   </table></div>
   <p class="note">로드셀 20개와 HX711 5개는 이번 방식에서 쓰지 않으므로 사지 않고 보관합니다. 로드셀 방식에 필요했던 만능기판, 4심 차폐선도 사지 않습니다.</p>
@@ -494,6 +587,15 @@ td.p{font-weight:500;min-width:8em}
       <p class="ref">참고: <a href="#vFront">정면도</a>, <a href="#vSide">우측면도</a></p>
     </div>
   </article>
+  <article class="step" style="grid-template-columns:1fr">
+    <div>
+      <h3><span class="n">10</span>PLC 연동 (조명, 나중에 해도 됨)</h3>
+      <p class="need">준비: PLC 박스, 절연 모듈, 24V SMPS, LED 스트립 5개, 프로그램 케이블, GX Works2</p>
+      <ol><li>PLC 박스에 FX3U, SMPS, 차단기, 단자대를 DIN 레일로 고정하고 AC 전원과 접지를 연결합니다.</li><li>S/S를 +24V에, 출력 COM을 0V에 연결합니다.</li><li>절연 모듈 출력 8개를 X10~X17에, 모듈 전원 공통은 해당 단자 규격대로 연결하고, 모듈 입력은 Pico GP10~GP17과 GND에 연결합니다.</li><li>LED 스트립의 +를 SMPS +24V에, −를 Y10~Y14에 연결합니다.</li><li>래더를 올리고 Pico를 연결한 상태에서 발판을 밟아 해당 LED가 켜지는지 봅니다.</li><li>Pico 시리얼 터미널에서 바이트 1과 2를 보내 전체 점등과 소등이 되는지 봅니다.</li></ol>
+      <p class="chk">확인: 밟는 발판의 LED만 켜지고, X15·X16 명령에 따라 전체 점등·소등이 되며, 판정용 키보드 입력은 영향이 없음</p>
+      <p class="ref">참고: <a href="#plc">PLC 연동</a>, <a href="#pins">핀 배정표</a></p>
+    </div>
+  </article>
   </div>
 </section>
 
@@ -515,11 +617,11 @@ td.p{font-weight:500;min-width:8em}
     <div class="card">
       <h4>Pico 펌웨어</h4>
       <ul>
-        <li>파일: hardware/pico-pad/pico-pad.ino (초안, 실기 미검증)</li>
+        <li>파일: hardware/pico-pad/pico-pad.ino (초안, 실기 미검증)</li><li>스위치 5개 → 키보드 + PLC 복사(GP10~GP14)</li>
         <li>Arduino-Pico 코어에서 USB 스택을 Adafruit TinyUSB로 고릅니다.</li>
         <li>눌림은 디바운스 없이 바로, 뗌만 4ms 안정 후에 보냅니다.</li>
         <li>USB 폴링 간격 1ms, 키는 넘패드 1·7·5·9·3입니다.</li>
-        <li>CircuitPython은 HID 폴링이 느려서(기본 8ms) 권하지 않습니다.</li>
+        <li>같은 USB로 시리얼도 받아 GP15~GP17(PLC 명령)을 켜고 끕니다.</li><li>CircuitPython은 HID 폴링이 느려서(기본 8ms) 권하지 않습니다.</li>
       </ul>
     </div>
     <div class="card">
@@ -532,26 +634,32 @@ td.p{font-weight:500;min-width:8em}
       </ul>
     </div>
     <div class="card">
-      <h4>PLC (FX3U-32M)의 자리</h4>
+      <h4>PLC (FX3U-32MT)의 자리</h4>
       <ul>
-        <li>입력 경로에서는 뺐습니다. 브라우저는 PLC와 직접 통신하지 못해서 RS-422 케이블과 중계 프로그램이 따로 필요하고, 입력 필터와 통신 주기 때문에 지연이 커집니다.</li>
-        <li>PLC를 꼭 쓰려면 센서를 24V NPN 근접센서로 바꾸고 S/S 단자를 +24V에 연결해 X10~X14에 받습니다. plc/pad-map.json의 매핑이 그대로 맞습니다.</li>
-        <li>나중에 발판 조명(Y 출력, 트랜지스터 출력형 -MT일 때)에 쓰는 것이 더 자연스럽습니다.</li>
+        <li>판정용 입력은 Pico → USB 키보드로 직접 보냅니다. PLC는 거치지 않습니다.</li>
+        <li>Pico가 같은 상태를 옵토 모듈로 PLC X10~X14에 복사하고, PLC가 래더로 조명(Y10~Y14)을 켭니다.</li>
+        <li>모터를 달 때는 Y0~Y2 펄스 출력과 X0~X7 입력을 씁니다. 자세한 배정은 <a href="#plc">PLC 연동</a>.</li>
       </ul>
     </div>
   </div>
   <h3>Pico 펌웨어 초안</h3>
   <pre style="margin:0;padding:12px 14px;overflow-x:auto;background:var(--sheet);border:1px solid var(--line);font-size:12.5px;line-height:1.5;tab-size:2"><code>// 펌프 발판 v4 - Pico 펌웨어 초안 (실기 미검증)
 // 보드: Raspberry Pi Pico (Arduino-Pico 코어), Tools &gt; USB Stack &gt; Adafruit TinyUSB
-// 발판 5개 → GPIO 5개 → USB 키보드(HID). step-five 기본 매핑(넘패드 1·7·5·9·3)과 같은 키를 보냅니다.
+//
+// 하는 일
+//  1) 발판 스위치 5개(GP2~GP6) → USB 키보드(넘패드 1·7·5·9·3)  : 판정용, 지연 최소
+//  2) 같은 상태를 옵토 모듈로 PLC 입력 X10~X14에 복사(GP10~GP14)   : 조명·모터 로직용
+//  3) USB 시리얼로 1바이트(하위 3비트)를 받아 GP15~GP17 → PLC X15~X17 : 게임이 PLC에 보내는 명령
 //
 // 설계 원칙
 //  - 눌림은 디바운스 없이 첫 신호에서 바로 보냅니다 (지연 0).
 //  - 뗌만 4ms 동안 안정된 뒤에 보냅니다 (접점 채터링 방지).
-//  - USB 폴링 간격 1ms.
+//  - USB 폴링 간격 1ms. PLC 쪽 출력은 키보드 보고서를 보낸 뒤에 갱신합니다.
 #include &lt;Adafruit_TinyUSB.h&gt;
 
-const uint8_t PIN[5]  = {2, 3, 4, 5, 6};   // 좌하, 좌상, 중앙, 우상, 우하 (DL, UL, CN, UR, DR)
+const uint8_t PIN[5]  = {2, 3, 4, 5, 6};          // 좌하, 좌상, 중앙, 우상, 우하 (DL, UL, CN, UR, DR)
+const uint8_t MIR[5]  = {10, 11, 12, 13, 14};     // → PLC X10~X14 (옵토 모듈 입력)
+const uint8_t CMD[3]  = {15, 16, 17};             // → PLC X15~X17 (전체 점등, 조명 끔, 모터 예약)
 const uint8_t KEY[5]  = {HID_KEY_KEYPAD_1, HID_KEY_KEYPAD_7, HID_KEY_KEYPAD_5, HID_KEY_KEYPAD_9, HID_KEY_KEYPAD_3};
 const uint32_t RELEASE_US = 4000;
 
@@ -570,7 +678,12 @@ void sendReport() {
 }
 
 void setup() {
-  for (uint8_t i = 0; i &lt; 5; i++) pinMode(PIN[i], INPUT_PULLUP);  // 외부 4.7kΩ 풀업을 달면 더 안정적
+  for (uint8_t i = 0; i &lt; 5; i++) {
+    pinMode(PIN[i], INPUT_PULLUP);                 // 외부 4.7kΩ 풀업을 달면 더 안정적
+    pinMode(MIR[i], OUTPUT); digitalWrite(MIR[i], LOW);
+  }
+  for (uint8_t i = 0; i &lt; 3; i++) { pinMode(CMD[i], OUTPUT); digitalWrite(CMD[i], LOW); }
+  Serial.begin(115200);
   usb_hid.setPollInterval(1);
   usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
   usb_hid.begin();
@@ -592,7 +705,14 @@ void loop() {
       }
     }
   }
-  if (changed) sendReport();
+  if (changed) {
+    sendReport();                                   // 먼저 게임으로
+    for (uint8_t i = 0; i &lt; 5; i++) digitalWrite(MIR[i], down[i] ? HIGH : LOW);  // 그다음 PLC로
+  }
+  while (Serial.available()) {                      // 게임 → PLC 명령: 하위 3비트 = X15, X16, X17
+    uint8_t b = Serial.read();
+    for (uint8_t i = 0; i &lt; 3; i++) digitalWrite(CMD[i], (b &gt;&gt; i) &amp; 1 ? HIGH : LOW);
+  }
 }
 </code></pre>
   <p class="note">발판 치수는 공식 규격과 같게 맞춘 DIY 실측 자료 기준입니다. 안전바 높이와 앞뒤 연장부 길이는 제안값이니 키와 설치 공간에 맞게 조정하세요. 스프링 상수와 스위치 눌림 지점(0.4~0.6mm)은 시작값이며 발판 한 장을 먼저 만들어 시험한 뒤 확정하세요.</p>
@@ -975,13 +1095,14 @@ partSvg('pC','-70 -55 520 435',a=>{
   box(14,162,170,44,'Pico','GPIO 5개, 전장 박스',true);
   box(200,10,166,44,'메뉴 버튼 4개','버튼 박스');
   box(200,86,166,44,'제로딜레이 인코더','버튼 박스 안');
+  box(200,162,120,44,'PLC FX3U-32MT','조명·모터',true);
   box(14,248,352,44,'Raspberry Pi 5','게임 실행, 전장 박스',true);
   box(14,330,170,40,'모니터·스피커');
   box(200,330,166,40,'27W USB-C 전원');
   ar(99,54,99,84,'접점',106,73);ar(99,130,99,160,'신호 5선 + GND',106,149);ar(99,206,99,246,'USB 키보드 (HID)',106,230);
-  ar(283,54,283,84,'접점',290,73);ar(283,130,283,246,'USB 게임패드 2',290,190);
+  ar(283,54,283,84,'접점',290,73);ar(345,130,345,246,'게임패드',352,190);ar(184,184,200,184,'',0,0);o+=`<text x="192" y="176" font-size="10" fill="var(--ink2)" text-anchor="middle">옵토</text>`;
   ar(99,292,99,328,'HDMI',106,314);ar(283,328,283,294,'전원',290,314);
-  const s=document.getElementById('dSys');s.setAttribute('viewBox','0 0 380 380');s.innerHTML=o;
+  const s=document.getElementById('dSys');s.setAttribute('viewBox','0 0 430 380');s.innerHTML=o;
 })();
 
 /* panel wiring */
@@ -1013,6 +1134,28 @@ partSvg('pC','-70 -55 520 435',a=>{
   o+=`<text x="252" y="28" font-size="11" fill="var(--ink)">GND (3)</text><text x="340" y="175" font-size="15" font-weight="600" fill="var(--ink)" text-anchor="middle">Pico</text><text x="307" y="346" font-size="11.5" fill="var(--ink2)" text-anchor="middle">USB → Pi 5 (키보드)</text>`;
   o+=`<line x1="20" y1="366" x2="34" y2="366" stroke="${SG}" stroke-width="2"/><text x="38" y="370" font-size="11.5" fill="var(--ink2)">신호</text><line x1="95" y1="366" x2="109" y2="366" stroke="${GN}" stroke-width="2"/><text x="113" y="370" font-size="11.5" fill="var(--ink2)">GND</text>`;
   document.getElementById('wPico').innerHTML=o;
+})();
+
+/* PLC wiring */
+(function(){
+  let o='';const OR='#D9822B',GN='#4A7FC1',RD='#D94A3D';
+  const T=(x,y,t,a='start',sz=11,c='var(--ink)')=>`<text x="${x}" y="${y}" font-size="${sz}" fill="${c}" text-anchor="${a}">${t}</text>`;
+  const Bx=(x,y,w,h,st)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="var(--sheet)" stroke="${st||'var(--ink2)'}" stroke-width="1.3"/>`;
+  const names=['좌하','좌상','중앙','우상','우하','전체 점등','조명 끔','모터 예약'];
+  const yy=i=>62+i*36;
+  o+=Bx(10,20,150,320,'var(--blue)')+T(85,42,'Pico','middle',14)+T(85,330,'GP10~GP17','middle',10.5,'var(--ink2)');
+  o+=Bx(250,20,110,320)+T(305,42,'절연 모듈','middle',13)+T(305,330,'8채널, 3.3V→24V','middle',10.5,'var(--ink2)');
+  o+=Bx(450,20,150,320,'var(--blue)')+T(525,42,'PLC FX3U-32MT','middle',13)+T(525,330,'X10~X17 / Y10~Y14','middle',10.5,'var(--ink2)');
+  names.forEach((n,i)=>{const y=yy(i),gp=10+i;
+    o+=`<line x1="160" y1="${y}" x2="250" y2="${y}" stroke="${OR}" stroke-width="1.6"/><line x1="360" y1="${y}" x2="450" y2="${y}" stroke="${OR}" stroke-width="1.6"/>`;
+    o+=T(164,y-4,'GP'+gp,'start',10.5)+T(446,y-4,'X'+(10+i),'end',10.5)+T(20,y+4,n,'start',11.5);
+    if(i<5){o+=`<line x1="600" y1="${y}" x2="660" y2="${y}" stroke="${GN}" stroke-width="1.6"/>`+T(596,y-4,'Y'+(10+i),'end',10.5)+Bx(660,y-14,90,28)+T(705,y+4,n+' LED','middle',10.5);
+      o+=`<line x1="750" y1="${y}" x2="775" y2="${y}" stroke="${RD}" stroke-width="1.4"/>`;}});
+  o+=`<line x1="775" y1="${yy(0)}" x2="775" y2="${yy(4)}" stroke="${RD}" stroke-width="2.4"/>`+T(775,yy(4)+18,'+24V','middle',11,RD);
+  o+=T(525,372,'S/S → +24V (싱크 입력)','middle',11,RD)+T(525,390,'출력 COM → 0V','middle',11,'var(--ink2)');
+  o+=Bx(640,350,150,56)+T(715,374,'24V SMPS 5A','middle',12)+T(715,392,'조명 전원, 0V만 PLC와 공통','middle',10,'var(--ink2)');
+  o+=T(85,372,'Pi 5 ↔ Pico: USB (키보드 + 시리얼)','middle',11,'var(--ink2)');
+  document.getElementById('wPlc').innerHTML=o;
 })();
 /* ---------- build-step isometric drawings ---------- */
 (function(){
