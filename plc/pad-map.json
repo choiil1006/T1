@@ -1,5 +1,5 @@
 {
-  "plcModel": "FX3U-32MT (sink output)",
+  "plcModel": "FX3U-32MT/ES (AC power, sink output)",
   "note": "Pad -> PLC input mapping. Device names are the PLC's own labels (octal numbering: X7 is followed by X10). Lanes are listed in the game's left-to-right order. In design v4 the pad state reaches these inputs through the Pico (GPIO -> opto module), NOT directly from the switches: the Pico sends the fast path to the PC as a USB keyboard and mirrors the same state to the PLC for lights/motor logic. Nothing in step-five reads this file yet.",
   "lanes": {
     "DL": "X10",

@@ -274,7 +274,7 @@ td.p{font-weight:500;min-width:8em}
 
 <section id="plc">
   <h2>PLC 연동</h2>
-  <p class="lead">FX3U-32MT 싱크 출력 PLC를 조명과 나중의 모터 확장에 씁니다. 발판 판정은 PLC를 거치지 않습니다. PLC 입력은 보통 약 10ms 필터와 스캔 주기가 있어서 판정용 경로로는 느리기 때문입니다. 대신 Pico가 같은 스위치 상태를 옵토 모듈로 PLC에 복사해 주면, PLC는 그 신호로 조명과 모터를 움직입니다.</p>
+  <p class="lead">FX3U-32MT 싱크 출력 PLC를 발판 조명에 씁니다. 모터는 아직 정하지 않아서 입출력 자리만 비워 둡니다. 발판 판정은 PLC를 거치지 않습니다. PLC 입력은 보통 약 10ms 필터와 스캔 주기가 있어서 판정용 경로로는 느리기 때문입니다. 대신 Pico가 같은 스위치 상태를 옵토 모듈로 PLC에 복사해 주면, PLC는 그 신호로 조명과 모터를 움직입니다.</p>
   <div class="sheets">
     <figure class="wide"><svg id="wPlc" role="img" aria-label="Pico, 옵토 모듈, PLC 연결도" viewBox="0 0 800 440"></svg><figcaption><b>Pico → 옵토 → PLC → 조명</b><span>싱크 입력(S/S를 +24V에), 싱크 출력(부하는 +24V와 Y 사이)</span></figcaption></figure>
   </div>
@@ -317,13 +317,13 @@ END</code></pre>
     <div class="card">
       <h4>PLC 설치 위치</h4>
       <ul>
-        <li>FX3U-32M은 폭 약 150, 높이 90, 깊이 약 86mm입니다. 전장 박스(상판 아래 높이 약 35mm)에는 들어가지 않습니다.</li>
+        <li>FX3U-32MT/ES는 폭 약 150, 높이 90, 깊이 약 86mm입니다. 전장 박스(상판 아래 높이 약 35mm)에는 들어가지 않습니다.</li>
         <li>본체 밖 뒤쪽 연장부 아래나 옆에 DIN 레일 박스를 따로 달고, Pico와 연결하는 8선 케이블만 본체 안으로 넣습니다.</li>
-        <li>PLC 전원은 AC 100~240V일 수 있습니다(/ES). 220V 배선은 차단기와 접지를 갖춰 박스 안에서만 하고, 자신이 없으면 전기 기사에게 맡기세요.</li>
+        <li>/ES 모델은 AC 100~240V 전원입니다. 220V 배선은 차단기와 접지를 갖춰 박스 안에서만 하고, 자신이 없으면 전기 기사에게 맡기세요.</li>
       </ul>
     </div>
     <div class="card">
-      <h4>모터 확장 때 추가할 것</h4>
+      <h4>모터 확장 (미정, 쓰게 되면)</h4>
       <ul>
         <li>스테핑 드라이버(24V 입력용) + 모터 + 별도 모터용 전원.</li>
         <li>Y0(펄스), Y1(방향), Y4(인에이블)을 드라이버 입력에 연결합니다. 드라이버 입력이 5V용이면 직렬 저항을 답니다.</li>
@@ -369,8 +369,8 @@ END</code></pre>
       <tr><td class="p">30mm 아케이드 버튼</td><td class="num">4</td><td><span class="tag buy">확인</span></td><td>인코더 키트에 들어 있으면 불필요</td></tr>
       <tr><td class="p">모니터, 스피커</td><td class="num">1</td><td><span class="tag">선택</span></td><td>HDMI 스피커 내장 모니터면 간단</td></tr>
       <tr><td class="p">50kg 하프브리지 로드셀 20, HX711 5</td><td class="num">—</td><td><span class="tag">미사용</span></td><td>v3 방식으로 돌아갈 때를 위해 보관</td></tr>
-      <tr><td class="p">Mitsubishi FX3U-32MT (싱크 출력)</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>조명과 모터 확장. 판정 입력 경로에는 쓰지 않음</td></tr>
-      <tr><td class="p">PLC 프로그램 케이블, GX Works2</td><td class="num">1</td><td><span class="tag buy">확인</span></td><td>래더를 올릴 때 필요. 있는지 알려주세요</td></tr>
+      <tr><td class="p">Mitsubishi FX3U-32MT/ES (AC 전원, 싱크 출력)</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>조명용. 모터는 미정이라 자리만 예약. 형명 끝 글자는 라벨로 재확인</td></tr>
+      <tr><td class="p">PLC 프로그램 케이블, GX Works2</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>Pi 5가 아닌 다른 PC에 있음. 래더는 그 PC에서 올림</td></tr>
       <tr><td class="p">절연 모듈 8채널 (3.3V 입력, NPN 24V 출력)</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>Pico → PLC 입력. 대안은 ULN2803 모듈(비절연)</td></tr>
       <tr><td class="p">24V SMPS 5A</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>조명 전원. PLC 24V 서비스 전원과 분리</td></tr>
       <tr><td class="p">24V LED 스트립 1m</td><td class="num">5</td><td><span class="tag buy">추가</span></td><td>발판 조명, 발판당 0.5A 이하</td></tr>
@@ -470,7 +470,7 @@ END</code></pre>
       <tr><td class="p">M8 조절발 (3030 바닥 장착형)</td><td class="num">16</td><td></td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=3030%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%A1%B0%EC%A0%88%EB%B0%9C%20M8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=3030%20%ED%94%84%EB%A1%9C%ED%8C%8C%EC%9D%BC%20%EC%A1%B0%EC%A0%88%EB%B0%9C%20M8" target="_blank" rel="noopener">네이버</a></td></tr>
     </tbody>
   </table></div>
-  <h3>PLC 연동 부품 (조명 먼저, 모터는 나중)</h3>
+  <h3>PLC 연동 부품 (조명만, 모터는 미정이라 제외)</h3>
   <div class="tablewrap"><table>
     <thead><tr><th>품목</th><th>수량</th><th>고를 때 확인</th><th>예상가(추정)</th><th>검색</th></tr></thead>
     <tbody>
@@ -482,7 +482,6 @@ END</code></pre>
       <tr><td class="p">DIN 레일 차단기 6A</td><td class="num">1</td><td>AC 입력 보호.</td><td class="num">0.5~1만</td><td><a href="https://www.coupang.com/np/search?q=DIN%20%EB%A0%88%EC%9D%BC%20%EC%B0%A8%EB%8B%A8%EA%B8%B0%201P%206A" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=DIN%20%EB%A0%88%EC%9D%BC%20%EC%B0%A8%EB%8B%A8%EA%B8%B0%201P%206A" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">DIN 레일 단자대 세트</td><td class="num">1</td><td>전원·신호 분배.</td><td class="num">1~2만</td><td><a href="https://www.coupang.com/np/search?q=DIN%20%EB%A0%88%EC%9D%BC%20%EB%8B%A8%EC%9E%90%EB%8C%80%202.5SQ%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=DIN%20%EB%A0%88%EC%9D%BC%20%EB%8B%A8%EC%9E%90%EB%8C%80%202.5SQ%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">PLC 박스 (플라스틱 배전함)</td><td class="num">1</td><td>PLC 깊이 86mm와 배선 여유를 고려한 크기.</td><td class="num">2~4만</td><td><a href="https://www.coupang.com/np/search?q=%ED%94%8C%EB%9D%BC%EC%8A%A4%ED%8B%B1%20%EB%B0%B0%EC%A0%84%ED%95%A8%20300x200x120" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%ED%94%8C%EB%9D%BC%EC%8A%A4%ED%8B%B1%20%EB%B0%B0%EC%A0%84%ED%95%A8%20300x200x120" target="_blank" rel="noopener">네이버</a></td></tr>
-      <tr><td class="p">FX3U 프로그램 케이블 (보유 확인)</td><td class="num">1</td><td>이미 있으면 불필요. 호환 케이블은 드라이버 설치가 필요할 수 있습니다.</td><td class="num">1.5~4만</td><td><a href="https://www.coupang.com/np/search?q=%EB%AF%B8%EC%93%B0%EB%B9%84%EC%8B%9C%20FX3U%20USB%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D%20%EC%BC%80%EC%9D%B4%EB%B8%94%20USB-SC09-FX" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EB%AF%B8%EC%93%B0%EB%B9%84%EC%8B%9C%20FX3U%20USB%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D%20%EC%BC%80%EC%9D%B4%EB%B8%94%20USB-SC09-FX" target="_blank" rel="noopener">네이버</a></td></tr>
     </tbody>
   </table></div>
   <p class="note">로드셀 20개와 HX711 5개는 이번 방식에서 쓰지 않으므로 사지 않고 보관합니다. 로드셀 방식에 필요했던 만능기판, 4심 차폐선도 사지 않습니다.</p>
@@ -590,7 +589,7 @@ END</code></pre>
   <article class="step" style="grid-template-columns:1fr">
     <div>
       <h3><span class="n">10</span>PLC 연동 (조명, 나중에 해도 됨)</h3>
-      <p class="need">준비: PLC 박스, 절연 모듈, 24V SMPS, LED 스트립 5개, 프로그램 케이블, GX Works2</p>
+      <p class="need">준비: PLC 박스, 절연 모듈, 24V SMPS, LED 스트립 5개, 프로그램 케이블과 GX Works2가 깔린 다른 PC</p>
       <ol><li>PLC 박스에 FX3U, SMPS, 차단기, 단자대를 DIN 레일로 고정하고 AC 전원과 접지를 연결합니다.</li><li>S/S를 +24V에, 출력 COM을 0V에 연결합니다.</li><li>절연 모듈 출력 8개를 X10~X17에, 모듈 전원 공통은 해당 단자 규격대로 연결하고, 모듈 입력은 Pico GP10~GP17과 GND에 연결합니다.</li><li>LED 스트립의 +를 SMPS +24V에, −를 Y10~Y14에 연결합니다.</li><li>래더를 올리고 Pico를 연결한 상태에서 발판을 밟아 해당 LED가 켜지는지 봅니다.</li><li>Pico 시리얼 터미널에서 바이트 1과 2를 보내 전체 점등과 소등이 되는지 봅니다.</li></ol>
       <p class="chk">확인: 밟는 발판의 LED만 켜지고, X15·X16 명령에 따라 전체 점등·소등이 되며, 판정용 키보드 입력은 영향이 없음</p>
       <p class="ref">참고: <a href="#plc">PLC 연동</a>, <a href="#pins">핀 배정표</a></p>
