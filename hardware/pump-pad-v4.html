@@ -234,7 +234,7 @@ td.p{font-weight:500;min-width:8em}
   <p class="lead">직접 가공하거나 가공 업체에 맡길 부품입니다.</p>
   <div class="sheets">
     <figure><svg id="pL" role="img" aria-label="스위치 마운트 부품도"></svg><figcaption><b>K2 스위치 마운트</b><span>알루미늄 4t, 20개</span></figcaption>
-      <p class="fnote">스위치 나사 구멍 2개(M2.5)는 구입한 스위치의 구멍 간격을 캘리퍼스로 재서 뚫습니다. 구멍을 길게(슬롯) 내면 눌림 지점을 조정하기 쉽습니다. 스프링 자리는 Ø10 얕은 홈이나 얇은 고무 시트로 잡습니다.</p></figure>
+      <p class="fnote">스위치 나사 구멍 2개(M2.5)는 구입한 스위치의 구멍 간격을 캘리퍼스로 재서 뚫습니다. 구멍을 길게(슬롯) 내면 눌림 지점을 조정하기 쉽습니다. 스프링 자리는 Ø11 얕은 홈이나 얇은 고무 시트로 잡습니다. 스프링 규격은 외경 10, 선경 1.2~1.3, 자유장 8.5~9mm입니다.</p></figure>
     <figure><svg id="pG" role="img" aria-label="코너 플레이트 부품도"></svg><figcaption><b>K1 코너 플레이트</b><span>알루미늄 4t, 20개</span></figcaption>
       <p class="fnote">그림은 왼쪽 앞 모서리용입니다. 다른 모서리는 대칭으로 뒤집어 씁니다. 스프링 윗면이 받치고 스위치 레버가 눌리는 면입니다. 60 × 4 알루미늄 평철을 60mm로 잘라 구멍만 뚫어도 됩니다.</p></figure>
     <figure class="wide"><svg id="pC" role="img" aria-label="캐리어 조립도"></svg><figcaption><b>캐리어 조립도</b><span>모서리 발판용 277×337, 중앙용은 옆변만 277</span></figcaption>
@@ -352,7 +352,7 @@ END</code></pre>
       <tr><td class="p">Raspberry Pi 5</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>게임 실행, 모니터 출력</td></tr>
       <tr><td class="p">제로딜레이 인코더</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>메뉴 버튼 4개용</td></tr>
       <tr><td class="p">소형 힌지 레버 마이크로스위치 (Omron SS-5GL2급)</td><td class="num">24</td><td><span class="tag buy">추가</span></td><td>발판 모서리 20개 + 여유 4개</td></tr>
-      <tr><td class="p">압축 스프링 모음 키트</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>발판 받침. 눌림 감각에 따라 교체하며 시험</td></tr>
+      <tr><td class="p">압축 스프링 외경 10, 선경 1.0·1.2·1.3, 자유장 8.5~9</td><td class="num">각 20</td><td><span class="tag buy">추가</span></td><td>발판 받침. 3종을 시험해 하나로 확정. 스프링 상수 약 10~15 N/mm</td></tr>
       <tr><td class="p">Raspberry Pi Pico H</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>스위치 읽기, USB 키보드</td></tr>
       <tr><td class="p">Pico 스크류 터미널 확장 보드</td><td class="num">1</td><td><span class="tag">선택</span></td><td>나사로 전선을 물리는 보드. 없으면 Pico 헤더에 직접 납땜</td></tr>
       <tr><td class="p">WAGO 221-415 5구 레버 커넥터</td><td class="num">12</td><td><span class="tag buy">추가</span></td><td>발판당 2개(GND, 신호), 여유 2개</td></tr>
@@ -434,7 +434,7 @@ END</code></pre>
     <tbody>
       <tr><td class="p">옴론 SS-5GL2 마이크로스위치</td><td class="num">24</td><td>정품이 오래 갑니다. 본체 약 20×10×6.4, 힌지 레버형. 받으면 높이와 구멍 간격을 먼저 실측하세요.</td><td class="num">개당 2~5천</td><td><a href="https://www.coupang.com/np/search?q=%EC%98%B4%EB%A1%A0%20SS-5GL2%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%EC%8A%A4%EC%9C%84%EC%B9%98" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%98%B4%EB%A1%A0%20SS-5GL2%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%EC%8A%A4%EC%9C%84%EC%B9%98" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">소형 마이크로스위치 (SS-5GL 호환)</td><td class="num">24</td><td>정품 대신 쓸 저가형. 수명이 짧을 수 있어 정품과 같은 형태인지 사진으로 확인.</td><td class="num">개당 0.5~1천</td><td><a href="https://www.coupang.com/np/search?q=%EC%86%8C%ED%98%95%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%EC%8A%A4%EC%9C%84%EC%B9%98%20SS-5GL%20%ED%9E%8C%EC%A7%80%20%EB%A0%88%EB%B2%84" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%86%8C%ED%98%95%20%EB%A7%88%EC%9D%B4%ED%81%AC%EB%A1%9C%EC%8A%A4%EC%9C%84%EC%B9%98%20SS-5GL%20%ED%9E%8C%EC%A7%80%20%EB%A0%88%EB%B2%84" target="_blank" rel="noopener">네이버</a></td></tr>
-      <tr><td class="p">압축 스프링 모음 키트</td><td class="num">1</td><td>선 지름 0.8~1.2, 외경 8~10, 길이 8~15가 섞인 키트. 눌림 감각을 시험하며 고릅니다.</td><td class="num">1~2만</td><td><a href="https://www.coupang.com/np/search?q=%EC%95%95%EC%B6%95%20%EC%8A%A4%ED%94%84%EB%A7%81%20%EC%84%B8%ED%8A%B8%20%EB%AA%A8%EC%9D%8C%20%EB%B0%95%EC%8A%A4" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%95%95%EC%B6%95%20%EC%8A%A4%ED%94%84%EB%A7%81%20%EC%84%B8%ED%8A%B8%20%EB%AA%A8%EC%9D%8C%20%EB%B0%95%EC%8A%A4" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">압축 스프링 (외경 10, 선경 1.0·1.2·1.3, 자유장 8.5~9) 각 20개</td><td class="num">60</td><td>끼우는 틈 8mm, 자리 Ø11, 밀착 길이 7mm 미만(선경 1.2~1.3mm이면 약 6mm)이어야 합니다. 일반 모음 키트에는 이렇게 짧고 센 스프링이 드뭅니다. 규격 판매처나 소량 제작 업체에서 구하세요.</td><td class="num">견적</td><td><a href="https://www.coupang.com/np/search?q=%EC%95%95%EC%B6%95%20%EC%8A%A4%ED%94%84%EB%A7%81%20%EC%99%B8%EA%B2%BD%2010%20%EC%84%A0%EA%B2%BD%201.2%20%EC%9E%90%EC%9C%A0%EC%9E%A5%209" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%95%95%EC%B6%95%20%EC%8A%A4%ED%94%84%EB%A7%81%20%EC%99%B8%EA%B2%BD%2010%20%EC%84%A0%EA%B2%BD%201.2%20%EC%9E%90%EC%9C%A0%EC%9E%A5%209" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">WAGO 221-415 5구 레버 커넥터</td><td class="num">12</td><td>2.5mm² 규격이지만 0.3~0.5mm² 전선도 물립니다. 호환품도 됩니다.</td><td class="num">개당 0.5~1.5천</td><td><a href="https://www.coupang.com/np/search?q=%EC%99%80%EA%B3%A0%20221-415%20%EB%A0%88%EB%B2%84%20%EC%BB%A4%EB%84%A5%ED%84%B0%205%EA%B5%AC" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%99%80%EA%B3%A0%20221-415%20%EB%A0%88%EB%B2%84%20%EC%BB%A4%EB%84%A5%ED%84%B0%205%EA%B5%AC" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">실리콘 전선 24AWG 세트</td><td class="num">1</td><td>스위치 사이 배선용. 빨강·검정 포함.</td><td class="num">1~1.5만</td><td><a href="https://www.coupang.com/np/search?q=%EC%8B%A4%EB%A6%AC%EC%BD%98%20%EC%A0%84%EC%84%A0%2024AWG%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%EC%8B%A4%EB%A6%AC%EC%BD%98%20%EC%A0%84%EC%84%A0%2024AWG%20%EC%84%B8%ED%8A%B8" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">2심 케이블 0.3sq</td><td class="num">10m</td><td>발판 → 전장 박스. 차폐형이면 더 좋습니다.</td><td class="num">1~1.5만</td><td><a href="https://www.coupang.com/np/search?q=2%EC%8B%AC%20%EC%BC%80%EC%9D%B4%EB%B8%94%200.3SQ%2010m" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=2%EC%8B%AC%20%EC%BC%80%EC%9D%B4%EB%B8%94%200.3SQ%2010m" target="_blank" rel="noopener">네이버</a></td></tr>
@@ -1048,7 +1048,7 @@ partSvg('pL','0 0 170 128',a=>{
   a.v(23,40,12,'17');a.h(20,60,17,'40');a.h(20,49,48,'29 (스프링 중심)',4);a.cl(49,19,49,44);
   a.t(42,62,'평면','middle',4.8,'var(--ink)');
   a.r(20,68,40,40,COL.bracket);a.raw(`<line x1="24" y1="68" x2="24" y2="108" stroke="var(--ink)" stroke-width=".4" stroke-dasharray="2 1.5"/>`);
-  a.c(49,88,5);a.cl(49,78,49,98);a.cl(39,88,59,88);a.t(54,80,'Ø10 스프링 자리','start',3.8,'var(--ink)');
+  a.c(49,88,5);a.cl(49,78,49,98);a.cl(39,88,59,88);a.t(54,80,'Ø11 스프링 자리','start',3.8,'var(--ink)');
   a.c(31,88,1.25);a.c(41,88,1.25);a.raw(`<rect x="27" y="83" width="19" height="10" fill="none" stroke="var(--ink)" stroke-width=".35" stroke-dasharray="2 1.5"/>`);
   a.t(36,102,'2-M2.5 (간격 실측)','middle',3.6,'var(--ink)');
   a.v(68,108,72,'40');
