@@ -223,7 +223,6 @@
 
     SF.$("edUseAutoBtn").addEventListener("click", () => {
       state.useCustomChart = false;
-      SF.ui.updateChartStatus();
       SF.storage.persistSongMeta();
       SF.ui.showToast("자동 생성 패턴으로 전환되었습니다.");
     });
@@ -232,7 +231,6 @@
       if (!editorNotes.length) { SF.ui.showToast("먼저 노트를 배치하거나 REC로 기록해주세요.", { type: "error" }); return; }
       state.customChart = editorNotes.map((n) => ({ time: n.time, lane: n.lane })).sort((a, b) => a.time - b.time);
       state.useCustomChart = true;
-      SF.ui.updateChartStatus();
       SF.storage.persistSongMeta();
       if (ed.audioEl) ed.audioEl.pause();
       state.edRecording = false;

@@ -137,7 +137,7 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
   text-shadow:0 0 18px rgba(255,214,10,.6);line-height:1;}
 #comboLbl{font-size:13px;letter-spacing:4px;color:var(--sub);}
 
-#arena{position:relative;width:min(620px,96vw);flex:1;margin-top:6px;z-index:1;}
+#arena{position:relative;width:min(620px,96vw);flex:1;margin-top:6px;margin-bottom:24px;z-index:1;}
 #lanes{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr);gap:3px;}
 .lane{position:relative;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
   border-left:1px solid var(--line);border-right:1px solid var(--line);overflow:hidden;}
@@ -297,7 +297,6 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 #pauseOverlay{position:absolute;inset:0;background:rgba(8,8,16,0.82);z-index:7;
   display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
 
-#footerHint{color:var(--sub);font-size:12px;letter-spacing:1px;text-align:center;padding:10px 0 18px;z-index:1;}
 
 /* ---------- results ---------- */
 #resultCard{width:min(480px,92vw);text-align:center;}

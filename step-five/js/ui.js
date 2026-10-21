@@ -60,12 +60,6 @@
     });
   }
 
-  function updateChartStatus() {
-    SF.$("chartStatus").textContent = (state.useCustomChart && state.customChart && state.customChart.length)
-      ? `현재: 직접 만든 패턴 사용 중 (${state.customChart.length}개 노트)`
-      : "현재: 자동 생성 패턴 사용 중";
-  }
-
   function formatScore(entry) {
     if (!entry) return null;
     return `BEST ${entry.grade} · ${entry.score}점 · ${entry.accuracy.toFixed(1)}%`;
@@ -87,7 +81,6 @@
     state.customChart = (meta && meta.customChart) || null;
     state.useCustomChart = !!(meta && meta.useCustomChart && state.customChart && state.customChart.length);
     SF.editor.loadFromCustomChart(state.customChart);
-    updateChartStatus();
 
     state.songAnalyzed = !!(meta && meta.analyzed);
     if (!state.songAnalyzed) {
@@ -252,7 +245,6 @@
       state.useCustomChart = false;
       state.customChart = null;
       SF.editor.loadFromCustomChart(null);
-      updateChartStatus();
       const id = await SF.storage.addSongToLibrary(f);
       state.currentSongId = id;
       await SF.storage.persistSongMeta();
@@ -376,5 +368,5 @@
     initStartAndResultButtons();
   }
 
-  SF.ui = { init, showScreen, updateChartStatus, renderSongList, selectSong, restoreFromStorage, showToast, wireDangerButton };
+  SF.ui = { init, showScreen, renderSongList, selectSong, restoreFromStorage, showToast, wireDangerButton };
 })();
