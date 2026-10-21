@@ -29,6 +29,16 @@ html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);
     radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255,90,54,0.10), transparent 60%);
 }
 
+/* the logo watermark behind the main screen — fixed to the viewport, behind
+   everything else, faded in only on that screen. The main screen's cards
+   are made see-through so the logo reads across the whole screen instead of
+   only peeking out at the sides. */
+#bgLogo{position:fixed;inset:5vh 0;z-index:0;pointer-events:none;
+  background:url("../img/logo.png") center / contain no-repeat;
+  opacity:0;transition:opacity .35s ease;}
+body[data-screen="setup"] #bgLogo{opacity:.3;}
+#setupScreen .card{background:rgba(22,22,42,.62);}
+
 h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5vw,44px);
   letter-spacing:2px;margin:36px 0 4px;z-index:1;
   background:linear-gradient(90deg,var(--ul),var(--cn) 50%,var(--ur));
@@ -60,7 +70,7 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 /* small card tucked under the song list: the selected song's best record
    per difficulty, popping in when a song is picked */
 #bestPopup{display:none;width:min(560px,92vw);margin:-6px 0 18px;padding:10px 16px 8px;z-index:1;
-  background:var(--panel);border:1px solid var(--cn);border-radius:12px;
+  background:rgba(22,22,42,.78);border:1px solid var(--cn);border-radius:12px;
   box-shadow:0 8px 24px rgba(0,0,0,.35), 0 0 14px rgba(255,214,10,.12);}
 #bestPopup.pop{animation:bestPop .28s ease-out;}
 @keyframes bestPop{from{opacity:0;transform:translateY(-8px) scale(.97);}to{opacity:1;transform:none;}}

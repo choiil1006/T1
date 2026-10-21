@@ -9,6 +9,7 @@
   function showScreen(name) {
     Object.values(SF.screens).forEach((s) => s.classList.remove("active"));
     SF.screens[name].classList.add("active");
+    document.body.dataset.screen = name; // lets CSS show things on one screen only (see #bgLogo)
     if (name === "setup") renderBestPopup(false); // a game may just have set a new record
   }
 
