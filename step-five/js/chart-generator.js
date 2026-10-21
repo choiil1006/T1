@@ -25,8 +25,6 @@
   "use strict";
 
   const LANE_INDEX = { DL: 0, UL: 1, CN: 2, UR: 3, DR: 4 };
-  const LEFT_LANES = ["DL", "UL"];
-  const RIGHT_LANES = ["UR", "DR"];
 
   // xfnv1a string hash -> mulberry32 PRNG. Deterministic: the same seed
   // string always produces the same sequence of "random" numbers.
@@ -100,10 +98,6 @@
     const endMs = Math.max(0, durationMs - beatMs * 2); // leave tail
     const notes = [];
     let lastLane = null;
-    // while the center panel is held, one foot is pinned there and the other
-    // can only sensibly work one side of the pad — so every note that lands
-    // during a center hold is kept to a single side (chosen per hold)
-    let centerHold = null; // { end, lanes }
     const holdChanceBase = diff.holdChance != null ? diff.holdChance : 0.08;
     const hasOnsetData = !!SF.state.onset;
 
@@ -154,10 +148,7 @@
       // more than 2 lanes engaged at once (one held + at most one fresh tap/jump)
       const busyLanes = SF.LANES.filter((l) => laneBusyUntil[l] > t);
       if (busyLanes.length >= 2) continue; // already two hands/feet occupied, add nothing more
-      let availableLanes = SF.LANES.filter((l) => !busyLanes.includes(l) && laneCooldownUntil[l] <= t);
-      if (centerHold && t < centerHold.end + stepMs * 0.5) {
-        availableLanes = availableLanes.filter((l) => centerHold.lanes.includes(l));
-      }
+      const availableLanes = SF.LANES.filter((l) => !busyLanes.includes(l) && laneCooldownUntil[l] <= t);
       if (availableLanes.length === 0) continue;
 
       const lane = pickLaneByFlow(availableLanes, lastLane, rand);
@@ -169,7 +160,10 @@
         holdChance *= (1.3 - energy * 0.6); // calmer sections favor holds a bit more
       }
 
-      let isHold = rand() < holdChance;
+      // no holds on the center panel: with one foot pinned there the other
+      // can't cover both sides. (rand() still runs first so every other
+      // decision in the chart stays on the same random sequence.)
+      let isHold = rand() < holdChance && lane !== "CN";
       let holdEnd = null;
       if (isHold) {
         const holdSteps = 2 + Math.floor(rand() * 3); // 2~4 grid steps long
@@ -181,15 +175,6 @@
         notes.push({ time: t, lane, hold: true, holdEnd, hit: false, judged: false, el: null, tailEl: null, holdState: null });
         laneBusyUntil[lane] = holdEnd + postHoldRecoveryMs;
         laneCooldownUntil[lane] = holdEnd + postHoldRecoveryMs;
-        if (lane === "CN") {
-          // stay on whichever side the previous note was already on, so the
-          // hold doesn't start with a cross-pad switch; no clue -> coin flip
-          let side;
-          if (LEFT_LANES.includes(lastLane)) side = LEFT_LANES;
-          else if (RIGHT_LANES.includes(lastLane)) side = RIGHT_LANES;
-          else side = rand() < 0.5 ? LEFT_LANES : RIGHT_LANES;
-          centerHold = { end: holdEnd, lanes: side };
-        }
       } else {
         notes.push({ time: t, lane, hold: false, hit: false, judged: false, el: null });
         laneCooldownUntil[lane] = t + minSameLaneGapMs;
@@ -215,10 +200,7 @@
             const midPeak = SF.audioAnalysis.onsetPeakNear(midT, stepMs * 0.3);
             const bonusChance = Math.max(0, midEnergy - 0.55) * 0.5 * midPeak;
             const midBusy = SF.LANES.filter((l) => laneBusyUntil[l] > midT);
-            let midAvailable = SF.LANES.filter((l) => !midBusy.includes(l) && laneCooldownUntil[l] <= midT);
-            if (centerHold && midT < centerHold.end + stepMs * 0.5) {
-              midAvailable = midAvailable.filter((l) => centerHold.lanes.includes(l));
-            }
+            const midAvailable = SF.LANES.filter((l) => !midBusy.includes(l) && laneCooldownUntil[l] <= midT);
             if (midAvailable.length && rand() < bonusChance) {
               const bonusLane = pickLaneByFlow(midAvailable, lane, rand);
               notes.push({ time: midT, lane: bonusLane, hold: false, hit: false, judged: false, el: null });
