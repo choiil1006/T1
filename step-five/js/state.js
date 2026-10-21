@@ -23,7 +23,10 @@
     listeningLane: null,
 
     notes: [], // {time, lane, hit, judged, el}
-    score: 0, combo: 0, maxCombo: 0,
+    // score is what's shown/saved, scaled so a flawless run lands exactly on
+    // SF.MAX_SCORE[difficulty]; rawScore is the unscaled running total and
+    // maxRawScore what a flawless run of the current chart would total
+    score: 0, rawScore: 0, maxRawScore: 0, combo: 0, maxCombo: 0,
     counts: { perfect: 0, great: 0, good: 0, bad: 0, miss: 0, empty: 0 },
     totalJudged: 0,
     running: false, paused: false,

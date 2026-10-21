@@ -48,8 +48,6 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 .songRow.active{border-color:var(--cn);background:rgba(255,214,10,0.07);}
 .songRow .songName{flex:1;min-width:0;overflow:hidden;}
 .songRow .songName span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;}
-.songRow .songName .best{font-size:11px;color:var(--sub);margin-top:2px;font-weight:500;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .songRow input.renameInput{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);
   color:var(--text);border-radius:6px;padding:5px 8px;font-family:'Rajdhani';font-weight:600;}
 .songRow .btn.small{padding:6px 10px;font-size:12px;flex-shrink:0;}
@@ -58,6 +56,20 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 .songRow-compact:focus-visible{outline:2px solid var(--cn);outline-offset:1px;}
 .songSelectedTag{flex-shrink:0;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--bg);
   background:var(--cn);border-radius:20px;padding:4px 10px;}
+
+/* small card tucked under the song list: the selected song's best record
+   per difficulty, popping in when a song is picked */
+#bestPopup{display:none;width:min(560px,92vw);margin:-6px 0 18px;padding:10px 16px 8px;z-index:1;
+  background:var(--panel);border:1px solid var(--cn);border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35), 0 0 14px rgba(255,214,10,.12);}
+#bestPopup.pop{animation:bestPop .28s ease-out;}
+@keyframes bestPop{from{opacity:0;transform:translateY(-8px) scale(.97);}to{opacity:1;transform:none;}}
+#bestPopup .bpTitle{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--cn);margin-bottom:6px;}
+#bestPopup .bpRow{display:flex;justify-content:space-between;gap:12px;padding:3px 0;
+  font-family:'JetBrains Mono';font-size:12px;}
+#bestPopup .bpDiff{color:var(--sub);letter-spacing:1px;}
+#bestPopup .bpRow.active .bpDiff{color:var(--cn);font-weight:700;}
+#bestPopup .bpNone{color:var(--sub);opacity:.7;}
 
 .btn{appearance:none;border:1px solid var(--line);background:var(--bg2);color:var(--text);
   font-family:'Rajdhani';font-weight:700;font-size:16px;padding:11px 18px;border-radius:9px;
