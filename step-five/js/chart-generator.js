@@ -25,6 +25,7 @@
   "use strict";
 
   const LANE_INDEX = { DL: 0, UL: 1, CN: 2, UR: 3, DR: 4 };
+  const QUIET_TAIL_MS = 3000; // no notes in the last 3 seconds of the song
 
   // xfnv1a string hash -> mulberry32 PRNG. Deterministic: the same seed
   // string always produces the same sequence of "random" numbers.
@@ -95,7 +96,9 @@
     const phase = ((phaseOffsetMs || 0) % beatMs + beatMs) % beatMs;
     const leadInMs = phase + beatMs * 4; // align to detected downbeat, then 4 beat lead-in
     const durationMs = durationSec * 1000;
-    const endMs = Math.max(0, durationMs - beatMs * 2); // leave tail
+    // nothing (taps, hold heads or hold releases) lands in the last stretch
+    // of the song, so it finishes on a clear 3 seconds instead of a note
+    const endMs = Math.max(0, durationMs - QUIET_TAIL_MS);
     const notes = [];
     let lastLane = null;
     const holdChanceBase = diff.holdChance != null ? diff.holdChance : 0.08;
