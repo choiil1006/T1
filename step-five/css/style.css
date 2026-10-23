@@ -61,6 +61,13 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 .songRow input.renameInput{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);
   color:var(--text);border-radius:6px;padding:5px 8px;font-family:'Rajdhani';font-weight:600;}
 .songRow .btn.small{padding:6px 10px;font-size:12px;flex-shrink:0;}
+.songTools{display:flex;gap:8px;margin-bottom:10px;}
+.songTools #songSearch{flex:1;min-width:0;background:var(--bg2);border:1px solid var(--line);
+  color:var(--text);border-radius:8px;padding:8px 12px;font-family:'Rajdhani';font-weight:600;font-size:15px;}
+.songTools #songSearch:focus{outline:none;border-color:var(--cn);}
+.songTools #songSearch::placeholder{color:var(--sub);font-weight:500;}
+.songTools .btn{flex-shrink:0;}
+.songEmpty{padding:12px 4px;font-size:14px;color:var(--sub);text-align:center;}
 .songRow-compact{cursor:pointer;transition:border-color .12s, background .12s;}
 .songRow-compact:hover{border-color:#4a4a75;background:#1c1c34;}
 .songRow-compact:focus-visible{outline:2px solid var(--cn);outline-offset:1px;}

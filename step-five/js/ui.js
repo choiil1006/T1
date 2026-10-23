@@ -133,7 +133,7 @@
       const meta = await SF.storage.getSongMeta(id);
       applyLoadedSong(id, rec.name, rec.blob, meta);
       await SF.storage.idbSet("lastSelectedId", id);
-      renderSongList();
+      await renderSongList();
     } catch (err) { console.warn("select song failed", err); }
   }
 
@@ -232,9 +232,86 @@
     return row;
   }
 
+  // ---- ordering and searching the song list ----
+
+  // Hangul first (가나다), then other letters (abc), then anything that
+  // starts with a digit/symbol. Leading punctuation like "(" or "[" is
+  // skipped so it doesn't decide the order, text is normalized to NFC (file
+  // names from macOS can arrive as decomposed Hangul), Latin compares
+  // case-insensitively and digit runs compare as numbers ("2" before "10").
+  const nameCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  function sortKey(name) {
+    return name.normalize("NFC").replace(/^[^\p{L}\p{N}]+/u, "");
+  }
+  function nameGroup(key) {
+    const first = key.charAt(0);
+    if (/\p{Script=Hangul}/u.test(first)) return 0;
+    if (/\p{L}/u.test(first)) return 1;
+    return 2;
+  }
+  function compareSongs(a, b) {
+    const ka = sortKey(a.name), kb = sortKey(b.name);
+    const ga = nameGroup(ka), gb = nameGroup(kb);
+    if (ga !== gb) return ga - gb;
+    return nameCollator.compare(ka, kb) || a.addedAt - b.addedAt;
+  }
+
+  // lower-cased, with the "_" "-" "." "(" ")" that file names are full of
+  // treated as spaces, so typing "pop off" finds "kiiikiii_-_pop_off_pop_off…"
+  function normalizeForSearch(text) {
+    return text.normalize("NFC").toLowerCase().replace(/[_\-.()[\]{}]+/g, " ").replace(/\s+/g, " ").trim();
+  }
+
+  let songIndexCache = []; // last index renderSongList read, so searching doesn't hit storage per keystroke
+  let songSearchQuery = "";
+
+  function visibleSongs() {
+    const sorted = songIndexCache.slice().sort(compareSongs);
+    const q = normalizeForSearch(songSearchQuery);
+    return q ? sorted.filter((s) => normalizeForSearch(s.name).includes(q)) : sorted;
+  }
+
+  function renderCompactList() {
+    const container = SF.$("songListContainer");
+    container.innerHTML = "";
+    const visible = visibleSongs();
+    if (!visible.length) {
+      const empty = document.createElement("div");
+      empty.className = "songEmpty";
+      empty.textContent = `"${songSearchQuery.trim()}"에 맞는 곡이 없어요.`;
+      container.appendChild(empty);
+      return;
+    }
+    visible.forEach((entry) => container.appendChild(buildCompactSongRow(entry)));
+  }
+
+  // picks among the songs currently listed (so with a search active it's a
+  // random pick among the matches), never the one already selected unless
+  // it's the only choice
+  async function pickRandomSong() {
+    const candidates = visibleSongs();
+    if (!candidates.length) { showToast("고를 수 있는 곡이 없어요.", { type: "error" }); return; }
+    let pool = candidates.filter((s) => s.id !== state.currentSongId);
+    if (!pool.length) pool = candidates;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    await selectSong(pick.id);
+    showToast("랜덤 선택: " + pick.name);
+    const row = document.querySelector("#songListContainer .songRow-compact.active");
+    if (row) row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function initSongTools() {
+    SF.$("songSearch").addEventListener("input", (e) => {
+      songSearchQuery = e.target.value;
+      renderCompactList();
+    });
+    SF.$("randomSongBtn").addEventListener("click", pickRandomSong);
+  }
+
   async function renderSongList() {
     let index;
     try { index = await SF.storage.getSongIndex(); } catch (err) { index = []; }
+    songIndexCache = index;
     const card = SF.$("songListCard"), container = SF.$("songListContainer");
     const manageCard = SF.$("songManageCard"), manageContainer = SF.$("songManageContainer");
     if (!index.length) {
@@ -245,13 +322,11 @@
     }
     card.style.display = "block";
     manageCard.style.display = "block";
-    index.sort((a, b) => b.addedAt - a.addedAt);
 
-    container.innerHTML = "";
-    index.forEach((entry) => container.appendChild(buildCompactSongRow(entry)));
+    renderCompactList();
 
     manageContainer.innerHTML = "";
-    index.forEach((entry) => manageContainer.appendChild(buildManageSongRow(entry)));
+    index.slice().sort(compareSongs).forEach((entry) => manageContainer.appendChild(buildManageSongRow(entry)));
     renderBestPopup(false);
   }
 
@@ -392,6 +467,7 @@
     SF.screens.editor = SF.$("editorScreen");
 
     initMusicUpload();
+    initSongTools();
     initTempoControls();
     initDifficulty();
     initSyncOffset();
