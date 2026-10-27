@@ -92,7 +92,7 @@ td.p{font-weight:500;min-width:8em}
 </head>
 <body>
 <nav class="toc" aria-label="목차"><div>
-  <a href="#overview">개요</a><a href="#model">3D 모델</a><a href="#mech">기구 설계도</a><a href="#partdwg">부품도</a><a href="#wiring">배선도</a><a href="#plc">PLC 연동</a><a href="#bom">부품 목록</a><a href="#buy">구입 목록</a><a href="#steps">제작 순서</a><a href="#build">점검·소프트웨어</a>
+  <a href="#overview">개요</a><a href="#summary">요약</a><a href="#model">3D 모델</a><a href="#mech">기구 설계도</a><a href="#partdwg">부품도</a><a href="#wiring">배선도</a><a href="#plc">PLC 연동</a><a href="#bom">부품 목록</a><a href="#buy">구입 목록</a><a href="#steps">제작 순서</a><a href="#build">점검·소프트웨어</a>
 </div></nav>
 <div class="wrap">
 
@@ -111,6 +111,48 @@ td.p{font-weight:500;min-width:8em}
   </dl>
 </header>
 
+<section id="summary">
+  <h2>한눈에 보기</h2>
+  <div class="cols">
+    <div class="card">
+      <h4>전체 구조</h4>
+      <ul>
+        <li><b>발판 → 판정</b>: 로드셀 20개 → HX711 5개 → Pico → USB 키보드 → Pi 5(step-five)</li>
+        <li><b>발판 불</b>: Pico → 옵토 → PLC → 파랑 LED (밟는 순간, 게임과 무관)</li>
+        <li><b>점수 램프·콤보 노랑</b>: 게임 → Web Serial → Pico → 옵토 → PLC → 램프 5단, 전체 노랑</li>
+        <li><b>소리</b>: Pi 5 → USB 스피커</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>조명 동작</h4>
+      <ul>
+        <li>밟으면 해당 발판 <b>파랑</b></li>
+        <li>콤보가 설정 값(기본 30) 이상이면 <b>모든 발판 노랑</b></li>
+        <li>점수 등급 D~SS를 <b>램프 0~5개</b>로 표시</li>
+        <li>콤보 노랑 중 밟는 발판은 <b>흰색</b>으로 보임</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>PLC 입출력</h4>
+      <ul>
+        <li>입력: X10~X14 발판, X15~X17 점수 단계(1·2·4), X0 콤보</li>
+        <li>출력: Y10~Y14 파랑, Y15·Y16 노랑(빨강·초록 공유), Y17·Y7·Y6·Y5·Y4 점수 램프</li>
+        <li>비움: Y0~Y3, X1~X7 (모터 미정)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>만든 것과 안 만든 것</h4>
+      <ul>
+        <li>완료(문서): 설계도, 구입 목록(중요도 포함), 래더, 결선도</li>
+        <li>완료(코드): Pico 펌웨어 초안, step-five PLC 모듈(브라우저에서 모의 시험만 함)</li>
+        <li>남음: 실기 시험 전부, 래더 PLC 업로드, 옵토·조명 결선, 스프링·스위치 조정</li>
+        <li>확인 필요: 콤보 임계값, 스트립 색당 전류, PLC 전원이 AC인지</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
 <section>
   <h2>v3에서 바뀐 점</h2>
   <div class="cols">
@@ -122,9 +164,9 @@ td.p{font-weight:500;min-width:8em}
     <div class="card">
       <h4>추가된 것</h4>
       <ul>
-        <li><b>PLC FX3U-32MT/ES</b>: 발판 조명 담당. Pico가 발판 상태를 옵토 모듈로 PLC X10~X14에 복사하고, PLC가 Y10~Y14를 켭니다. 모터는 미정이라 자리만 예약합니다.</li>
+        <li><b>PLC FX3U-32MT/ES</b>: 조명 담당. 밟으면 발판 파랑, 콤보가 쌓이면 모든 발판 노랑, 점수 등급은 램프 0~5개로 표시합니다. 모터는 미정이라 자리만 예약합니다.</li>
         <li><b>USB 오디오형 스피커</b>: Pi 5 USB 하나로 소리를 냅니다.</li>
-        <li>Pico 펌웨어는 HX711 읽기, 키보드 전송, PLC 복사와 명령을 합친 초안입니다(실기 미검증).</li>
+        <li>Pico 펌웨어는 HX711 읽기, 키보드 전송, PLC 복사와 게임 명령(점수 단계, 콤보)을 합친 초안입니다(실기 미검증). step-five에는 PLC 모듈(<code>js/plc.js</code>)이 추가되었습니다.</li>
         <li>PLC 박스는 본체 밖에 따로 답니다(깊이 약 86mm라 전장 박스에 안 들어갑니다).</li>
       </ul>
     </div>
@@ -260,7 +302,8 @@ td.p{font-weight:500;min-width:8em}
       <tr><td class="p">우하 (DR)</td><td>DT / SCK</td><td class="num">GP10 (14) / GP11 (15)</td><td>넘패드 3</td></tr>
       <tr><td class="p">HX711 전원 ×5</td><td>VCC / GND</td><td class="num">3V3 OUT (36) / GND (38)</td><td>5V 금지</td></tr>
       <tr><td class="p">PLC 복사 ×5</td><td>좌하~우하 → 옵토 → PLC</td><td class="num">GP12~GP16 (16,17,19,20,21)</td><td>PLC X10~X14</td></tr>
-      <tr><td class="p">PLC 명령 ×3</td><td>전체 점등, 조명 끔, 모터 예약</td><td class="num">GP17~GP19 (22,24,25)</td><td>PLC X15~X17</td></tr>
+      <tr><td class="p">점수 단계 ×3</td><td>값 1, 2, 4 (0~5)</td><td class="num">GP17~GP19 (22,24,25)</td><td>PLC X15~X17 (모듈 1)</td></tr>
+      <tr><td class="p">콤보</td><td>콤보 노랑 켜짐</td><td class="num">GP20 (26)</td><td>PLC X0 (모듈 2)</td></tr>
       <tr><td class="p">Pico → Pi 5</td><td>마이크로 USB</td><td>Pi 5 USB 포트</td><td>USB 키보드 + 시리얼</td></tr>
       <tr><td class="p">메뉴 버튼 4개</td><td>이전, 다음, 선택, 뒤로</td><td>인코더 버튼 단자 1~4</td><td>인코더 버튼 1~4</td></tr>
       <tr><td class="p">인코더 → Pi 5</td><td>인코더 USB</td><td>Pi 5 USB 포트</td><td>게임패드</td></tr>
@@ -271,73 +314,88 @@ td.p{font-weight:500;min-width:8em}
 
 <section id="plc">
   <h2>PLC 연동</h2>
-  <p class="lead">FX3U-32MT 싱크 출력 PLC를 발판 조명에 씁니다. 모터는 아직 정하지 않아서 입출력 자리만 비워 둡니다. 발판 판정은 PLC를 거치지 않습니다. PLC 입력은 보통 약 10ms 필터와 스캔 주기가 있어서 판정용 경로로는 느리기 때문입니다. 대신 Pico가 같은 스위치 상태를 옵토 모듈로 PLC에 복사해 주면, PLC는 그 신호로 조명과 모터를 움직입니다.</p>
+  <p class="lead">FX3U-32MT/ES(싱크 출력) PLC로 발판 조명과 점수 램프를 켭니다. 판정 입력은 PLC를 거치지 않고, Pico가 같은 신호를 옵토 모듈로 PLC에 넘겨 줍니다. 게임(웹)은 Pico에 바이트 1개를 써서 점수 단계와 콤보 상태를 알려 줍니다. 모터는 미정이라 출력 Y0~Y3만 비워 둡니다.</p>
   <div class="sheets">
-    <figure class="wide"><svg id="wPlc" role="img" aria-label="Pico, 옵토 모듈, PLC 연결도" viewBox="0 0 800 440"></svg><figcaption><b>Pico → 옵토 → PLC → 조명</b><span>싱크 입력(S/S를 +24V에), 싱크 출력(부하는 +24V와 Y 사이)</span></figcaption></figure>
+    <figure class="wide"><svg id="wPlc" role="img" aria-label="Pico, 옵토 모듈, PLC, 조명 연결도" viewBox="0 0 860 480"></svg><figcaption><b>Pico → 옵토 → PLC → 조명</b><span>입력은 싱크(S/S를 +24V에), 출력도 싱크(부하는 +24V와 Y 사이)</span></figcaption></figure>
   </div>
   <div class="cols" style="margin-top:14px">
     <div class="card">
       <h4>입출력 배정</h4>
       <ul>
-        <li><b>X10~X14</b>: 발판 좌하·좌상·중앙·우상·우하 (<code>plc/pad-map.json</code> 그대로)</li>
-        <li><b>X15</b> 전체 점등, <b>X16</b> 조명 끔, <b>X17</b> 모터 예약 (게임이 보내는 명령)</li>
-        <li><b>X0~X7</b>: 모터 확장용 예약 (원점, 리밋, 엔코더)</li>
-        <li><b>Y10~Y14</b>: 발판 조명 24V LED, <b>Y15</b>: 캐비닛 조명 예약</li>
-        <li><b>Y0~Y3</b>: 모터 펄스·방향, <b>Y4</b>: 인에이블 (Y0~Y2가 펄스 출력 가능, 매뉴얼로 확인)</li>
+        <li><b>X10~X14</b>: 발판 좌하·좌상·중앙·우상·우하 (<code>plc/pad-map.json</code>)</li>
+        <li><b>X15·X16·X17</b>: 점수 단계 0~5를 3비트 숫자로 받음 (1, 2, 4)</li>
+        <li><b>X0</b>: 콤보 노랑 켜짐 (옵토 모듈 2)</li>
+        <li><b>Y10~Y14</b>: 발판 5개의 파랑 채널(각각), <b>Y15</b>: 5개 발판의 빨강 채널 병렬, <b>Y16</b>: 5개 발판의 초록 채널 병렬 (빨강+초록=노랑)</li>
+        <li><b>Y17, Y7, Y6, Y5, Y4</b>: 점수 램프 1~5단</li>
+        <li><b>Y0~Y3</b>: 모터 예약(비워 둠), X1~X7도 비어 있음</li>
       </ul>
     </div>
     <div class="card">
-      <h4>래더 (명령어 목록 입력)</h4>
+      <h4>래더 (명령어 목록)</h4>
       <pre style="margin:0;font-size:12.5px;line-height:1.5;overflow-x:auto"><code>LD  X010
-OR  X015
-ANI X016
-OUT Y010
-LD  X011
-OR  X015
-ANI X016
-OUT Y011
-... (X012→Y012, X013→Y013, X014→Y014 반복)
+OUT Y010          ; X011→Y011 ... X014→Y014 반복
+LD  X000
+OUT Y015          ; 콤보 노랑: 빨강
+LD  X000
+OUT Y016          ; 콤보 노랑: 초록
+LD  X015
+OR  X016
+OR  X017
+OUT Y017          ; 점수 1단 이상
+LD  X016
+OR  X017
+OUT Y007          ; 2단 이상
+LD  X015
+AND X016
+OR  X017
+OUT Y006          ; 3단 이상
 LD  X017
-OUT M100   ; 모터용 예약
+OUT Y005          ; 4단 이상
+LD  X015
+OR  X016
+AND X017
+OUT Y004          ; 5단
 END</code></pre>
-      <p style="margin-top:8px">GX Works2에서 명령어 목록으로 입력하거나 같은 내용을 래더로 그리면 됩니다. 밟는 발판은 즉시 켜지고, 게임이 X15를 올리면 전체 점등, X16을 올리면 꺼집니다.</p>
+      <p style="margin-top:8px">전체 파일은 <code>plc/ladder.il.txt</code>입니다. GX Works2에서 명령어 목록으로 입력하거나 래더로 그려 PLC에 올립니다.</p>
+    </div>
+    <div class="card">
+      <h4>점수 단계와 색 (게임이 정함)</h4>
+      <ul>
+        <li>현재 정확도를 등급 기준으로 환산: D=0, C=1, B=2, A=3, S=4, SS=5 단.</li>
+        <li>콤보가 설정 값(기본 30) 이상이면 노랑 켜짐. 설정 화면에서 바꿀 수 있고 0이면 끕니다.</li>
+        <li>곡이 끝나면 최종 등급 단계는 켜 두고 노랑은 끕니다. 메인으로 돌아가면 모두 끕니다.</li>
+        <li><b>밟는 발판은 흰색으로 보입니다.</b> 노랑(빨강+초록)이 켜진 상태에서 파랑이 더해지기 때문입니다. 노랑을 발판마다 따로 둘 수 없는 한계입니다.</li>
+      </ul>
     </div>
     <div class="card">
       <h4>결선 요점</h4>
       <ul>
-        <li>입력 공통 <b>S/S는 +24V</b>에 연결합니다(싱크 입력). 옵토의 트랜지스터가 X를 0V로 끌어내리면 입력이 켜집니다.</li>
-        <li>출력은 <b>싱크</b>라서 LED 스트립의 +를 24V 전원에, −를 Y 단자에 연결하고, 출력 공통 COM은 24V 전원의 0V에 연결합니다.</li>
-        <li>점당 0.5A 안팎이 한계입니다(공통 묶음 합계 제한은 매뉴얼 확인). 발판당 LED 스트립은 그 이하로 합니다.</li>
-        <li>조명 전원은 PLC의 24V 서비스 전원이 아니라 별도 SMPS를 씁니다. 0V만 PLC와 연결합니다.</li>
+        <li>입력 공통 <b>S/S는 +24V</b>에 연결합니다(싱크 입력). 옵토 모듈의 트랜지스터가 X를 0V로 끌어내리면 입력이 켜집니다.</li>
+        <li>옵토 모듈이 2장입니다. 8채널(X10~X17)과 4채널 이상(X0 하나만 사용).</li>
+        <li>RGB 스트립은 <b>24V 공통 애노드</b>(+, R, G, B 4핀)여야 합니다. 공통(+)은 24V에, 각 색 단자는 해당 Y에 연결하고 출력 공통 COM은 24V의 0V에 연결합니다.</li>
+        <li><b>Y15, Y16은 스트립 5개의 같은 색이 병렬로 걸립니다.</b> 출력 한 점의 한도(약 0.5A)를 넘기 쉬우니 스트립의 색당 전류 합이 0.4A 이하인지 확인하고, 넘으면 24V용 MOSFET이나 SSR 모듈을 끼워 쓰세요.</li>
+        <li>조명 전원은 PLC의 24V 서비스 전원이 아니라 별도 SMPS를 씁니다. 0V만 PLC와 공통으로 묶습니다.</li>
       </ul>
     </div>
     <div class="card">
       <h4>PLC 설치 위치</h4>
       <ul>
-        <li>FX3U-32MT/ES는 폭 약 150, 높이 90, 깊이 약 86mm입니다. 전장 박스(상판 아래 높이 약 35mm)에는 들어가지 않습니다.</li>
-        <li>본체 밖 뒤쪽 연장부 아래나 옆에 DIN 레일 박스를 따로 달고, Pico와 연결하는 8선 케이블만 본체 안으로 넣습니다.</li>
+        <li>FX3U-32M은 폭 약 150, 높이 90, 깊이 약 86mm입니다. 전장 박스(높이 약 35mm)에는 들어가지 않습니다.</li>
+        <li>본체 밖 뒤쪽 연장부 아래나 옆에 DIN 레일 박스를 따로 달고, Pico와의 신호 케이블(9선)만 본체 안으로 넣습니다.</li>
         <li>/ES 모델은 AC 100~240V 전원입니다. 220V 배선은 차단기와 접지를 갖춰 박스 안에서만 하고, 자신이 없으면 전기 기사에게 맡기세요.</li>
       </ul>
     </div>
     <div class="card">
-      <h4>모터 확장 (미정, 쓰게 되면)</h4>
+      <h4>게임 쪽 (구현됨, 실기 미검증)</h4>
       <ul>
-        <li>스테핑 드라이버(24V 입력용) + 모터 + 별도 모터용 전원.</li>
-        <li>Y0(펄스), Y1(방향), Y4(인에이블)을 드라이버 입력에 연결합니다. 드라이버 입력이 5V용이면 직렬 저항을 답니다.</li>
-        <li>원점·리밋 센서는 X0~X2에 연결합니다. 비상정지는 PLC 로직과 별개로 모터 전원을 끊는 하드와이어로 구성하세요.</li>
-        <li>래더에서 DRVI·ZRN 같은 위치 명령으로 구동합니다. 게임은 Pico 시리얼로 X17 명령 비트를 올리기만 합니다.</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h4>게임 쪽 작업 (아직 없음)</h4>
-      <ul>
-        <li>step-five는 지금 PLC 명령을 보내지 않습니다. Web Serial로 Pico에 1바이트를 쓰는 모듈을 추가해야 합니다.</li>
-        <li>바이트의 하위 3비트가 X15·X16·X17 상태가 됩니다(예: 1 = 전체 점등, 2 = 조명 끔).</li>
-        <li>Web Serial은 Chromium에서 localhost나 https에서만 쓸 수 있고, 사용자 클릭으로 포트를 한 번 승인해야 합니다.</li>
+        <li><code>step-five/js/plc.js</code>가 Web Serial로 Pico에 바이트 1개를 씁니다: 하위 3비트 = 점수 단계, 비트 3 = 콤보.</li>
+        <li>설정 화면 4번 "PLC 조명 연결"에서 연결하고, 시험 버튼으로 단계별 램프와 노랑을 먼저 확인합니다.</li>
+        <li>연결하지 않아도 게임은 그대로 동작합니다. 크롬이고 https나 localhost여야 하며, 포트는 한 번 승인하면 다음부터 자동 연결됩니다.</li>
+        <li>모터를 쓰게 되면 비트를 더 쓰거나(X1~X7) PLC 통신 방식으로 확장합니다.</li>
       </ul>
     </div>
   </div>
-  <p class="note">조명은 스위치가 눌린 뒤 옵토, PLC 입력 필터, 스캔, 출력을 거쳐 켜져서 판정 입력보다 수 ms~십수 ms 늦습니다. 불빛 용도에서는 문제없지만, 이 신호로 판정하지 마세요.</p>
+  <p class="note">조명은 판정보다 수 ms~십수 ms 늦게 켜집니다(옵토, PLC 입력 필터, 스캔, 출력). 조명 용도에서는 문제없지만 이 신호로 판정하지 마세요.</p>
 </section>
 
 <section id="bom">
@@ -354,9 +412,12 @@ END</code></pre>
       <tr><td class="p">Raspberry Pi Pico H</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>HX711 읽기, USB 키보드, PLC 복사</td></tr>
       <tr><td class="p">Mitsubishi FX3U-32MT/ES (AC 전원, 싱크 출력)</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>조명용. 모터는 미정이라 자리만 예약</td></tr>
       <tr><td class="p">PLC 프로그램 케이블, GX Works2</td><td class="num">1</td><td><span class="tag own">보유</span></td><td>다른 PC에 있음</td></tr>
-      <tr><td class="p">절연 모듈 8채널 (3.3V 입력, NPN 24V 출력)</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>Pico → PLC 입력</td></tr>
+      <tr><td class="p">절연 모듈 8채널 (3.3V 입력, NPN 24V 출력)</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>Pico → PLC X10~X17</td></tr>
+      <tr><td class="p">절연 모듈 4채널 이상 (같은 사양)</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>콤보 신호 → PLC X0</td></tr>
       <tr><td class="p">24V SMPS 5A</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>조명 전원. PLC 24V 서비스 전원과 분리</td></tr>
-      <tr><td class="p">24V LED 스트립 1m</td><td class="num">5</td><td><span class="tag buy">추가</span></td><td>발판 조명, 발판당 0.5A 이하</td></tr>
+      <tr><td class="p">24V RGB LED 스트립 1m (공통 애노드 4핀)</td><td class="num">5</td><td><span class="tag buy">추가</span></td><td>발판 조명. 색당 전류 합 0.4A 이하(공유 채널)</td></tr>
+      <tr><td class="p">24V LED 램프 (점수 표시)</td><td class="num">5</td><td><span class="tag buy">추가</span></td><td>모니터 옆 점수 램프 1~5단</td></tr>
+      <tr><td class="p">24V MOSFET/SSR 모듈</td><td class="num">2</td><td><span class="tag">선택</span></td><td>노랑 공유 채널 전류가 클 때</td></tr>
       <tr><td class="p">PLC 박스, DIN 레일, 차단기</td><td class="num">1식</td><td><span class="tag buy">추가</span></td><td>PLC는 본체 밖 별도 박스</td></tr>
       <tr><td class="p">USB 오디오형 2채널 스피커 (유선)</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>USB 하나로 전원과 소리</td></tr>
       <tr><td class="p">Pi 5용 27W USB-C 전원</td><td class="num">1</td><td><span class="tag buy">추가</span></td><td>정품 권장</td></tr>
@@ -460,7 +521,10 @@ END</code></pre>
     <tbody>
       <tr><td class="p">8채널 절연 모듈 (3.3V 입력, NPN 24V 출력)</td><td class="num">1</td><td><b>2 권장</b></td><td>입력이 3.3V이고 출력이 24V NPN인 제품인지 사양 확인. 방향이 반대인 보드는 불가</td><td class="num">0.5~1.5만</td><td><a href="https://www.coupang.com/np/search?q=8%EC%B1%84%EB%84%90%20%EC%98%B5%ED%86%A0%EC%BB%A4%ED%94%8C%EB%9F%AC%20%EC%A0%88%EC%97%B0%20%EB%AA%A8%EB%93%88%20PLC%20NPN%2024V%203.3V" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=8%EC%B1%84%EB%84%90%20%EC%98%B5%ED%86%A0%EC%BB%A4%ED%94%8C%EB%9F%AC%20%EC%A0%88%EC%97%B0%20%EB%AA%A8%EB%93%88%20PLC%20NPN%2024V%203.3V" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">24V SMPS 5A</td><td class="num">1</td><td><b>2 권장</b></td><td>조명 전원</td><td class="num">1.5~2.5만</td><td><a href="https://www.coupang.com/np/search?q=SMPS%2024V%205A%20%ED%8C%8C%EC%9B%8C%EC%84%9C%ED%94%8C%EB%9D%BC%EC%9D%B4" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=SMPS%2024V%205A%20%ED%8C%8C%EC%9B%8C%EC%84%9C%ED%94%8C%EB%9D%BC%EC%9D%B4" target="_blank" rel="noopener">네이버</a></td></tr>
-      <tr><td class="p">24V LED 스트립 1m</td><td class="num">5</td><td><b>2 권장</b></td><td>발판당 하나, 소비전류 0.5A 이하</td><td class="num">개당 0.5~1만</td><td><a href="https://www.coupang.com/np/search?q=24V%20LED%20%EC%8A%A4%ED%8A%B8%EB%A6%BD%20COB%201m%20%EB%B0%B1%EC%83%89" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=24V%20LED%20%EC%8A%A4%ED%8A%B8%EB%A6%BD%20COB%201m%20%EB%B0%B1%EC%83%89" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">24V RGB LED 스트립 1m (공통 애노드 4핀)</td><td class="num">5</td><td><b>2 권장</b></td><td>발판 조명(파랑, 노랑=빨강+초록). 색당 전류 합이 0.4A 이하인지 확인</td><td class="num">개당 0.7~1.5만</td><td><a href="https://www.coupang.com/np/search?q=24V%20RGB%20LED%20%EC%8A%A4%ED%8A%B8%EB%A6%BD%20%EA%B3%B5%ED%86%B5%20%EC%95%A0%EB%85%B8%EB%93%9C%204%ED%95%80%201m" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=24V%20RGB%20LED%20%EC%8A%A4%ED%8A%B8%EB%A6%BD%20%EA%B3%B5%ED%86%B5%20%EC%95%A0%EB%85%B8%EB%93%9C%204%ED%95%80%201m" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">24V LED 램프 (모니터 옆 점수 표시)</td><td class="num">5</td><td><b>2 권장</b></td><td>점수 단계 1~5. 한 출력에 2개까지 병렬 가능(전류 합 0.5A 이하)</td><td class="num">개당 0.3~0.8만</td><td><a href="https://www.coupang.com/np/search?q=24V%20LED%20%ED%91%9C%EC%8B%9C%EB%93%B1%20%EB%9E%A8%ED%94%84%2022mm" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=24V%20LED%20%ED%91%9C%EC%8B%9C%EB%93%B1%20%EB%9E%A8%ED%94%84%2022mm" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">8채널 절연 모듈 (3.3V 입력, NPN 24V 출력) — 두 번째 모듈(4채널 이상)</td><td class="num">1</td><td><b>2 권장</b></td><td>콤보 신호(X0)용. 같은 사양</td><td class="num">0.3~1만</td><td><a href="https://www.coupang.com/np/search?q=4%EC%B1%84%EB%84%90%20%EC%98%B5%ED%86%A0%EC%BB%A4%ED%94%8C%EB%9F%AC%20%EC%A0%88%EC%97%B0%20%EB%AA%A8%EB%93%88%20PLC%20NPN%2024V%203.3V" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=4%EC%B1%84%EB%84%90%20%EC%98%B5%ED%86%A0%EC%BB%A4%ED%94%8C%EB%9F%AC%20%EC%A0%88%EC%97%B0%20%EB%AA%A8%EB%93%88%20PLC%20NPN%2024V%203.3V" target="_blank" rel="noopener">네이버</a></td></tr>
+      <tr><td class="p">24V MOSFET/SSR 모듈 (필요 시)</td><td class="num">2</td><td><b>1 선택</b></td><td>노랑 공유 채널(Y15, Y16) 전류가 클 때만</td><td class="num">개당 0.3~1만</td><td><a href="https://www.coupang.com/np/search?q=24V%20MOSFET%20%EB%AA%A8%EB%93%88%20PWM%20%EC%8A%A4%EC%9C%84%EC%B9%98%20PLC" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=24V%20MOSFET%20%EB%AA%A8%EB%93%88%20PWM%20%EC%8A%A4%EC%9C%84%EC%B9%98%20PLC" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">플라스틱 배전함 300×200×120</td><td class="num">1</td><td><b>3 중요</b></td><td>PLC 깊이 86mm를 고려</td><td class="num">2~4만</td><td><a href="https://www.coupang.com/np/search?q=%ED%94%8C%EB%9D%BC%EC%8A%A4%ED%8B%B1%20%EB%B0%B0%EC%A0%84%ED%95%A8%20300x200x120" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=%ED%94%8C%EB%9D%BC%EC%8A%A4%ED%8B%B1%20%EB%B0%B0%EC%A0%84%ED%95%A8%20300x200x120" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">DIN 레일 차단기 1P 6A</td><td class="num">1</td><td><b>3 중요</b></td><td>AC 입력 보호</td><td class="num">0.5~1만</td><td><a href="https://www.coupang.com/np/search?q=DIN%20%EB%A0%88%EC%9D%BC%20%EC%B0%A8%EB%8B%A8%EA%B8%B0%201P%206A" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=DIN%20%EB%A0%88%EC%9D%BC%20%EC%B0%A8%EB%8B%A8%EA%B8%B0%201P%206A" target="_blank" rel="noopener">네이버</a></td></tr>
       <tr><td class="p">DIN 레일 35mm 300mm</td><td class="num">1</td><td><b>1 선택</b></td><td>PLC·SMPS 고정</td><td class="num">0.3~0.6만</td><td><a href="https://www.coupang.com/np/search?q=DIN%20%EB%A0%88%EC%9D%BC%2035mm%20300mm" target="_blank" rel="noopener">쿠팡</a> · <a href="https://search.shopping.naver.com/search/all?query=DIN%20%EB%A0%88%EC%9D%BC%2035mm%20300mm" target="_blank" rel="noopener">네이버</a></td></tr>
@@ -595,10 +659,10 @@ END</code></pre>
   </article>
   <article class="step" style="grid-template-columns:1fr">
     <div>
-      <h3><span class="n">10</span>PLC 연동 (조명, 나중에 해도 됨)</h3>
-      <p class="need">준비: PLC 박스, 절연 모듈, 24V SMPS, LED 스트립 5개, 프로그램 케이블과 GX Works2가 깔린 다른 PC</p>
-      <ol><li>PLC 박스에 FX3U, SMPS, 차단기, 단자대를 DIN 레일로 고정하고 AC 전원과 접지를 연결합니다.</li><li>S/S를 +24V에, 출력 COM을 0V에 연결합니다.</li><li>절연 모듈 출력 8개를 X10~X17에, 모듈 전원 공통은 해당 단자 규격대로 연결하고, 모듈 입력은 Pico GP12~GP19과 GND에 연결합니다.</li><li>LED 스트립의 +를 SMPS +24V에, −를 Y10~Y14에 연결합니다.</li><li>래더를 올리고 Pico를 연결한 상태에서 발판을 밟아 해당 LED가 켜지는지 봅니다.</li><li>Pico 시리얼 터미널에서 바이트 1과 2를 보내 전체 점등과 소등이 되는지 봅니다.</li></ol>
-      <p class="chk">확인: 밟는 발판의 LED만 켜지고, X15·X16 명령에 따라 전체 점등·소등이 되며, 판정용 키보드 입력은 영향이 없음</p>
+      <h3><span class="n">10</span>PLC 연동 (조명)</h3>
+      <p class="need">준비: PLC 박스, 절연 모듈 2장, 24V SMPS, RGB 스트립 5개, 점수 램프 5개, 프로그램 케이블과 GX Works2가 깔린 다른 PC</p>
+      <ol><li>PLC 박스에 FX3U, SMPS, 차단기를 DIN 레일로 고정하고 AC 전원과 접지를 연결합니다.</li><li>S/S를 +24V에, 출력 COM을 0V에 연결합니다.</li><li>절연 모듈 1(8채널)의 출력 8개를 X10~X17에, 모듈 2의 출력 1개를 X0에 연결하고, 모듈 입력은 Pico GP12~GP20과 GND에 연결합니다.</li><li>RGB 스트립 5개의 공통(+)을 SMPS +24V에 잇고, 파랑 단자를 Y10~Y14에, 빨강 단자 5개를 Y15 하나에, 초록 단자 5개를 Y16 하나에 연결합니다. 색당 전류 합이 0.4A를 넘으면 MOSFET/SSR 모듈을 끼웁니다.</li><li>점수 램프 5개의 +는 24V에, 반대쪽은 Y17, Y7, Y6, Y5, Y4에 연결합니다.</li><li>래더(<code>plc/ladder.il.txt</code>)를 올리고 발판을 밟아 해당 파랑만 켜지는지 봅니다.</li><li>Pi 5의 크롬에서 step-five 설정 4번 "PLC 조명 연결"로 Pico를 연결하고, 시험 버튼으로 점수 1~5단과 노랑이 켜지는지 봅니다.</li></ol>
+      <p class="chk">확인: 밟는 발판의 파랑만 켜지고, 시험 버튼으로 단계별 램프와 전체 노랑이 켜지며, 곡을 돌리면 정확도와 콤보에 따라 바뀌고, 판정용 키보드 입력은 영향이 없음</p>
       <p class="ref">참고: <a href="#plc">PLC 연동</a>, <a href="#pins">핀 배정표</a></p>
     </div>
   </article>
@@ -618,7 +682,8 @@ END</code></pre>
         <li>빈 발판에서 값이 안정되고, 밟으면 양수로 커지는가</li>
         <li>종이 한 장을 발판 둘레로 돌렸을 때 걸리는 곳이 없는가</li>
         <li>체중을 실어 뛰었을 때 코너 플레이트가 레일에 먼저 닿는가</li>
-        <li>발판을 밟았을 때 PLC LED가 해당 발판만 켜지는가</li>
+        <li>발판을 밟았을 때 PLC 파랑이 해당 발판만 켜지는가</li>
+        <li>설정 화면 시험 버튼으로 점수 1~5단과 콤보 노랑이 켜지는가</li>
       </ul>
     </div>
     <div class="card">
@@ -628,7 +693,7 @@ END</code></pre>
         <li>Arduino-Pico 코어에서 USB 스택을 Adafruit TinyUSB로 고릅니다.</li>
         <li>부팅 1초간 자동 영점, 빈 발판일 때만 영점을 천천히 따라갑니다.</li>
         <li>눌림은 평균 없이 첫 샘플에서 바로 판정하고, 뗌은 2샘플 연속 확인합니다.</li>
-        <li>시리얼: d = 원시값 출력, z = 영점, 0~7 = PLC 명령 비트.</li>
+        <li>시리얼: d = 원시값 출력, z = 영점, 바이트 0~15 = 점수 단계(하위 3비트)와 콤보(비트 3).</li>
         <li>T_ON, T_OFF는 시작값이라 실측으로 조정해야 합니다.</li>
       </ul>
     </div>
@@ -649,7 +714,11 @@ END</code></pre>
 // 하는 일
 //  1) HX711 5개(발판당 로드셀 4개)를 읽어 밟힘/뗌을 판정 → USB 키보드(넘패드 1·7·5·9·3)
 //  2) 같은 상태를 옵토 모듈로 PLC 입력 X10~X14에 복사(GP12~GP16)
-//  3) USB 시리얼 명령: 0~7 = PLC X15~X17(GP17~GP19) 상태, 'd' = 원시값 출력 켜고 끄기, 'z' = 영점 다시 잡기
+//  3) USB 시리얼 명령(게임이 보냄): 바이트 1개, 0~15
+//       하위 3비트 = 점수 단계 0~5 → GP17~GP19 → PLC X15~X17 (옵토 모듈 1)
+//       비트 3     = 콤보 노랑 켜짐   → GP20       → PLC X0        (옵토 모듈 2)
+//     'd' = 원시값 출력 켜고 끄기, 'z' = 영점 다시 잡기
+//     (시리얼 모니터에서 엔터를 치면 바이트 10이 가서 단계 2 + 콤보가 켜집니다. 시험 중에만 주의)
 //
 // 핀 (v3 설계도와 같음)
 //  좌하 DT2/SCK3, 좌상 DT4/SCK5, 중앙 DT6/SCK7, 우상 DT8/SCK9, 우하 DT10/SCK11. HX711 전원은 3V3(36번).
@@ -663,7 +732,7 @@ END</code></pre>
 const uint8_t DT[5]  = {2, 4, 6, 8, 10};
 const uint8_t SCK_[5] = {3, 5, 7, 9, 11};
 const uint8_t MIR[5] = {12, 13, 14, 15, 16};      // → PLC X10~X14
-const uint8_t CMD[3] = {17, 18, 19};              // → PLC X15~X17
+const uint8_t CMD[4] = {17, 18, 19, 20};          // → PLC X15, X16, X17, X0
 const uint8_t KEY[5] = {HID_KEY_KEYPAD_1, HID_KEY_KEYPAD_7, HID_KEY_KEYPAD_5, HID_KEY_KEYPAD_9, HID_KEY_KEYPAD_3};
 
 const int32_t T_ON  = 3000;   // 영점 대비 이만큼 커지면 눌림 (대략 2kg 수준, 실측 필요)
@@ -718,7 +787,7 @@ void setup() {
     pinMode(DT[i], INPUT); pinMode(SCK_[i], OUTPUT); digitalWrite(SCK_[i], LOW);
     pinMode(MIR[i], OUTPUT); digitalWrite(MIR[i], LOW);
   }
-  for (uint8_t i = 0; i &lt; 3; i++) { pinMode(CMD[i], OUTPUT); digitalWrite(CMD[i], LOW); }
+  for (uint8_t i = 0; i &lt; 4; i++) { pinMode(CMD[i], OUTPUT); digitalWrite(CMD[i], LOW); }
   Serial.begin(115200);
   usb_hid.setPollInterval(1);
   usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
@@ -749,7 +818,7 @@ void loop() {
   }
   while (Serial.available()) {
     uint8_t b = Serial.read();
-    if (b &lt; 8) { for (uint8_t i = 0; i &lt; 3; i++) digitalWrite(CMD[i], (b &gt;&gt; i) &amp; 1 ? HIGH : LOW); }
+    if (b &lt; 16) { for (uint8_t i = 0; i &lt; 4; i++) digitalWrite(CMD[i], (b &gt;&gt; i) &amp; 1 ? HIGH : LOW); }
     else if (b == 'd') dbg = !dbg;
     else if (b == 'z') zeroAll();
   }
@@ -1177,23 +1246,28 @@ partSvg('pC','-70 -55 520 435',a=>{
 
 /* PLC wiring */
 (function(){
-  let o='';const OR='#D9822B',GN='#4A7FC1',RD='#D94A3D';
+  let o='';const OR='#D9822B',GN='#4A7FC1',RD='#D94A3D',YL='#C9A400';
   const T=(x,y,t,a='start',sz=11,c='var(--ink)')=>`<text x="${x}" y="${y}" font-size="${sz}" fill="${c}" text-anchor="${a}">${t}</text>`;
   const Bx=(x,y,w,h,st)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="var(--sheet)" stroke="${st||'var(--ink2)'}" stroke-width="1.3"/>`;
-  const names=['좌하','좌상','중앙','우상','우하','전체 점등','조명 끔','모터 예약'];
-  const yy=i=>62+i*36;
-  o+=Bx(10,20,150,320,'var(--blue)')+T(85,42,'Pico','middle',14)+T(85,330,'GP12~GP19','middle',10.5,'var(--ink2)');
-  o+=Bx(250,20,110,320)+T(305,42,'절연 모듈','middle',13)+T(305,330,'8채널, 3.3V→24V','middle',10.5,'var(--ink2)');
-  o+=Bx(450,20,150,320,'var(--blue)')+T(525,42,'PLC FX3U-32MT','middle',13)+T(525,330,'X10~X17 / Y10~Y14','middle',10.5,'var(--ink2)');
-  names.forEach((n,i)=>{const y=yy(i),gp=12+i;
-    o+=`<line x1="160" y1="${y}" x2="250" y2="${y}" stroke="${OR}" stroke-width="1.6"/><line x1="360" y1="${y}" x2="450" y2="${y}" stroke="${OR}" stroke-width="1.6"/>`;
-    o+=T(164,y-4,'GP'+gp,'start',10.5)+T(446,y-4,'X'+(10+i),'end',10.5)+T(20,y+4,n,'start',11.5);
-    if(i<5){o+=`<line x1="600" y1="${y}" x2="660" y2="${y}" stroke="${GN}" stroke-width="1.6"/>`+T(596,y-4,'Y'+(10+i),'end',10.5)+Bx(660,y-14,90,28)+T(705,y+4,n+' LED','middle',10.5);
-      o+=`<line x1="750" y1="${y}" x2="775" y2="${y}" stroke="${RD}" stroke-width="1.4"/>`;}});
-  o+=`<line x1="775" y1="${yy(0)}" x2="775" y2="${yy(4)}" stroke="${RD}" stroke-width="2.4"/>`+T(775,yy(4)+18,'+24V','middle',11,RD);
-  o+=T(525,372,'S/S → +24V (싱크 입력)','middle',11,RD)+T(525,390,'출력 COM → 0V','middle',11,'var(--ink2)');
-  o+=Bx(640,350,150,56)+T(715,374,'24V SMPS 5A','middle',12)+T(715,392,'조명 전원, 0V만 PLC와 공통','middle',10,'var(--ink2)');
-  o+=T(10,372,'Pi 5 ↔ Pico: USB (키보드 + 시리얼)','start',11,'var(--ink2)');
+  const inRows=[['좌하','GP12','X10'],['좌상','GP13','X11'],['중앙','GP14','X12'],['우상','GP15','X13'],['우하','GP16','X14'],['점수 1','GP17','X15'],['점수 2','GP18','X16'],['점수 4','GP19','X17'],['콤보','GP20','X0']];
+  const yi=i=>66+i*40;
+  o+=Bx(10,24,130,392,'var(--blue)')+T(75,46,'Pico','middle',14);
+  o+=Bx(232,24,100,330)+T(282,46,'절연 모듈 1','middle',12)+T(282,340,'8채널','middle',10.5,'var(--ink2)');
+  o+=Bx(232,376,100,40)+T(282,398,'절연 모듈 2','middle',12)+T(282,410,'(1채널 사용)','middle',9.5,'var(--ink2)');
+  o+=Bx(440,24,150,392,'var(--blue)')+T(515,46,'PLC FX3U-32MT/ES','middle',13);
+  inRows.forEach(([n,gp,x],i)=>{const y=yi(i);
+    o+=`<line x1="140" y1="${y}" x2="232" y2="${y}" stroke="${OR}" stroke-width="1.6"/><line x1="332" y1="${y}" x2="440" y2="${y}" stroke="${OR}" stroke-width="1.6"/>`;
+    o+=T(20,y+4,n,'start',11.5)+T(144,y-4,gp,'start',10.5)+T(436,y-4,x,'end',10.5);});
+  const outs=[['Y10','좌하 파랑',GN],['Y11','좌상 파랑',GN],['Y12','중앙 파랑',GN],['Y13','우상 파랑',GN],['Y14','우하 파랑',GN],['Y15','노랑: 빨강 ×5',RD],['Y16','노랑: 초록 ×5','#3F9C6B'],['Y17','점수 1단',YL],['Y7','점수 2단',YL],['Y6','점수 3단',YL],['Y5','점수 4단',YL],['Y4','점수 5단',YL]];
+  const yo=j=>58+j*30;
+  outs.forEach(([y,n,c],j)=>{const yy=yo(j);
+    o+=`<line x1="590" y1="${yy}" x2="660" y2="${yy}" stroke="${c}" stroke-width="1.6"/>`+T(586,yy-4,y,'end',10.5)+Bx(660,yy-12,130,24)+T(725,yy+4,n,'middle',10.5);
+    o+=`<line x1="790" y1="${yy}" x2="820" y2="${yy}" stroke="${RD}" stroke-width="1.2"/>`;});
+  o+=`<line x1="820" y1="${yo(0)}" x2="820" y2="${yo(11)}" stroke="${RD}" stroke-width="2.4"/>`+T(820,yo(11)+18,'+24V','middle',11,RD);
+  o+=T(515,436,'S/S → +24V (싱크 입력), 출력 COM → 0V','middle',11,RD);
+  o+=T(10,440,'Pi 5 ↔ Pico: USB (키보드 + 시리얼)','start',11,'var(--ink2)');
+  o+=T(10,458,'스트립은 24V 공통 애노드. 각 색 단자만 Y에 연결','start',10.5,'var(--ink2)');
+  o+=Bx(640,438,200,36)+T(740,454,'24V SMPS 5A (조명)','middle',11.5)+T(740,468,'0V만 PLC와 공통','middle',9.5,'var(--ink2)');
   document.getElementById('wPlc').innerHTML=o;
 })();
 /* ---------- build-step isometric drawings ---------- */

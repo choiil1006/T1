@@ -6,6 +6,7 @@
   SF.ui.init();
   SF.input.init();
   SF.editor.init();
+  SF.plc.init();
   SF.game.cacheLaneEls();
 
   SF.ui.restoreFromStorage();

@@ -1,6 +1,6 @@
 {
   "plcModel": "FX3U-32MT/ES (AC power, sink output)",
-  "note": "Pad -> PLC input mapping. Device names are the PLC's own labels (octal numbering: X7 is followed by X10). Lanes are listed in the game's left-to-right order. In design v4 the pad state reaches these inputs through the Pico (GPIO -> opto module), NOT directly from the switches: the Pico sends the fast path to the PC as a USB keyboard and mirrors the same state to the PLC for lights/motor logic. Nothing in step-five reads this file yet.",
+  "note": "Pad -> PLC input mapping. Device names are the PLC's own labels (octal numbering: X7 is followed by X10). In design v4 the pad state reaches X10-X14 through the Pico (GPIO -> opto module), not directly from the switches. The game sends one byte over Web Serial to the Pico (step-five/js/plc.js): bits 0-2 = score level 0..5 -> X15..X17, bit 3 = combo lamp -> X0.",
   "lanes": {
     "DL": "X10",
     "UL": "X11",
@@ -9,24 +9,37 @@
     "DR": "X14"
   },
   "commands": {
-    "X15": "all pad lights on (host request)",
-    "X16": "pad lights off (host request)",
-    "X17": "motor request (reserved)"
+    "X15": "score level bit0 (value 1)",
+    "X16": "score level bit1 (value 2)",
+    "X17": "score level bit2 (value 4)",
+    "X0": "combo lamp on (yellow)"
   },
   "lights": {
-    "DL": "Y10",
-    "UL": "Y11",
-    "CN": "Y12",
-    "UR": "Y13",
-    "DR": "Y14"
+    "padBlue": {
+      "DL": "Y10",
+      "UL": "Y11",
+      "CN": "Y12",
+      "UR": "Y13",
+      "DR": "Y14"
+    },
+    "comboYellowRed": "Y15",
+    "comboYellowGreen": "Y16",
+    "scoreLamps": {
+      "1": "Y17",
+      "2": "Y7",
+      "3": "Y6",
+      "4": "Y5",
+      "5": "Y4"
+    }
   },
   "reserved": {
-    "inputs": "X0-X7 motor origin/limit/encoder",
-    "outputs": "Y0-Y2 pulse, Y1/Y3 direction, Y4 enable, Y15 cabinet light"
+    "inputs": "X1-X7",
+    "outputs": "Y0-Y3 pulse/direction for a possible motor"
   },
   "picoPins": {
-    "padInputs": "GP2-GP6",
-    "plcMirror": "GP10-GP14",
-    "plcCommands": "GP15-GP17"
+    "padInputs (HX711 DT/SCK)": "GP2-GP11",
+    "plcMirror": "GP12-GP16",
+    "scoreLevel": "GP17-GP19",
+    "combo": "GP20"
   }
 }

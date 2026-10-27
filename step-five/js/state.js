@@ -13,6 +13,9 @@
     // reading as early or late for a given setup.
     syncOffsetMs: 0,
 
+    // combo count at which the PLC combo (yellow) light turns on; 0 = never
+    plcComboOn: 30,
+
     mapping: { // default keyboard mapping via numpad geometry
       DL: { type: "key", code: "Numpad1", label: "Num1" },
       UL: { type: "key", code: "Numpad7", label: "Num7" },

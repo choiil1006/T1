@@ -37,6 +37,7 @@
     }, { once: true });
 
     state.audioEl.addEventListener("ended", finishGame);
+    SF.plc.reset();
 
     // reset stats
     state.score = 0; state.rawScore = 0; state.combo = 0; state.maxCombo = 0;
@@ -338,7 +339,9 @@
   function updateHUD() {
     SF.$("scoreVal").textContent = state.score;
     SF.$("comboNum").textContent = state.combo;
-    SF.$("accVal").textContent = computeAccuracy(state.counts, state.totalJudged).toFixed(1) + "%";
+    const acc = computeAccuracy(state.counts, state.totalJudged);
+    SF.$("accVal").textContent = acc.toFixed(1) + "%";
+    SF.plc.update(acc, state.totalJudged, state.combo);
   }
 
   function togglePause() {
@@ -353,6 +356,7 @@
     SF.$("pauseOverlay").style.display = "none";
     document.querySelectorAll(".note").forEach((n) => n.remove());
     document.querySelectorAll(".holdTail").forEach((n) => n.remove());
+    SF.plc.reset();
     SF.ui.showScreen("setup");
   }
 
@@ -368,6 +372,7 @@
     const c = state.counts;
     const acc = computeAccuracy(c, state.totalJudged);
     const grade = gradeFor(acc);
+    SF.plc.showFinal(acc, state.totalJudged);
 
     SF.$("rScore").textContent = state.score;
     SF.$("rCombo").textContent = state.maxCombo;

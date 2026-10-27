@@ -342,7 +342,7 @@
     SF.$("resumeBtn").addEventListener("click", SF.game.togglePause);
     SF.$("quitBtn").addEventListener("click", SF.game.quit);
     SF.$("retryBtn").addEventListener("click", SF.game.startGame);
-    SF.$("backBtn").addEventListener("click", () => showScreen("setup"));
+    SF.$("backBtn").addEventListener("click", () => { SF.plc.reset(); showScreen("setup"); });
   }
 
   async function restoreFromStorage() {
@@ -358,6 +358,10 @@
         if (settings.mapping) {
           state.mapping = settings.mapping;
           SF.LANES.forEach(SF.input.renderPadSlot);
+        }
+        if (typeof settings.plcComboOn === "number") {
+          state.plcComboOn = settings.plcComboOn;
+          if (SF.$("plcComboInput")) SF.$("plcComboInput").value = state.plcComboOn;
         }
         if (typeof settings.syncOffsetMs === "number") {
           state.syncOffsetMs = settings.syncOffsetMs;

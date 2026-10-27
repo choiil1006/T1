@@ -102,8 +102,30 @@
       <div id="padStatus">각 칸을 클릭한 뒤, 해당 발판을 밟거나 키를 누르면 자동 등록됩니다. (게임패드로 연결된 발판 자동 인식, 화면의 레인을 직접 클릭/터치해도 플레이할 수 있어요)</div>
     </div>
 
+    <div class="card">
+      <h2><span class="num">4</span>PLC 조명 연결 (선택)</h2>
+      <button class="btn" id="plcConnectBtn" style="width:100%;">PLC 연결</button>
+      <div id="plcStatus" style="font-size:13px;color:var(--sub);margin-top:8px;">연결 안 됨 — Pico를 USB로 꽂고 버튼을 누른 뒤 포트를 선택하세요. (크롬, https 또는 localhost 필요)</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px;">
+        <span>노랑 조명이 켜지는 콤보</span>
+        <input type="number" id="plcComboInput" min="0" max="9999" style="width:80px;">
+        <span style="color:var(--sub);font-size:12px;">0이면 사용 안 함</span>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--sub);">시험 (0~5: 점수 단계 램프, +8: 콤보 노랑)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+        <button class="btn small" data-plc-test="0">끄기</button>
+        <button class="btn small" data-plc-test="1">1단</button>
+        <button class="btn small" data-plc-test="2">2단</button>
+        <button class="btn small" data-plc-test="3">3단</button>
+        <button class="btn small" data-plc-test="4">4단</button>
+        <button class="btn small" data-plc-test="5">5단</button>
+        <button class="btn small" data-plc-test="8">노랑만</button>
+        <button class="btn small" data-plc-test="13">5단+노랑</button>
+      </div>
+    </div>
+
     <div class="card" style="margin-bottom:40px;">
-      <h2><span class="num">4</span>패턴 에디터</h2>
+      <h2><span class="num">5</span>패턴 에디터</h2>
       <button class="btn" id="openEditorBtn" disabled style="width:100%;">패턴 에디터 열기</button>
     </div>
   </div>
@@ -225,6 +247,7 @@
 <script src="js/audio-analysis.js"></script>
 <script src="js/chart-generator.js"></script>
 <script src="js/input.js"></script>
+<script src="js/plc.js"></script>
 <script src="js/game.js"></script>
 <script src="js/editor.js"></script>
 <script src="js/ui.js"></script>

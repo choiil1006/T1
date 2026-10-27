@@ -4,7 +4,11 @@
 // 하는 일
 //  1) HX711 5개(발판당 로드셀 4개)를 읽어 밟힘/뗌을 판정 → USB 키보드(넘패드 1·7·5·9·3)
 //  2) 같은 상태를 옵토 모듈로 PLC 입력 X10~X14에 복사(GP12~GP16)
-//  3) USB 시리얼 명령: 0~7 = PLC X15~X17(GP17~GP19) 상태, 'd' = 원시값 출력 켜고 끄기, 'z' = 영점 다시 잡기
+//  3) USB 시리얼 명령(게임이 보냄): 바이트 1개, 0~15
+//       하위 3비트 = 점수 단계 0~5 → GP17~GP19 → PLC X15~X17 (옵토 모듈 1)
+//       비트 3     = 콤보 노랑 켜짐   → GP20       → PLC X0        (옵토 모듈 2)
+//     'd' = 원시값 출력 켜고 끄기, 'z' = 영점 다시 잡기
+//     (시리얼 모니터에서 엔터를 치면 바이트 10이 가서 단계 2 + 콤보가 켜집니다. 시험 중에만 주의)
 //
 // 핀 (v3 설계도와 같음)
 //  좌하 DT2/SCK3, 좌상 DT4/SCK5, 중앙 DT6/SCK7, 우상 DT8/SCK9, 우하 DT10/SCK11. HX711 전원은 3V3(36번).
@@ -18,7 +22,7 @@
 const uint8_t DT[5]  = {2, 4, 6, 8, 10};
 const uint8_t SCK_[5] = {3, 5, 7, 9, 11};
 const uint8_t MIR[5] = {12, 13, 14, 15, 16};      // → PLC X10~X14
-const uint8_t CMD[3] = {17, 18, 19};              // → PLC X15~X17
+const uint8_t CMD[4] = {17, 18, 19, 20};          // → PLC X15, X16, X17, X0
 const uint8_t KEY[5] = {HID_KEY_KEYPAD_1, HID_KEY_KEYPAD_7, HID_KEY_KEYPAD_5, HID_KEY_KEYPAD_9, HID_KEY_KEYPAD_3};
 
 const int32_t T_ON  = 3000;   // 영점 대비 이만큼 커지면 눌림 (대략 2kg 수준, 실측 필요)
@@ -73,7 +77,7 @@ void setup() {
     pinMode(DT[i], INPUT); pinMode(SCK_[i], OUTPUT); digitalWrite(SCK_[i], LOW);
     pinMode(MIR[i], OUTPUT); digitalWrite(MIR[i], LOW);
   }
-  for (uint8_t i = 0; i < 3; i++) { pinMode(CMD[i], OUTPUT); digitalWrite(CMD[i], LOW); }
+  for (uint8_t i = 0; i < 4; i++) { pinMode(CMD[i], OUTPUT); digitalWrite(CMD[i], LOW); }
   Serial.begin(115200);
   usb_hid.setPollInterval(1);
   usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
@@ -104,7 +108,7 @@ void loop() {
   }
   while (Serial.available()) {
     uint8_t b = Serial.read();
-    if (b < 8) { for (uint8_t i = 0; i < 3; i++) digitalWrite(CMD[i], (b >> i) & 1 ? HIGH : LOW); }
+    if (b < 16) { for (uint8_t i = 0; i < 4; i++) digitalWrite(CMD[i], (b >> i) & 1 ? HIGH : LOW); }
     else if (b == 'd') dbg = !dbg;
     else if (b == 'z') zeroAll();
   }
