@@ -9,6 +9,8 @@
   function showScreen(name) {
     Object.values(SF.screens).forEach((s) => s.classList.remove("active"));
     SF.screens[name].classList.add("active");
+    document.body.dataset.screen = name; // lets CSS show things on one screen only (see #bgLogo)
+    if (name === "setup") renderBestPopup(false); // a game may just have set a new record
   }
 
   // the current song's name is shown in two places — the compact summary on
@@ -60,15 +62,42 @@
     });
   }
 
-  function updateChartStatus() {
-    SF.$("chartStatus").textContent = (state.useCustomChart && state.customChart && state.customChart.length)
-      ? `현재: 직접 만든 패턴 사용 중 (${state.customChart.length}개 노트)`
-      : "현재: 자동 생성 패턴 사용 중";
-  }
+  // the small card under the song list: the selected song's best record on
+  // each difficulty, with the currently chosen difficulty highlighted.
+  // `pop` replays the pop-in animation (used when a song gets selected).
+  async function renderBestPopup(pop) {
+    const box = SF.$("bestPopup");
+    if (!state.currentSongId) { box.style.display = "none"; return; }
+    let scores = {};
+    try { scores = await SF.storage.getHighScores(state.currentSongId); } catch (err) { /* ignore */ }
+    if (!state.currentSongId) { box.style.display = "none"; return; }
 
-  function formatScore(entry) {
-    if (!entry) return null;
-    return `BEST ${entry.grade} · ${entry.score}점 · ${entry.accuracy.toFixed(1)}%`;
+    box.textContent = "";
+    const title = document.createElement("div");
+    title.className = "bpTitle";
+    title.textContent = "최고 기록";
+    box.appendChild(title);
+    ["easy", "normal", "hard"].forEach((d) => {
+      const row = document.createElement("div");
+      row.className = "bpRow" + (d === state.difficulty ? " active" : "");
+      const label = document.createElement("span");
+      label.className = "bpDiff";
+      label.textContent = SF.DIFF[d].label;
+      const value = document.createElement("span");
+      const rec = scores[d];
+      value.textContent = rec
+        ? `${rec.grade} · ${rec.score.toLocaleString()}점 · ${rec.accuracy.toFixed(1)}%`
+        : "기록 없음";
+      if (!rec) value.className = "bpNone";
+      row.append(label, value);
+      box.appendChild(row);
+    });
+    box.style.display = "block";
+    if (pop) {
+      box.classList.remove("pop");
+      void box.offsetWidth;
+      box.classList.add("pop");
+    }
   }
 
   function applyLoadedSong(id, name, blob, meta) {
@@ -87,7 +116,6 @@
     state.customChart = (meta && meta.customChart) || null;
     state.useCustomChart = !!(meta && meta.useCustomChart && state.customChart && state.customChart.length);
     SF.editor.loadFromCustomChart(state.customChart);
-    updateChartStatus();
 
     state.songAnalyzed = !!(meta && meta.analyzed);
     if (!state.songAnalyzed) {
@@ -95,6 +123,7 @@
     } else {
       SF.$("tapHint").textContent = `저장된 BPM ${SF.$("bpmInput").value}을 사용합니다. 다르게 느껴지면 숫자를 직접 수정하세요.`;
     }
+    renderBestPopup(true);
   }
 
   async function selectSong(id) {
@@ -144,7 +173,7 @@
   }
 
   // main screen: just a clickable name — click it to select that song
-  async function buildCompactSongRow(entry) {
+  function buildCompactSongRow(entry) {
     const row = document.createElement("div");
     row.className = "songRow songRow-compact" + (entry.id === state.currentSongId ? " active" : "");
     row.tabIndex = 0;
@@ -156,15 +185,6 @@
     const nameSpan = document.createElement("span");
     nameSpan.textContent = entry.name;
     nameWrap.appendChild(nameSpan);
-    let scores = {};
-    try { scores = await SF.storage.getHighScores(entry.id); } catch (err) { /* ignore */ }
-    const bestAny = scores.hard || scores.normal || scores.easy;
-    if (bestAny) {
-      const best = document.createElement("div");
-      best.className = "best";
-      best.textContent = formatScore(bestAny);
-      nameWrap.appendChild(best);
-    }
     row.appendChild(nameWrap);
 
     if (entry.id === state.currentSongId) {
@@ -220,6 +240,7 @@
     if (!index.length) {
       card.style.display = "none"; container.innerHTML = "";
       manageCard.style.display = "none"; manageContainer.innerHTML = "";
+      renderBestPopup(false);
       return;
     }
     card.style.display = "block";
@@ -227,10 +248,11 @@
     index.sort((a, b) => b.addedAt - a.addedAt);
 
     container.innerHTML = "";
-    for (const entry of index) container.appendChild(await buildCompactSongRow(entry));
+    index.forEach((entry) => container.appendChild(buildCompactSongRow(entry)));
 
     manageContainer.innerHTML = "";
     index.forEach((entry) => manageContainer.appendChild(buildManageSongRow(entry)));
+    renderBestPopup(false);
   }
 
   function initMusicUpload() {
@@ -252,11 +274,11 @@
       state.useCustomChart = false;
       state.customChart = null;
       SF.editor.loadFromCustomChart(null);
-      updateChartStatus();
       const id = await SF.storage.addSongToLibrary(f);
       state.currentSongId = id;
       await SF.storage.persistSongMeta();
       renderSongList();
+      renderBestPopup(true);
       runAutoAnalysis(); // new song, never analyzed — measure its BPM automatically
     });
   }
@@ -294,6 +316,7 @@
       el.classList.add("sel");
       state.difficulty = el.dataset.diff;
       SF.storage.persistGlobalSettings();
+      renderBestPopup(false);
     });
   }
 
@@ -376,5 +399,5 @@
     initStartAndResultButtons();
   }
 
-  SF.ui = { init, showScreen, updateChartStatus, renderSongList, selectSong, restoreFromStorage, showToast, wireDangerButton };
+  SF.ui = { init, showScreen, renderSongList, selectSong, restoreFromStorage, showToast, wireDangerButton };
 })();

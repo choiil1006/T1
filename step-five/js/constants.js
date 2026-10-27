@@ -11,6 +11,10 @@ SF.DIFF = {
 };
 
 SF.JUDGE_SCORE = { perfect: 100, great: 70, good: 35, bad: 10, miss: -20 };
+// the score a flawless run (every judgement PERFECT, never broken combo) ends
+// on — scores are scaled so this is the ceiling for that difficulty, which
+// makes harder difficulties able to reach a higher top score on any song
+SF.MAX_SCORE = { easy: 500000, normal: 750000, hard: 1000000 };
 SF.EMPTY_PRESS_PENALTY = 15;
 SF.GRADE_THRESHOLDS = [
   { min: 98, grade: "SS" },

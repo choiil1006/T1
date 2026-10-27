@@ -160,7 +160,10 @@
         holdChance *= (1.3 - energy * 0.6); // calmer sections favor holds a bit more
       }
 
-      let isHold = rand() < holdChance;
+      // no holds on the center panel: with one foot pinned there the other
+      // can't cover both sides. (rand() still runs first so every other
+      // decision in the chart stays on the same random sequence.)
+      let isHold = rand() < holdChance && lane !== "CN";
       let holdEnd = null;
       if (isHold) {
         const holdSteps = 2 + Math.floor(rand() * 3); // 2~4 grid steps long

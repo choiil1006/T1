@@ -32,13 +32,14 @@
       } else {
         state.notes = SF.chartGenerator.generateChart(state.bpm, state.difficulty, dur, state.phaseOffsetMs, state.currentSongId);
       }
+      state.maxRawScore = computeMaxRawScore(state.notes);
       beginCountdown();
     }, { once: true });
 
     state.audioEl.addEventListener("ended", finishGame);
 
     // reset stats
-    state.score = 0; state.combo = 0; state.maxCombo = 0;
+    state.score = 0; state.rawScore = 0; state.combo = 0; state.maxCombo = 0;
     state.counts = { perfect: 0, great: 0, good: 0, bad: 0, miss: 0, empty: 0 };
     state.totalJudged = 0;
     state.paused = false;
@@ -270,18 +271,41 @@
     setTimeout(() => r.classList.remove("flash"), 90);
   }
 
+  function comboMultiplier(combo) {
+    return 1 + Math.min(combo, 50) * 0.01;
+  }
+
+  // what an all-PERFECT, never-broken run of this chart would total in raw
+  // points — a hold counts two judgements (its head and its release)
+  function computeMaxRawScore(notes) {
+    let judgements = 0;
+    for (const n of notes) judgements += n.hold ? 2 : 1;
+    let sum = 0;
+    for (let k = 1; k <= judgements; k++) sum += Math.round(SF.JUDGE_SCORE.perfect * comboMultiplier(k));
+    return sum;
+  }
+
+  // the shown/saved score: the raw total scaled so a flawless run is exactly
+  // this difficulty's ceiling (a run can never exceed it — combo can't be
+  // longer than the number of judgements made so far)
+  function syncScore() {
+    state.score = state.maxRawScore > 0
+      ? Math.round(state.rawScore / state.maxRawScore * SF.MAX_SCORE[state.difficulty])
+      : 0;
+  }
+
   function registerJudgement(grade, lane) {
     state.counts[grade]++;
     state.totalJudged++;
     if (grade === "miss") {
       state.combo = 0;
-      state.score = Math.max(0, state.score + SF.JUDGE_SCORE.miss);
+      state.rawScore = Math.max(0, state.rawScore + SF.JUDGE_SCORE.miss);
     } else {
       state.combo++;
       state.maxCombo = Math.max(state.maxCombo, state.combo);
-      const comboMult = 1 + Math.min(state.combo, 50) * 0.01;
-      state.score += Math.round(SF.JUDGE_SCORE[grade] * comboMult);
+      state.rawScore += Math.round(SF.JUDGE_SCORE[grade] * comboMultiplier(state.combo));
     }
+    syncScore();
     SF.sfx.playJudge(grade);
     popJudgeText(grade);
     updateHUD();
@@ -290,7 +314,8 @@
   function registerEmptyPress(lane) {
     state.counts.empty++;
     state.combo = 0;
-    state.score = Math.max(0, state.score - SF.EMPTY_PRESS_PENALTY);
+    state.rawScore = Math.max(0, state.rawScore - SF.EMPTY_PRESS_PENALTY);
+    syncScore();
     SF.sfx.playJudge("miss"); // shown the same as a miss — it's an incorrect press either way
     popJudgeText("miss");
     updateHUD();

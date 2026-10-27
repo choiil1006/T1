@@ -29,6 +29,16 @@ html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);
     radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255,90,54,0.10), transparent 60%);
 }
 
+/* the logo watermark behind the main screen — fixed to the viewport, behind
+   everything else, faded in only on that screen. The main screen's cards
+   are made see-through so the logo reads across the whole screen instead of
+   only peeking out at the sides. */
+#bgLogo{position:fixed;inset:5vh 0;z-index:0;pointer-events:none;
+  background:url("../img/logo.png") center / contain no-repeat;
+  opacity:0;transition:opacity .35s ease;}
+body[data-screen="setup"] #bgLogo{opacity:.3;}
+#setupScreen .card{background:rgba(22,22,42,.62);}
+
 h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5vw,44px);
   letter-spacing:2px;margin:36px 0 4px;z-index:1;
   background:linear-gradient(90deg,var(--ul),var(--cn) 50%,var(--ur));
@@ -48,8 +58,6 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 .songRow.active{border-color:var(--cn);background:rgba(255,214,10,0.07);}
 .songRow .songName{flex:1;min-width:0;overflow:hidden;}
 .songRow .songName span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;}
-.songRow .songName .best{font-size:11px;color:var(--sub);margin-top:2px;font-weight:500;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .songRow input.renameInput{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);
   color:var(--text);border-radius:6px;padding:5px 8px;font-family:'Rajdhani';font-weight:600;}
 .songRow .btn.small{padding:6px 10px;font-size:12px;flex-shrink:0;}
@@ -58,6 +66,20 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 .songRow-compact:focus-visible{outline:2px solid var(--cn);outline-offset:1px;}
 .songSelectedTag{flex-shrink:0;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--bg);
   background:var(--cn);border-radius:20px;padding:4px 10px;}
+
+/* small card tucked under the song list: the selected song's best record
+   per difficulty, popping in when a song is picked */
+#bestPopup{display:none;width:min(560px,92vw);margin:-6px 0 18px;padding:10px 16px 8px;z-index:1;
+  background:rgba(22,22,42,.78);border:1px solid var(--cn);border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35), 0 0 14px rgba(255,214,10,.12);}
+#bestPopup.pop{animation:bestPop .28s ease-out;}
+@keyframes bestPop{from{opacity:0;transform:translateY(-8px) scale(.97);}to{opacity:1;transform:none;}}
+#bestPopup .bpTitle{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--cn);margin-bottom:6px;}
+#bestPopup .bpRow{display:flex;justify-content:space-between;gap:12px;padding:3px 0;
+  font-family:'JetBrains Mono';font-size:12px;}
+#bestPopup .bpDiff{color:var(--sub);letter-spacing:1px;}
+#bestPopup .bpRow.active .bpDiff{color:var(--cn);font-weight:700;}
+#bestPopup .bpNone{color:var(--sub);opacity:.7;}
 
 .btn{appearance:none;border:1px solid var(--line);background:var(--bg2);color:var(--text);
   font-family:'Rajdhani';font-weight:700;font-size:16px;padding:11px 18px;border-radius:9px;
@@ -137,7 +159,7 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
   text-shadow:0 0 18px rgba(255,214,10,.6);line-height:1;}
 #comboLbl{font-size:13px;letter-spacing:4px;color:var(--sub);}
 
-#arena{position:relative;width:min(620px,96vw);flex:1;margin-top:6px;z-index:1;}
+#arena{position:relative;width:min(620px,96vw);flex:1;margin-top:6px;margin-bottom:24px;z-index:1;}
 #lanes{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr);gap:3px;}
 .lane{position:relative;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
   border-left:1px solid var(--line);border-right:1px solid var(--line);overflow:hidden;}
@@ -297,7 +319,6 @@ h1.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(28px,5
 #pauseOverlay{position:absolute;inset:0;background:rgba(8,8,16,0.82);z-index:7;
   display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
 
-#footerHint{color:var(--sub);font-size:12px;letter-spacing:1px;text-align:center;padding:10px 0 18px;z-index:1;}
 
 /* ---------- results ---------- */
 #resultCard{width:min(480px,92vw);text-align:center;}
