@@ -1,0 +1,340 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-290 -330 1500 2010" width="1500" height="2010" role="img" aria-label="프레임 평면도 치수도"><rect x="-290" y="-330" width="1500" height="2010" fill="#fff"/>
+<rect x="0" y="-120" width="30" height="1247" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="847" y="-120" width="30" height="1247" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="30" y="-120" width="817" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="30" y="0" width="817" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="30" y="847" width="817" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="30" y="1097" width="817" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="283" y="30" width="30" height="817" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="564" y="30" width="30" height="817" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="30" y="343" width="253" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="30" y="423" width="253" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="30" y="504" width="253" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="594" y="343" width="253" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="594" y="423" width="253" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="594" y="504" width="253" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="313" y="135" width="251" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="313" y="284" width="251" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="313" y="563" width="251" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="313" y="700" width="251" height="30" fill="#A6B0BA" fill-opacity="1" stroke="#1B2833" stroke-width="1"/>
+<rect x="20" y="20" width="277" height="337" fill="none" fill-opacity="1" stroke="#1F5FA8" stroke-width="1.2" stroke-dasharray="7 5"/>
+<text x="158.5" y="193.5" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">좌상 발판</text>
+<rect x="580" y="20" width="277" height="337" fill="none" fill-opacity="1" stroke="#1F5FA8" stroke-width="1.2" stroke-dasharray="7 5"/>
+<text x="718.5" y="193.5" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">우상 발판</text>
+<rect x="20" y="520" width="277" height="337" fill="none" fill-opacity="1" stroke="#1F5FA8" stroke-width="1.2" stroke-dasharray="7 5"/>
+<text x="158.5" y="693.5" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">좌하 발판</text>
+<rect x="580" y="520" width="277" height="337" fill="none" fill-opacity="1" stroke="#1F5FA8" stroke-width="1.2" stroke-dasharray="7 5"/>
+<text x="718.5" y="693.5" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">우하 발판</text>
+<rect x="300" y="300" width="277" height="277" fill="none" fill-opacity="1" stroke="#1F5FA8" stroke-width="1.2" stroke-dasharray="7 5"/>
+<text x="438.5" y="443.5" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">중앙 발판</text>
+<rect x="0" y="880" width="40" height="40" fill="#3B444E" fill-opacity="0.85" stroke="#1B2833" stroke-width="1"/>
+<rect x="837" y="880" width="40" height="40" fill="#3B444E" fill-opacity="0.85" stroke="#1B2833" stroke-width="1"/>
+<rect x="0" y="920" width="30" height="179" fill="none" fill-opacity="1" stroke="#D9822B" stroke-width="1.2" stroke-dasharray="5 4"/>
+<rect x="847" y="920" width="30" height="179" fill="none" fill-opacity="1" stroke="#D9822B" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text x="15" y="1030" font-size="12" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 15 1030)">F6</text>
+<text x="862" y="1030" font-size="12" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 862 1030)">F6</text>
+<text x="15" y="300" font-size="14" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 15 300)">F1</text>
+<text x="862" y="300" font-size="14" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 862 300)">F1</text>
+<text x="438" y="-100" font-size="14" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F2</text>
+<text x="438" y="20" font-size="14" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F2</text>
+<text x="438" y="867" font-size="14" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F2</text>
+<text x="438" y="1117" font-size="14" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F2</text>
+<text x="298" y="200" font-size="14" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 298 200)">F3</text>
+<text x="579" y="200" font-size="14" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 579 200)">F3</text>
+<text x="156" y="363" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F4</text>
+<text x="720" y="363" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F4</text>
+<text x="156" y="443" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F4</text>
+<text x="720" y="443" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F4</text>
+<text x="156" y="524" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F4</text>
+<text x="720" y="524" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F4</text>
+<text x="438" y="155" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F5</text>
+<text x="438" y="304" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F5</text>
+<text x="438" y="583" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F5</text>
+<text x="438" y="720" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F5</text>
+<text x="20" y="905" font-size="12" fill="#fff" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">B1</text>
+<text x="857" y="905" font-size="12" fill="#fff" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">B1</text>
+<circle cx="15" cy="-105" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="15" y="-101" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">1</text>
+<circle cx="15" cy="300" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="15" y="304" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">2</text>
+<circle cx="15" cy="600" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="15" y="604" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">3</text>
+<circle cx="15" cy="862" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="15" y="866" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">4</text>
+<circle cx="15" cy="1112" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="15" y="1116" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">5</text>
+<circle cx="862" cy="-105" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="862" y="-101" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">6</text>
+<circle cx="862" cy="300" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="862" y="304" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">7</text>
+<circle cx="862" cy="600" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="862" y="604" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">8</text>
+<circle cx="862" cy="862" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="862" y="866" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">9</text>
+<circle cx="862" cy="1112" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="862" y="1116" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">10</text>
+<circle cx="298" cy="60" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="298" y="64" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">11</text>
+<circle cx="298" cy="438" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="298" y="442" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">12</text>
+<circle cx="298" cy="820" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="298" y="824" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">13</text>
+<circle cx="579" cy="60" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="579" y="64" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">14</text>
+<circle cx="579" cy="438" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="579" y="442" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">15</text>
+<circle cx="579" cy="820" r="11" fill="#fff" stroke="#C0392B" stroke-width="1.4"/>
+<text x="579" y="824" font-size="11" fill="#C0392B" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">16</text>
+<line x1="0" y1="-150" x2="877" y2="-150" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="0" y1="-125" x2="0" y2="-144" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-6" y1="-144" x2="6" y2="-156" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="30" y1="-125" x2="30" y2="-144" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="24" y1="-144" x2="36" y2="-156" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="283" y1="-125" x2="283" y2="-144" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="277" y1="-144" x2="289" y2="-156" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="313" y1="-125" x2="313" y2="-144" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="307" y1="-144" x2="319" y2="-156" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="564" y1="-125" x2="564" y2="-144" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="558" y1="-144" x2="570" y2="-156" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="594" y1="-125" x2="594" y2="-144" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="588" y1="-144" x2="600" y2="-156" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="847" y1="-125" x2="847" y2="-144" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="841" y1="-144" x2="853" y2="-156" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="877" y1="-125" x2="877" y2="-144" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="871" y1="-144" x2="883" y2="-156" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="15.0" y="-156" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">30</text>
+<text x="156.5" y="-156" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">253</text>
+<text x="298.0" y="-156" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">30</text>
+<text x="438.5" y="-156" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">251</text>
+<text x="579.0" y="-156" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">30</text>
+<text x="720.5" y="-156" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">253</text>
+<text x="862.0" y="-156" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">30</text>
+<line x1="0" y1="-200" x2="877" y2="-200" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="0" y1="-175" x2="0" y2="-194" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-6" y1="-194" x2="6" y2="-206" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="877" y1="-175" x2="877" y2="-194" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="871" y1="-194" x2="883" y2="-206" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="438.5" y="-206" font-size="16" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">877</text>
+<text x="1000" y="-196" font-size="12" fill="#1F5FA8" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">← F1 바깥 ~ 바깥</text>
+<line x1="0" y1="-250" x2="877" y2="-250" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="0" y1="-225" x2="0" y2="-244" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-6" y1="-244" x2="6" y2="-256" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="15" y1="-225" x2="15" y2="-244" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="9" y1="-244" x2="21" y2="-256" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="298" y1="-225" x2="298" y2="-244" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="292" y1="-244" x2="304" y2="-256" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="579" y1="-225" x2="579" y2="-244" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="573" y1="-244" x2="585" y2="-256" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="862" y1="-225" x2="862" y2="-244" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="856" y1="-244" x2="868" y2="-256" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="877" y1="-225" x2="877" y2="-244" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="871" y1="-244" x2="883" y2="-256" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="7.5" y="-256" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">15</text>
+<text x="156.5" y="-256" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">283</text>
+<text x="438.5" y="-256" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">281</text>
+<text x="720.5" y="-256" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">283</text>
+<text x="869.5" y="-256" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">15</text>
+<text x="1000" y="-246" font-size="12" fill="#1F5FA8" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">← 중심선 x = 15, 298, 579, 862</text>
+<line x1="0" y1="1180" x2="877" y2="1180" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="0" y1="1130" x2="0" y2="1174" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-6" y1="1186" x2="6" y2="1174" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="40" y1="1130" x2="40" y2="1174" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="34" y1="1186" x2="46" y2="1174" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="837" y1="1130" x2="837" y2="1174" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="831" y1="1186" x2="843" y2="1174" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="877" y1="1130" x2="877" y2="1174" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="871" y1="1186" x2="883" y2="1174" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="20.0" y="1174" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">40</text>
+<text x="438.5" y="1174" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">797</text>
+<text x="857.0" y="1174" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">40</text>
+<text x="438" y="1204" font-size="13" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">B1 (4040) 기둥 위치와 B2 손잡이 길이 797 (z 880~920에 세움)</text>
+<line x1="-60" y1="-120" x2="-60" y2="1127" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="0" y1="-120" x2="-54" y2="-120" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="-114" x2="-54" y2="-126" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="-90" x2="-54" y2="-90" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="-84" x2="-54" y2="-96" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="0" x2="-54" y2="0" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="6" x2="-54" y2="-6" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="30" x2="-54" y2="30" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="36" x2="-54" y2="24" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="343" x2="-54" y2="343" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="349" x2="-54" y2="337" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="373" x2="-54" y2="373" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="379" x2="-54" y2="367" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="423" x2="-54" y2="423" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="429" x2="-54" y2="417" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="453" x2="-54" y2="453" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="459" x2="-54" y2="447" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="504" x2="-54" y2="504" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="510" x2="-54" y2="498" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="534" x2="-54" y2="534" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="540" x2="-54" y2="528" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="847" x2="-54" y2="847" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="853" x2="-54" y2="841" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="877" x2="-54" y2="877" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="883" x2="-54" y2="871" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="1097" x2="-54" y2="1097" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="1103" x2="-54" y2="1091" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="0" y1="1127" x2="-54" y2="1127" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-66" y1="1133" x2="-54" y2="1121" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="-67" y="-101.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 -101.0)">30</text>
+<text x="-67" y="-41.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 -41.0)">90</text>
+<text x="-67" y="19.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 19.0)">30</text>
+<text x="-67" y="190.5" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 190.5)">313</text>
+<text x="-67" y="362.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 362.0)">30</text>
+<text x="-67" y="402.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 402.0)">50</text>
+<text x="-67" y="442.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 442.0)">30</text>
+<text x="-67" y="482.5" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 482.5)">51</text>
+<text x="-67" y="523.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 523.0)">30</text>
+<text x="-67" y="694.5" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 694.5)">313</text>
+<text x="-67" y="866.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 866.0)">30</text>
+<text x="-67" y="991.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 991.0)">220</text>
+<text x="-67" y="1116.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -67 1116.0)">30</text>
+<line x1="-120" y1="-120" x2="-120" y2="1127" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="-60" y1="-120" x2="-114" y2="-120" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-126" y1="-114" x2="-114" y2="-126" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="-60" y1="0" x2="-114" y2="0" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-126" y1="6" x2="-114" y2="-6" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="-60" y1="877" x2="-114" y2="877" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-126" y1="883" x2="-114" y2="871" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="-60" y1="1127" x2="-114" y2="1127" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-126" y1="1133" x2="-114" y2="1121" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="-127" y="-56.0" font-size="15" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -127 -56.0)">120</text>
+<text x="-127" y="442.5" font-size="15" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -127 442.5)">877</text>
+<text x="-127" y="1006.0" font-size="15" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -127 1006.0)">250</text>
+<text x="-148" y="-60" font-size="13" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -148 -60)">전장부</text>
+<text x="-148" y="440" font-size="13" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -148 440)">발판 영역</text>
+<text x="-148" y="1000" font-size="13" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -148 1000)">후면</text>
+<line x1="-180" y1="-120" x2="-180" y2="1127" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="-120" y1="-120" x2="-174" y2="-120" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-186" y1="-114" x2="-174" y2="-126" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="-120" y1="1127" x2="-174" y2="1127" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-186" y1="1133" x2="-174" y2="1121" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="-187" y="507.5" font-size="16" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -187 507.5)">1247</text>
+<line x1="-235" y1="-105" x2="-235" y2="1112" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="-180" y1="-105" x2="-229" y2="-105" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-241" y1="-99" x2="-229" y2="-111" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="-180" y1="15" x2="-229" y2="15" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-241" y1="21" x2="-229" y2="9" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="-180" y1="862" x2="-229" y2="862" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-241" y1="868" x2="-229" y2="856" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="-180" y1="1112" x2="-229" y2="1112" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="-241" y1="1118" x2="-229" y2="1106" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="-242" y="-41.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -242 -41.0)">120</text>
+<text x="-242" y="442.5" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -242 442.5)">847</text>
+<text x="-242" y="991.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -242 991.0)">250</text>
+<text x="-215" y="-110" font-size="12" fill="#1F5FA8" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 -215 -110)">중심선 z</text>
+<line x1="940" y1="0" x2="940" y2="877" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="880" y1="0" x2="934" y2="0" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="6" x2="946" y2="-6" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="30" x2="934" y2="30" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="36" x2="946" y2="24" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="135" x2="934" y2="135" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="141" x2="946" y2="129" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="165" x2="934" y2="165" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="171" x2="946" y2="159" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="284" x2="934" y2="284" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="290" x2="946" y2="278" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="314" x2="934" y2="314" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="320" x2="946" y2="308" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="563" x2="934" y2="563" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="569" x2="946" y2="557" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="593" x2="934" y2="593" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="599" x2="946" y2="587" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="700" x2="934" y2="700" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="706" x2="946" y2="694" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="730" x2="934" y2="730" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="736" x2="946" y2="724" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="847" x2="934" y2="847" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="853" x2="946" y2="841" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="877" x2="934" y2="877" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="883" x2="946" y2="871" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="956" y="19.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 19.0)">30</text>
+<text x="956" y="86.5" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 86.5)">105</text>
+<text x="956" y="154.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 154.0)">30</text>
+<text x="956" y="228.5" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 228.5)">119</text>
+<text x="956" y="303.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 303.0)">30</text>
+<text x="956" y="442.5" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 442.5)">249</text>
+<text x="956" y="582.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 582.0)">30</text>
+<text x="956" y="650.5" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 650.5)">107</text>
+<text x="956" y="719.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 719.0)">30</text>
+<text x="956" y="792.5" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 792.5)">117</text>
+<text x="956" y="866.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 866.0)">30</text>
+<line x1="940" y1="877" x2="940" y2="1127" stroke="#1F5FA8" stroke-width="1"/>
+<line x1="880" y1="877" x2="934" y2="877" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="883" x2="946" y2="871" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="1097" x2="934" y2="1097" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="1103" x2="946" y2="1091" stroke="#1F5FA8" stroke-width="1.2"/>
+<line x1="880" y1="1127" x2="934" y2="1127" stroke="#1F5FA8" stroke-width="0.6" stroke-dasharray="3 3"/>
+<line x1="934" y1="1133" x2="946" y2="1121" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="956" y="991.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 991.0)">220</text>
+<text x="956" y="1116.0" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-90 956 1116.0)">30</text>
+<line x1="0" y1="0" x2="877" y2="877" stroke="#D9822B" stroke-width="1.4" stroke-dasharray="9 6"/>
+<line x1="877" y1="0" x2="0" y2="877" stroke="#D9822B" stroke-width="1.4" stroke-dasharray="9 6"/>
+<text x="120" y="210" font-size="15" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(45 120 210)">대각선 1240.3</text>
+<text x="760" y="210" font-size="15" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" transform="rotate(-45 760 210)">대각선 1240.3</text>
+<text x="438" y="908" font-size="13" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">두 대각선 차 1mm 이내로 맞춘 뒤 본조임</text>
+<text x="438" y="-300" font-size="14" fill="#1B2833" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">▲ 앞 (화면 쪽)</text>
+<text x="-250" y="1250" font-size="20" fill="#1B2833" text-anchor="start" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">프레임 평면도 치수도 (제작 순서 1)</text>
+<text x="-250" y="1272" font-size="13" fill="#56636F" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">단위 mm · 원점은 발판 프레임의 왼쪽 앞 모서리 · x는 오른쪽, z는 뒤쪽(안전바 쪽) · 3030 프로파일 단면 30 × 30</text>
+<text x="-250" y="1300" font-size="13" fill="#1B2833" text-anchor="start" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">부재</text>
+<text x="-190" y="1300" font-size="13" fill="#1B2833" text-anchor="start" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">규격</text>
+<text x="-110" y="1300" font-size="13" fill="#1B2833" text-anchor="start" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">길이</text>
+<text x="-30" y="1300" font-size="13" fill="#1B2833" text-anchor="start" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">수량</text>
+<text x="30" y="1300" font-size="13" fill="#1B2833" text-anchor="start" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">위치 (중심선)</text>
+<line x1="-250" y1="1306" x2="510" y2="1306" stroke="#BCC6CF" stroke-width="0.6"/>
+<text x="-250" y="1322" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F1</text>
+<text x="-190" y="1322" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">3030</text>
+<text x="-110" y="1322" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">1,247</text>
+<text x="-30" y="1322" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">2</text>
+<text x="30" y="1322" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">x = 15, 862 · z −120 ~ 1,127</text>
+<line x1="-250" y1="1328" x2="510" y2="1328" stroke="#BCC6CF" stroke-width="0.6"/>
+<text x="-250" y="1344" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F2</text>
+<text x="-190" y="1344" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">3030</text>
+<text x="-110" y="1344" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">817</text>
+<text x="-30" y="1344" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">4</text>
+<text x="30" y="1344" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">z = −105, 15, 862, 1,112 · x 30 ~ 847</text>
+<line x1="-250" y1="1350" x2="510" y2="1350" stroke="#BCC6CF" stroke-width="0.6"/>
+<text x="-250" y="1366" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F3</text>
+<text x="-190" y="1366" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">3030</text>
+<text x="-110" y="1366" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">817</text>
+<text x="-30" y="1366" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">2</text>
+<text x="30" y="1366" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">x = 298, 579 · z 30 ~ 847</text>
+<line x1="-250" y1="1372" x2="510" y2="1372" stroke="#BCC6CF" stroke-width="0.6"/>
+<text x="-250" y="1388" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F4</text>
+<text x="-190" y="1388" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">3030</text>
+<text x="-110" y="1388" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">253</text>
+<text x="-30" y="1388" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">6</text>
+<text x="30" y="1388" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">z = 358, 438, 519 · x 30 ~ 283, 594 ~ 847</text>
+<line x1="-250" y1="1394" x2="510" y2="1394" stroke="#BCC6CF" stroke-width="0.6"/>
+<text x="-250" y="1410" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F5</text>
+<text x="-190" y="1410" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">3030</text>
+<text x="-110" y="1410" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">251</text>
+<text x="-30" y="1410" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">4</text>
+<text x="30" y="1410" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">z = 150, 299, 578, 715 · x 313 ~ 564</text>
+<line x1="-250" y1="1416" x2="510" y2="1416" stroke="#BCC6CF" stroke-width="0.6"/>
+<text x="-250" y="1432" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">B1</text>
+<text x="-190" y="1432" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">4040</text>
+<text x="-110" y="1432" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">920</text>
+<text x="-30" y="1432" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">2</text>
+<text x="30" y="1432" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">x = 20, 857 · z 880 ~ 920 (F1 위)</text>
+<line x1="-250" y1="1438" x2="510" y2="1438" stroke="#BCC6CF" stroke-width="0.6"/>
+<text x="-250" y="1454" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">B2</text>
+<text x="-190" y="1454" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">4040</text>
+<text x="-110" y="1454" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">797</text>
+<text x="-30" y="1454" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">1</text>
+<text x="30" y="1454" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">높이 925 ~ 965 · x 40 ~ 837</text>
+<line x1="-250" y1="1460" x2="510" y2="1460" stroke="#BCC6CF" stroke-width="0.6"/>
+<text x="-250" y="1476" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">F6</text>
+<text x="-190" y="1476" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">3030</text>
+<text x="-110" y="1476" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">약 340</text>
+<text x="-30" y="1476" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">2</text>
+<text x="30" y="1476" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">사선 브레이스 · z 920 ~ 1,099 (측면도 참조)</text>
+<line x1="-250" y1="1482" x2="510" y2="1482" stroke="#BCC6CF" stroke-width="0.6"/>
+<text x="-250" y="1508" font-size="13" fill="#1B2833" text-anchor="start" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">조절발 M8 16개 (번호 원) 중심 좌표 (x, z):</text>
+<text x="-250" y="1528" font-size="12.5" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">1:(15, -105)   2:(15, 300)   3:(15, 600)   4:(15, 862)</text>
+<text x="-250" y="1548" font-size="12.5" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">5:(15, 1112)   6:(862, -105)   7:(862, 300)   8:(862, 600)</text>
+<text x="-250" y="1568" font-size="12.5" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">9:(862, 862)   10:(862, 1112)   11:(298, 60)   12:(298, 438)</text>
+<text x="-250" y="1588" font-size="12.5" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">13:(298, 820)   14:(579, 60)   15:(579, 438)   16:(579, 820)</text>
+<text x="-250" y="1622" font-size="13" fill="#56636F" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">조립 순서: F1 2개를 877mm 간격으로 놓고 → F2 → F3 → F4·F5를 코너 브래킷으로 가조임 → 대각선 차 1mm 이내 확인 → 본조임 → 조절발 16개 부착 → 수평</text>
+</svg>
