@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1020" width="1560" height="1020" role="img" aria-label="발판 입력부 PLC 배선도"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker></defs><rect width="1560" height="1020" fill="#fff"/>
+<text x="780" y="40" font-size="24" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">발판 입력부 → PLC 배선도 (조명 제외)</text>
+<text x="780" y="64" font-size="14" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">로드셀 → HX711 → Pico → (USB 키보드 → Pi 5) 와 (옵토 모듈 → PLC X10~X14)</text>
+<text x="130" y="100" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">① 로드셀 (발판마다 4개)</text>
+<text x="400" y="100" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">② HX711 ×5</text>
+<text x="700" y="100" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">③ Pico H</text>
+<text x="1020" y="100" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">④ 절연(옵토) 모듈</text>
+<text x="1370" y="100" font-size="15" fill="#1F5FA8" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">⑤ PLC FX3U-32MT/ES</text>
+<rect x="20" y="120" width="220" height="330" rx="6" fill="#F6F8FA" stroke="#1B2833" stroke-width="1.5"/>
+<text x="130" y="146" font-size="13" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">발판 1장 (5장 동일)</text>
+<rect x="34" y="162" width="192" height="54" rx="4" fill="#fff" stroke="#6B7280" stroke-width="1"/>
+<text x="130" y="182" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">셀 1</text>
+<text x="130" y="202" font-size="11.5" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">검정→E+  빨강→A+  노랑→E−</text>
+<rect x="34" y="230" width="192" height="54" rx="4" fill="#fff" stroke="#6B7280" stroke-width="1"/>
+<text x="130" y="250" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">셀 2</text>
+<text x="130" y="270" font-size="11.5" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">검정→E+  빨강→A+  노랑→E−</text>
+<rect x="34" y="298" width="192" height="54" rx="4" fill="#fff" stroke="#6B7280" stroke-width="1"/>
+<text x="130" y="318" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">셀 3</text>
+<text x="130" y="338" font-size="11.5" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">검정→E−  빨강→A−  노랑→E+</text>
+<rect x="34" y="366" width="192" height="54" rx="4" fill="#fff" stroke="#6B7280" stroke-width="1"/>
+<text x="130" y="386" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="600" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">셀 4</text>
+<text x="130" y="406" font-size="11.5" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">검정→E−  빨강→A−  노랑→E+</text>
+<text x="130" y="436" font-size="11.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">각 셀 3선 (검정·빨강·노랑)</text>
+<rect x="330" y="130" width="150" height="82" rx="6" fill="#F6F8FA" stroke="#1F5FA8" stroke-width="1.4"/>
+<text x="405" y="150" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">HX711 · 좌하</text>
+<text x="405" y="168" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">E+ E− A+ A− ← 로드셀</text>
+<text x="405" y="183" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">VCC GND DT SCK → Pico</text>
+<text x="405" y="198" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">80SPS 개조 (RATE 15→16핀)</text>
+<rect x="330" y="222" width="150" height="82" rx="6" fill="#F6F8FA" stroke="#1F5FA8" stroke-width="1.4"/>
+<text x="405" y="242" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">HX711 · 좌상</text>
+<text x="405" y="260" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">E+ E− A+ A− ← 로드셀</text>
+<text x="405" y="275" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">VCC GND DT SCK → Pico</text>
+<text x="405" y="290" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">80SPS 개조 (RATE 15→16핀)</text>
+<rect x="330" y="314" width="150" height="82" rx="6" fill="#F6F8FA" stroke="#1F5FA8" stroke-width="1.4"/>
+<text x="405" y="334" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">HX711 · 중앙</text>
+<text x="405" y="352" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">E+ E− A+ A− ← 로드셀</text>
+<text x="405" y="367" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">VCC GND DT SCK → Pico</text>
+<text x="405" y="382" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">80SPS 개조 (RATE 15→16핀)</text>
+<rect x="330" y="406" width="150" height="82" rx="6" fill="#F6F8FA" stroke="#1F5FA8" stroke-width="1.4"/>
+<text x="405" y="426" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">HX711 · 우상</text>
+<text x="405" y="444" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">E+ E− A+ A− ← 로드셀</text>
+<text x="405" y="459" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">VCC GND DT SCK → Pico</text>
+<text x="405" y="474" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">80SPS 개조 (RATE 15→16핀)</text>
+<rect x="330" y="498" width="150" height="82" rx="6" fill="#F6F8FA" stroke="#1F5FA8" stroke-width="1.4"/>
+<text x="405" y="518" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">HX711 · 우하</text>
+<text x="405" y="536" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">E+ E− A+ A− ← 로드셀</text>
+<text x="405" y="551" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">VCC GND DT SCK → Pico</text>
+<text x="405" y="566" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">80SPS 개조 (RATE 15→16핀)</text>
+<polyline points="240,285 300,285 300,168 330,168" fill="none" stroke="#D9822B" stroke-width="2" stroke-linejoin="round" marker-end="url(#ah)"/>
+<text x="300" y="280" font-size="11" fill="#D9822B" text-anchor="end" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">4군데로</text>
+<text x="300" y="296" font-size="11" fill="#D9822B" text-anchor="end" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">묶어 납땜</text>
+<text x="405" y="590" font-size="11.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">(발판 5장 각각 위 ①→②를 반복)</text>
+<rect x="620" y="120" width="200" height="470" rx="6" fill="#F6F8FA" stroke="#1F5FA8" stroke-width="2"/>
+<text x="720" y="146" font-size="14" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">Raspberry Pi Pico H</text>
+<line x1="480" y1="160" x2="620" y2="160" stroke="#6B7280" stroke-width="1.4"/>
+<line x1="480" y1="176" x2="620" y2="176" stroke="#6B7280" stroke-width="1.4"/>
+<text x="552" y="156" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">DT→GP2</text>
+<text x="552" y="190" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">SCK→GP3</text>
+<line x1="480" y1="252" x2="620" y2="252" stroke="#6B7280" stroke-width="1.4"/>
+<line x1="480" y1="268" x2="620" y2="268" stroke="#6B7280" stroke-width="1.4"/>
+<text x="552" y="248" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">DT→GP4</text>
+<text x="552" y="282" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">SCK→GP5</text>
+<line x1="480" y1="344" x2="620" y2="344" stroke="#6B7280" stroke-width="1.4"/>
+<line x1="480" y1="360" x2="620" y2="360" stroke="#6B7280" stroke-width="1.4"/>
+<text x="552" y="340" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">DT→GP6</text>
+<text x="552" y="374" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">SCK→GP7</text>
+<line x1="480" y1="436" x2="620" y2="436" stroke="#6B7280" stroke-width="1.4"/>
+<line x1="480" y1="452" x2="620" y2="452" stroke="#6B7280" stroke-width="1.4"/>
+<text x="552" y="432" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">DT→GP8</text>
+<text x="552" y="466" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">SCK→GP9</text>
+<line x1="480" y1="528" x2="620" y2="528" stroke="#6B7280" stroke-width="1.4"/>
+<line x1="480" y1="544" x2="620" y2="544" stroke="#6B7280" stroke-width="1.4"/>
+<text x="552" y="524" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">DT→GP10</text>
+<text x="552" y="558" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">SCK→GP11</text>
+<text x="552" y="610" font-size="12" fill="#C0392B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">HX711 VCC → Pico 3V3(36번)  /  GND → GND(38번)   (5V 금지)</text>
+<line x1="820" y1="168" x2="950" y2="168" stroke="#D9822B" stroke-width="1.8" marker-end="url(#ah)"/>
+<text x="885" y="163" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">GP12</text>
+<line x1="820" y1="260" x2="950" y2="260" stroke="#D9822B" stroke-width="1.8" marker-end="url(#ah)"/>
+<text x="885" y="255" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">GP13</text>
+<line x1="820" y1="352" x2="950" y2="352" stroke="#D9822B" stroke-width="1.8" marker-end="url(#ah)"/>
+<text x="885" y="347" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">GP14</text>
+<line x1="820" y1="444" x2="950" y2="444" stroke="#D9822B" stroke-width="1.8" marker-end="url(#ah)"/>
+<text x="885" y="439" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">GP15</text>
+<line x1="820" y1="536" x2="950" y2="536" stroke="#D9822B" stroke-width="1.8" marker-end="url(#ah)"/>
+<text x="885" y="531" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">GP16</text>
+<rect x="950" y="120" width="160" height="470" rx="6" fill="#F6F8FA" stroke="#1F5FA8" stroke-width="2"/>
+<text x="1030" y="146" font-size="13" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">8채널 절연 모듈</text>
+<text x="1030" y="162" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">(3.3V 입력 → 24V NPN 출력)</text>
+<text x="1030" y="172" font-size="11" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">IN1 → OUT1  좌하</text>
+<text x="1030" y="264" font-size="11" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">IN2 → OUT2  좌상</text>
+<text x="1030" y="356" font-size="11" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">IN3 → OUT3  중앙</text>
+<text x="1030" y="448" font-size="11" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">IN4 → OUT4  우상</text>
+<text x="1030" y="540" font-size="11" fill="#1B2833" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">IN5 → OUT5  우하</text>
+<text x="1030" y="284" font-size="11" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">입력쪽 GND = Pico GND</text>
+<text x="1030" y="300" font-size="11" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">출력쪽(트랜지스터) = PLC</text>
+<text x="1030" y="316" font-size="11" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">두 쪽은 전기적으로 분리</text>
+<rect x="1260" y="120" width="220" height="470" rx="6" fill="#F6F8FA" stroke="#1F5FA8" stroke-width="2"/>
+<text x="1370" y="146" font-size="14" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">PLC 입력</text>
+<polyline points="1110,168 1260,168" fill="none" stroke="#D9822B" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#ah)"/>
+<text x="1185" y="163" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">→ X10</text>
+<text x="1300" y="172" font-size="11.5" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">X10  (좌하)</text>
+<polyline points="1110,260 1260,260" fill="none" stroke="#D9822B" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#ah)"/>
+<text x="1185" y="255" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">→ X11</text>
+<text x="1300" y="264" font-size="11.5" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">X11  (좌상)</text>
+<polyline points="1110,352 1260,352" fill="none" stroke="#D9822B" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#ah)"/>
+<text x="1185" y="347" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">→ X12</text>
+<text x="1300" y="356" font-size="11.5" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">X12  (중앙)</text>
+<polyline points="1110,444 1260,444" fill="none" stroke="#D9822B" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#ah)"/>
+<text x="1185" y="439" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">→ X13</text>
+<text x="1300" y="448" font-size="11.5" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">X13  (우상)</text>
+<polyline points="1110,536 1260,536" fill="none" stroke="#D9822B" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#ah)"/>
+<text x="1185" y="531" font-size="11" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">→ X14</text>
+<text x="1300" y="540" font-size="11.5" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">X14  (우하)</text>
+<rect x="1260" y="610" width="220" height="150" rx="4" fill="#fff" stroke="#6B7280" stroke-width="1"/>
+<text x="1370" y="632" font-size="12" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">PLC 단자 (입력 쪽)</text>
+<text x="1370" y="654" font-size="11.5" fill="#C0392B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">S/S ← 24V 단자 (서비스 전원)</text>
+<text x="1370" y="674" font-size="11.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">0V 단자 → 옵토 출력 공통(이미터)</text>
+<text x="1370" y="694" font-size="11.5" fill="#D9822B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">X 단자 ← 옵토 출력(컬렉터)</text>
+<text x="1370" y="714" font-size="11.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">AC L/N ← 차단기 ← 220V</text>
+<text x="1370" y="734" font-size="11" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">싱크 입력: 옵토가 X를 0V로 당기면 ON</text>
+<polyline points="1030,590 1030,685 1260,685" fill="none" stroke="#6B7280" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<text x="1145" y="678" font-size="10.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">0V 공통(이미터 쪽)</text>
+<rect x="600" y="640" width="240" height="90" rx="6" fill="#F6F8FA" stroke="#1B2833" stroke-width="1.6"/>
+<text x="720" y="670" font-size="14" fill="#1B2833" text-anchor="middle" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">Raspberry Pi 5</text>
+<text x="720" y="692" font-size="11.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">step-five (크롬) · 키보드로 인식</text>
+<text x="720" y="712" font-size="11.5" fill="#6B7280" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">넘패드 1·7·5·9·3 입력</text>
+<polyline points="720,590 720,640" fill="none" stroke="#3F9C6B" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#ah)"/>
+<text x="730" y="622" font-size="11.5" fill="#3F9C6B" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">USB (마이크로 B → 키보드 HID)</text>
+<rect x="20" y="780" width="1520" height="210" rx="6" fill="#fff" stroke="#6B7280" stroke-width="1"/>
+<text x="40" y="806" font-size="15" fill="#1B2833" text-anchor="start" font-weight="700" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">신호 흐름</text>
+<text x="40" y="832" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">1. 발판을 밟으면 로드셀이 휘어 HX711 입력(E+/E−/A+/A−)에 미세 전압 변화가 생김</text>
+<text x="40" y="856" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">2. HX711이 24비트 값으로 바꿔 DT/SCK로 Pico에 보냄 (80SPS 개조 시 약 12.5ms마다)</text>
+<text x="40" y="880" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">3. Pico가 영점 대비 T_ON 이상이면 '눌림'으로 판정 → 즉시 USB 키보드 키를 눌러 Pi 5에 전달</text>
+<text x="40" y="904" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">4. 같은 시점에 Pico가 해당 GPIO(GP12~GP16)를 켜서 절연 모듈 입력을 구동</text>
+<text x="40" y="928" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">5. 절연 모듈 출력이 PLC 입력 X10~X14를 0V로 끌어내려 PLC가 '입력 ON'으로 인식 (싱크 입력)</text>
+<text x="40" y="952" font-size="13" fill="#1B2833" text-anchor="start" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">6. 래더에서 이 X 신호를 읽어 조명 등을 제어 (여기서는 입력까지만, 조명 출력은 제외)</text>
+<text x="780" y="1010" font-size="12" fill="#C0392B" text-anchor="middle" font-weight="400" font-family="'IBM Plex Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif">Pico GND와 PLC 0V는 서로 연결하지 않습니다 (절연 모듈이 분리). 전원은 HX711만 Pico 3V3에서 받습니다.</text>
+</svg>
