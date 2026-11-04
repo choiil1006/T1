@@ -1043,7 +1043,7 @@ END</code></pre>
         <li>Arduino-Pico 코어에서 USB 스택을 Adafruit TinyUSB로 고릅니다.</li>
         <li>부팅 1초간 자동 영점, 빈 발판일 때만 영점을 천천히 따라갑니다.</li>
         <li>눌림은 평균 없이 첫 샘플에서 바로 판정하고, 뗌은 2샘플 연속 확인합니다.</li>
-        <li>시리얼: d = 원시값 출력, z = 영점, 바이트 0~15 = 점수 단계(하위 3비트)와 콤보(비트 3).</li>
+        <li>시리얼: d = 원시값 출력, z = 영점, r = 초당 샘플 수, 바이트 0~15 = 점수 단계(하위 3비트)와 콤보(비트 3).</li><li>ACTIVE 비트마스크로 연결한 발판만 읽습니다(1장 시험은 0b00001).</li>
         <li>T_ON, T_OFF는 시작값이라 실측으로 조정해야 합니다.</li>
       </ul>
     </div>
@@ -1077,12 +1077,16 @@ END</code></pre>
 //  - HX711은 RATE 핀을 80SPS로 개조한 상태를 가정합니다(안 하면 10SPS라 너무 느립니다).
 //  - 부팅 직후 약 1초 동안 영점을 잡으므로 발판 위에 아무것도 올리지 마세요.
 //  - T_ON, T_OFF는 시작값입니다. 'd'로 원시값을 보며 발판에 맞게 고치세요.
+//  - ACTIVE 비트마스크: 연결한 발판만 켭니다. 발판 1장만 시험할 때는 0b00001(좌하), 5장이 모두 연결되면 0b11111.
+//    (연결 안 된 채널은 읽지 않으므로 오입력이 생기지 않습니다.)
+//  - 'r'을 보내면 채널별 초당 샘플 수를 출력합니다. 80SPS 개조가 되어 있으면 약 80, 안 되어 있으면 약 10입니다.
 #include &lt;Adafruit_TinyUSB.h&gt;
 
 const uint8_t DT[5]  = {2, 4, 6, 8, 10};
 const uint8_t SCK_[5] = {3, 5, 7, 9, 11};
 const uint8_t MIR[5] = {12, 13, 14, 15, 16};      // → PLC X10~X14
 const uint8_t CMD[4] = {17, 18, 19, 20};          // → PLC X15, X16, X17, X0
+const uint8_t ACTIVE = 0b00001;                  // 비트 i = 발판 i 연결됨 (0 좌하, 1 좌상, 2 중앙, 3 우상, 4 우하)
 const uint8_t KEY[5] = {HID_KEY_KEYPAD_1, HID_KEY_KEYPAD_7, HID_KEY_KEYPAD_5, HID_KEY_KEYPAD_9, HID_KEY_KEYPAD_3};
 
 const int32_t T_ON  = 3000;   // 영점 대비 이만큼 커지면 눌림 (대략 2kg 수준, 실측 필요)
@@ -1097,6 +1101,8 @@ bool    down[5]    = {false, false, false, false, false};
 uint8_t lowCount[5] = {0, 0, 0, 0, 0};
 bool    dbg = false;
 int32_t lastRaw[5];
+uint32_t sampleCnt[5] = {0, 0, 0, 0, 0};
+uint32_t spsStart = 0;
 
 int32_t readHX(uint8_t dt, uint8_t sck) {
   uint32_t v = 0;
@@ -1122,6 +1128,7 @@ void sendReport() {
 
 void zeroAll() {
   for (uint8_t i = 0; i &lt; 5; i++) {
+    if (!((ACTIVE &gt;&gt; i) &amp; 1)) { baseV[i] = 0; continue; }
     int64_t sum = 0; uint8_t got = 0;
     uint32_t t0 = millis();
     while (got &lt; 16 &amp;&amp; millis() - t0 &lt; 1500) {
@@ -1134,7 +1141,7 @@ void zeroAll() {
 
 void setup() {
   for (uint8_t i = 0; i &lt; 5; i++) {
-    pinMode(DT[i], INPUT); pinMode(SCK_[i], OUTPUT); digitalWrite(SCK_[i], LOW);
+    pinMode(DT[i], INPUT_PULLUP); pinMode(SCK_[i], OUTPUT); digitalWrite(SCK_[i], LOW);
     pinMode(MIR[i], OUTPUT); digitalWrite(MIR[i], LOW);
   }
   for (uint8_t i = 0; i &lt; 4; i++) { pinMode(CMD[i], OUTPUT); digitalWrite(CMD[i], LOW); }
@@ -1150,9 +1157,10 @@ void setup() {
 void loop() {
   bool changed = false;
   for (uint8_t i = 0; i &lt; 5; i++) {
+    if (!((ACTIVE &gt;&gt; i) &amp; 1)) continue;                      // 연결 안 된 발판은 건너뜀
     if (digitalRead(DT[i]) != LOW) continue;                 // 아직 새 값 없음
     int32_t raw = readHX(DT[i], SCK_[i]);
-    lastRaw[i] = raw;
+    lastRaw[i] = raw; sampleCnt[i]++;
     int32_t d = raw - baseV[i];
     if (!down[i]) {
       if (d &gt;= T_ON) { down[i] = true; lowCount[i] = 0; changed = true; }   // 눌림: 첫 샘플에서 바로
@@ -1171,6 +1179,11 @@ void loop() {
     if (b &lt; 16) { for (uint8_t i = 0; i &lt; 4; i++) digitalWrite(CMD[i], (b &gt;&gt; i) &amp; 1 ? HIGH : LOW); }
     else if (b == 'd') dbg = !dbg;
     else if (b == 'z') zeroAll();
+    else if (b == 'r') {                                     // 초당 샘플 수
+      uint32_t dtms = millis() - spsStart; if (!dtms) dtms = 1;
+      for (uint8_t i = 0; i &lt; 5; i++) { Serial.print((sampleCnt[i] * 1000UL) / dtms); Serial.print(i &lt; 4 ? ',' : '\n'); sampleCnt[i] = 0; }
+      spsStart = millis();
+    }
   }
   static uint32_t lastPrint = 0;
   if (dbg &amp;&amp; millis() - lastPrint &gt; 50) {
