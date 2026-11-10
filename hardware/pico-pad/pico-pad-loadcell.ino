@@ -15,7 +15,8 @@
 //
 // 주의
 //  - HX711은 RATE 핀을 80SPS로 개조한 상태를 가정합니다(안 하면 10SPS라 너무 느립니다).
-//  - 부팅 직후 약 1초 동안 영점을 잡으므로 발판 위에 아무것도 올리지 마세요.
+//  - 값이 처음 들어올 때(부팅, 선 재연결, 'z') 샘플 16개로 영점을 잡습니다. 그동안 발판 위에 아무것도 올리지 마세요.
+//    (10SPS면 약 1.6초, 80SPS면 약 0.2초) 값이 1초 넘게 끊겼다가 다시 들어오면 영점을 자동으로 다시 잡습니다.
 //  - T_ON, T_OFF는 시작값입니다. 'd'로 원시값을 보며 발판에 맞게 고치세요.
 //  - ACTIVE 비트마스크: 연결한 발판만 켭니다. 발판 1장만 시험할 때는 0b00001(좌하), 5장이 모두 연결되면 0b11111.
 //    (연결 안 된 채널은 읽지 않으므로 오입력이 생기지 않습니다.)
@@ -75,17 +76,21 @@ void sendReport() {
   usb_hid.keyboardReport(0, 0, keys);
 }
 
+// 영점 잡기: 발판마다 처음 들어오는 16개 샘플의 평균을 영점으로 씁니다.
+// HX711이 늦게 깨어나거나 선을 다시 꽂아도, 값이 들어오기 시작할 때 자동으로 영점을 잡습니다.
+const uint8_t ZERO_N = 16;
+bool    zeroed[5] = {false, false, false, false, false};
+int64_t zSum[5];
+uint8_t zCnt[5];
+uint32_t lastSample[5] = {0, 0, 0, 0, 0};
+
 void zeroAll() {
   for (uint8_t i = 0; i < 5; i++) {
-    if (!((ACTIVE >> i) & 1)) { baseV[i] = 0; continue; }
-    int64_t sum = 0; uint8_t got = 0;
-    uint32_t t0 = millis();
-    while (got < 16 && millis() - t0 < 1500) {
-      if (digitalRead(DT[i]) == LOW) { sum += readPad(i); got++; }
-    }
-    baseV[i] = got ? (int32_t)(sum / got) : 0;
-    down[i] = false; lowCount[i] = 0;
+    zeroed[i] = false; zSum[i] = 0; zCnt[i] = 0;
+    if (down[i]) { down[i] = false; lowCount[i] = 0; }
   }
+  sendReport();
+  for (uint8_t i = 0; i < 5; i++) digitalWrite(MIR[i], LOW);
 }
 
 void setup() {
@@ -100,7 +105,7 @@ void setup() {
   usb_hid.begin();
   while (!TinyUSBDevice.mounted()) delay(1);
   delay(500);
-  zeroAll();
+  zeroAll();                                               // 실제 영점은 loop()에서 첫 샘플 16개로 잡힘
 }
 
 void loop() {
@@ -110,6 +115,15 @@ void loop() {
     if (digitalRead(DT[i]) != LOW) continue;                 // 아직 새 값 없음
     int32_t raw = readPad(i);
     lastRaw[i] = raw; sampleCnt[i]++;
+    uint32_t now = millis();
+    if (now - lastSample[i] > 1000) { zeroed[i] = false; zSum[i] = 0; zCnt[i] = 0; }   // 1초 이상 끊겼다가 다시 들어오면 영점 다시
+    lastSample[i] = now;
+    if (!zeroed[i]) {                                        // 영점 잡는 중: 판정하지 않음
+      if (down[i]) { down[i] = false; lowCount[i] = 0; changed = true; }
+      zSum[i] += raw;
+      if (++zCnt[i] >= ZERO_N) { baseV[i] = (int32_t)(zSum[i] / zCnt[i]); zeroed[i] = true; }
+      continue;
+    }
     int32_t d = raw - baseV[i];
     if (!down[i]) {
       if (d >= T_ON) { down[i] = true; lowCount[i] = 0; changed = true; }   // 눌림: 첫 샘플에서 바로
@@ -118,6 +132,9 @@ void loop() {
       if (d < T_OFF) { if (++lowCount[i] >= RELEASE_SAMPLES) { down[i] = false; changed = true; } }
       else lowCount[i] = 0;
     }
+  }
+  for (uint8_t i = 0; i < 5; i++) {                         // 선이 빠져서 값이 안 들어오면 키를 놓음
+    if (down[i] && millis() - lastSample[i] > 300) { down[i] = false; lowCount[i] = 0; changed = true; }
   }
   if (changed) {
     sendReport();
@@ -137,6 +154,6 @@ void loop() {
   static uint32_t lastPrint = 0;
   if (dbg && millis() - lastPrint > 50) {
     lastPrint = millis();
-    for (uint8_t i = 0; i < 5; i++) { Serial.print(lastRaw[i] - baseV[i]); Serial.print(i < 4 ? ',' : '\n'); }
+    for (uint8_t i = 0; i < 5; i++) { Serial.print(zeroed[i] ? lastRaw[i] - baseV[i] : 0); Serial.print(i < 4 ? ',' : '\n'); }
   }
 }
