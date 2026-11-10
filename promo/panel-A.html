@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1240px;height:1754px;overflow:hidden}
+body{font-family:'Gothic A1',sans-serif;word-break:keep-all}
+
+body{background:linear-gradient(180deg,#0b0420 0%,#1d0b45 38%,#4a0f6b 62%,#120424 100%);color:#f4ecff;position:relative}
+.stars{position:absolute;inset:0;background-image:radial-gradient(2px 2px at 10% 8%,#fff8,transparent),radial-gradient(2px 2px at 80% 12%,#fff9,transparent),radial-gradient(1.5px 1.5px at 60% 4%,#fff7,transparent),radial-gradient(1.5px 1.5px at 30% 18%,#fff6,transparent),radial-gradient(2px 2px at 92% 30%,#fff6,transparent),radial-gradient(1.5px 1.5px at 5% 32%,#fff6,transparent)}
+.sun{position:absolute;left:80px;top:420px;width:360px;height:360px;margin-left:0;border-radius:50%;
+ background:linear-gradient(180deg,#ffe36e 0%,#ff7ac6 55%,#b02cff 100%);opacity:.9;
+ -webkit-mask:linear-gradient(180deg,#000 0 52%,transparent 52% 55%,#000 55% 64%,transparent 64% 68%,#000 68% 76%,transparent 76% 81%,#000 81% 88%,transparent 88% 94%,#000 94%);
+ box-shadow:0 0 120px #ff4fd8}
+.floor{position:absolute;left:-30%;right:-30%;bottom:-120px;height:520px;transform:perspective(500px) rotateX(62deg);transform-origin:50% 100%;
+ background-image:linear-gradient(#ff3fd8 2px,transparent 2px),linear-gradient(90deg,#ff3fd8 2px,transparent 2px);background-size:80px 80px;opacity:.45;
+ -webkit-mask:linear-gradient(180deg,transparent,#000 40%)}
+.wrap{position:absolute;inset:0;padding:64px 70px}
+.top{display:flex;justify-content:space-between;align-items:center;font-family:Orbitron;letter-spacing:6px;font-size:22px;color:#7ff9ff;text-shadow:0 0 12px #2ef0ff}
+.title{margin:28px auto 0;height:180px;border:4px dashed #ff7ad9;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ color:#ffb8ee;font-family:'Black Han Sans';font-size:64px;text-shadow:0 0 18px #ff3fd8;box-shadow:0 0 30px #ff3fd855 inset;background:#0b0420cc}
+.title small{font-family:'Gothic A1';font-size:22px;color:#ffd6f4;margin-top:8px;text-shadow:none;letter-spacing:2px}
+.team{margin-top:26px;display:flex;align-items:center;gap:22px;justify-content:center}
+.team .name{font-family:'Black Han Sans';font-size:46px;color:#fff;text-shadow:0 0 14px #2ef0ff,0 0 30px #2ef0ff}
+.team .bar{width:3px;height:44px;background:#7ff9ff;box-shadow:0 0 10px #2ef0ff}
+.team .mem{font-size:32px;font-weight:700;color:#e7f9ff}
+.mid{display:flex;gap:34px;margin-top:28px;align-items:stretch;position:relative}
+.padbox{width:380px;height:380px;display:flex;align-items:center;justify-content:center;flex:none}
+.photo{flex:1;border:3px dashed #7ff9ff;border-radius:22px;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#bff8ff;font-size:28px;font-weight:700;background:#0b0a2a88;box-shadow:0 0 26px #2ef0ff55}
+.photo span{font-size:18px;font-weight:400;margin-top:8px;opacity:.8}
+.card{margin-top:22px;background:#140a33dd;border:2px solid #ff5fd8;border-radius:22px;padding:18px 30px;box-shadow:0 0 22px #ff3fd877,0 0 2px #fff inset}
+.card.c{border-color:#2ef0ff;box-shadow:0 0 22px #2ef0ff77}
+.h{display:flex;align-items:baseline;gap:16px;margin-bottom:12px}
+.h b{font-family:'Do Hyeon';font-weight:400;font-size:40px;color:#fff;text-shadow:0 0 10px #ff3fd8aa}
+.card.c .h b{text-shadow:0 0 10px #2ef0ffaa}
+.h i{font-family:Orbitron;font-style:normal;font-size:17px;letter-spacing:3px;color:#ff9be6}
+.card.c .h i{color:#8ff6ff}
+.li{display:flex;gap:14px;align-items:flex-start;font-size:22px;line-height:1.45;margin:3px 0}
+.dot{flex:none;width:12px;height:12px;margin-top:12px;border-radius:50%;background:#ff7ad9;box-shadow:0 0 10px #ff3fd8}
+.card.c .dot{background:#7ff9ff;box-shadow:0 0 10px #2ef0ff}
+.rev{display:flex;gap:22px}
+.rv{flex:1;font-size:17px;line-height:1.55;color:#f1e9ff}
+.rv b{display:block;font-size:22px;color:#ffe36e;margin-bottom:6px;text-shadow:0 0 10px #ffb800}
+</style></head><body><div class="stars"></div><div class="sun"></div><div class="floor"></div><div class="wrap">
+<div class="top"><span>TEAM T1</span><span>RHYTHM · LOAD CELL · PLC</span></div>
+<div class="title">작품 제목<small>TITLE AREA</small></div>
+<div class="team"><span class="name">조 이름 티원</span><span class="bar"></span><span class="mem">최원준 · 우성민</span></div>
+<div class="mid"><div class="padbox"><svg viewBox="-30 -30 420 420" width="360" height="360" style="overflow:visible" xmlns="http://www.w3.org/2000/svg"><defs><filter id="g" filterUnits="userSpaceOnUse" x="-40" y="-40" width="440" height="440"><feGaussianBlur stdDeviation="8.399999999999999" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect x="9.6" y="9.6" width="100.8" height="100.8" rx="12.096" fill="#ff4f6d" fill-opacity="0.15" stroke="#ff4f6d" stroke-width="6" filter="url(#g)"/><polygon points="38.6,38.6 48.2,80.3 57.9,70.7 73.9,86.7 86.7,73.9 70.7,57.9 80.3,48.2" fill="#ff4f6d" fill-opacity="0.9" stroke="#ff4f6d" stroke-width="4.199999999999999" stroke-linejoin="round" filter="url(#g)"/><rect x="249.6" y="9.6" width="100.8" height="100.8" rx="12.096" fill="#ff4f6d" fill-opacity="0.15" stroke="#ff4f6d" stroke-width="6" filter="url(#g)"/><polygon points="321.4,38.6 279.7,48.2 289.3,57.9 273.3,73.9 286.1,86.7 302.1,70.7 311.8,80.3" fill="#ff4f6d" fill-opacity="0.9" stroke="#ff4f6d" stroke-width="4.199999999999999" stroke-linejoin="round" filter="url(#g)"/><rect x="129.6" y="129.6" width="100.8" height="100.8" rx="12.096" fill="#ffe36e" fill-opacity="0.15" stroke="#ffe36e" stroke-width="6" filter="url(#g)"/><rect x="155.808" y="155.808" width="48.384" height="48.384" rx="6.048" fill="none" stroke="#ffe36e" stroke-width="6" filter="url(#g)"/><rect x="9.6" y="249.6" width="100.8" height="100.8" rx="12.096" fill="#2ef0ff" fill-opacity="0.15" stroke="#2ef0ff" stroke-width="6" filter="url(#g)"/><polygon points="38.6,321.4 80.3,311.8 70.7,302.1 86.7,286.1 73.9,273.3 57.9,289.3 48.2,279.7" fill="#2ef0ff" fill-opacity="0.9" stroke="#2ef0ff" stroke-width="4.199999999999999" stroke-linejoin="round" filter="url(#g)"/><rect x="249.6" y="249.6" width="100.8" height="100.8" rx="12.096" fill="#2ef0ff" fill-opacity="0.15" stroke="#2ef0ff" stroke-width="6" filter="url(#g)"/><polygon points="321.4,321.4 311.8,279.7 302.1,289.3 286.1,273.3 273.3,286.1 289.3,302.1 279.7,311.8" fill="#2ef0ff" fill-opacity="0.9" stroke="#2ef0ff" stroke-width="4.199999999999999" stroke-linejoin="round" filter="url(#g)"/></svg></div><div class="photo">사진 자리<span>완성품 또는 제작 과정 사진</span></div></div>
+<div class="card"><div class="h"><b>동작설명</b><i>OPERATION</i></div><div class="li"><span class="dot"></span><span>화면의 화살표가 판정선에 닿는 순간 해당 발판을 밟는다</span></div><div class="li"><span class="dot"></span><span>발판 아래 로드셀이 체중 변화를 감지해 게임에 입력된다</span></div><div class="li"><span class="dot"></span><span>판정과 콤보에 따라 발판 조명과 점수 램프가 켜진다</span></div></div>
+<div class="card c"><div class="h"><b>작동원리</b><i>PRINCIPLE</i></div><div class="li"><span class="dot"></span><span>발판마다 로드셀 4개와 HX711 모듈로 밟는 압력을 측정</span></div><div class="li"><span class="dot"></span><span>Raspberry Pi Pico가 눌림을 판정해 USB 키보드 신호로 게임에 입력</span></div><div class="li"><span class="dot"></span><span>Mitsubishi FX3U PLC로 발판 LED와 점수 램프를 제어</span></div><div class="li"><span class="dot"></span><span>알루미늄 프로파일 프레임과 PC 판으로 사람의 체중을 지지</span></div></div>
+<div class="card"><div class="h"><b>제작후기</b><i>REVIEW</i></div><div class="rev"><div class="rv"><b>최원준</b>처음 시도해보는 로드셀 제어를 이용한 프로젝트를 제작하면서 사람의 체중을 어떻게 안전하게 받을 수 있을지, 조그만 기판들을 어떻게 연결하여 입력과 출력을 전달할 수 있을지와 같은 난이도 있는 과제와 부딪혀 보면서 3학년의 마지막을 제대로 불태운 것 같아서 만족스럽습니다.</div><div class="rv"><b>우성민</b>게임 화면과 발판, PLC 조명이 하나의 신호로 이어지도록 맞춰 가는 과정이 생각보다 훨씬 까다로웠습니다. 값이 튈 때마다 선을 다시 잇고 숫자를 다시 읽던 시행착오 끝에, 처음으로 발판을 밟자 화면에 입력이 들어오고 불이 켜졌을 때의 짜릿함은 잊지 못할 것 같습니다. 친구와 끝까지 완성해 낸 이 작품이 고등학교 3년의 가장 큰 자랑으로 남을 것 같습니다.</div></div></div>
+</div></body></html>
