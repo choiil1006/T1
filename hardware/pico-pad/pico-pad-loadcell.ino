@@ -19,6 +19,7 @@
 //  - T_ON, T_OFF는 시작값입니다. 'd'로 원시값을 보며 발판에 맞게 고치세요.
 //  - ACTIVE 비트마스크: 연결한 발판만 켭니다. 발판 1장만 시험할 때는 0b00001(좌하), 5장이 모두 연결되면 0b11111.
 //    (연결 안 된 채널은 읽지 않으므로 오입력이 생기지 않습니다.)
+//  - INVERT: 눌렀을 때 값이 음수로 가는 발판은 해당 칸을 true로 바꾸면 됩니다.
 //  - 'r'을 보내면 채널별 초당 샘플 수를 출력합니다. 80SPS 개조가 되어 있으면 약 80, 안 되어 있으면 약 10입니다.
 #include <Adafruit_TinyUSB.h>
 
@@ -28,6 +29,9 @@ const uint8_t MIR[5] = {12, 13, 14, 15, 16};      // → PLC X10~X14
 const uint8_t CMD[4] = {17, 18, 19, 20};          // → PLC X15, X16, X17, X0
 const uint8_t ACTIVE = 0b00001;                  // 비트 i = 발판 i 연결됨 (0 좌하, 1 좌상, 2 중앙, 3 우상, 4 우하)
 const uint8_t KEY[5] = {HID_KEY_KEYPAD_1, HID_KEY_KEYPAD_7, HID_KEY_KEYPAD_5, HID_KEY_KEYPAD_9, HID_KEY_KEYPAD_3};
+
+// 눌렀을 때 'd' 값이 음수로 가는 발판은 true로 바꾸세요 (선을 바꾸지 않고 방향만 뒤집음)
+const bool    INVERT[5] = {false, false, false, false, false};   // 좌하, 좌상, 중앙, 우상, 우하
 
 const int32_t T_ON  = 3000;   // 영점 대비 이만큼 커지면 눌림 (대략 2kg 수준, 실측 필요)
 const int32_t T_OFF = 1500;   // 이 밑으로 2번 연속 내려오면 뗌
@@ -58,6 +62,11 @@ int32_t readHX(uint8_t dt, uint8_t sck) {
   return (int32_t)v;
 }
 
+int32_t readPad(uint8_t i) {
+  int32_t v = readHX(DT[i], SCK_[i]);
+  return INVERT[i] ? -v : v;
+}
+
 void sendReport() {
   uint8_t keys[6] = {0, 0, 0, 0, 0, 0};
   uint8_t n = 0;
@@ -72,7 +81,7 @@ void zeroAll() {
     int64_t sum = 0; uint8_t got = 0;
     uint32_t t0 = millis();
     while (got < 16 && millis() - t0 < 1500) {
-      if (digitalRead(DT[i]) == LOW) { sum += readHX(DT[i], SCK_[i]); got++; }
+      if (digitalRead(DT[i]) == LOW) { sum += readPad(i); got++; }
     }
     baseV[i] = got ? (int32_t)(sum / got) : 0;
     down[i] = false; lowCount[i] = 0;
@@ -99,7 +108,7 @@ void loop() {
   for (uint8_t i = 0; i < 5; i++) {
     if (!((ACTIVE >> i) & 1)) continue;                      // 연결 안 된 발판은 건너뜀
     if (digitalRead(DT[i]) != LOW) continue;                 // 아직 새 값 없음
-    int32_t raw = readHX(DT[i], SCK_[i]);
+    int32_t raw = readPad(i);
     lastRaw[i] = raw; sampleCnt[i]++;
     int32_t d = raw - baseV[i];
     if (!down[i]) {
