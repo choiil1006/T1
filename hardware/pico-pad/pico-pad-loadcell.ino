@@ -142,7 +142,7 @@ void loop() {
   }
   while (Serial.available()) {
     uint8_t b = Serial.read();
-    if (b < 16) { for (uint8_t i = 0; i < 4; i++) digitalWrite(CMD[i], (b >> i) & 1 ? HIGH : LOW); }
+    if (b < 16 || (b >= 0x80 && b <= 0x8F)) { for (uint8_t i = 0; i < 4; i++) digitalWrite(CMD[i], (b >> i) & 1 ? HIGH : LOW); }
     else if (b == 'd') dbg = !dbg;
     else if (b == 'z') zeroAll();
     else if (b == 'r') {                                     // 초당 샘플 수

@@ -1,5 +1,5 @@
 // PLC lights bridge. The browser cannot talk to the PLC directly, so it writes
-// ONE byte to the Pico over Web Serial; the Pico turns the bits into GPIO
+// ONE byte (0x80 | value) to the Pico over Web Serial; the Pico turns the bits into GPIO
 // outputs that reach the PLC inputs through an opto module:
 //   bits 0-2 (X15, X16, X17) = score level 0..5  (0 = D ... 5 = SS grade)
 //   bit  3   (X0)            = combo lamp on
@@ -47,7 +47,7 @@
         const b = pending; pending = null;
         if (b === lastByte) continue;
         lastByte = b;
-        await writer.write(new Uint8Array([b]));
+        await writer.write(new Uint8Array([0x80 | (b & 0x0F)]));   // high bit marks a light command (text commands stay free)
       }
     } catch (err) {
       connectionLost();
@@ -85,7 +85,7 @@
 
   async function disconnect() {
     if (writer) {
-      try { await writer.write(new Uint8Array([0])); } catch (e) { /* ignore */ }
+      try { await writer.write(new Uint8Array([0x80])); } catch (e) { /* ignore */ }
       try { writer.releaseLock(); } catch (e) { /* ignore */ }
     }
     if (port) { try { await port.close(); } catch (e) { /* ignore */ } }
