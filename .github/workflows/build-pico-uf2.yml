@@ -1,0 +1,39 @@
+name: Build Pico firmware (.uf2)
+
+# 발판용 Pico 펌웨어를 컴파일해서 .uf2 파일로 만듭니다.
+# 결과물: Actions 실행 화면 아래 Artifacts의 "pico-pad-run-uf2" (zip 안에 .uf2)
+on:
+  push:
+    paths:
+      - "hardware/pico-pad/pico-pad-run/**"
+      - ".github/workflows/build-pico-uf2.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: arduino/setup-arduino-cli@v2
+
+      - name: Install Raspberry Pi Pico core (Earle Philhower)
+        run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+          arduino-cli core update-index
+          arduino-cli core install rp2040:rp2040
+
+      - name: Compile pico-pad-run (USB stack = Adafruit TinyUSB)
+        run: |
+          arduino-cli compile \
+            --fqbn rp2040:rp2040:rpipico:usbstack=tinyusb \
+            --output-dir build \
+            hardware/pico-pad/pico-pad-run
+          ls -la build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pico-pad-run-uf2
+          path: build/*.uf2
+          if-no-files-found: error
