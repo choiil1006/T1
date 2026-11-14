@@ -51,10 +51,18 @@
     });
   }
 
+  // typing into the search box / BPM field must not double as pad input
+  function isTyping() {
+    const el = document.activeElement;
+    return !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
+  }
+
   function dispatchPress(lane) {
     if (state.listeningLane) return; // calibration handled by the raw key/gamepad handlers
     if (state.edRecording) { SF.editor.recordNote(lane); return; }
-    if (state.running && !state.paused) SF.game.handleHit(lane);
+    if (state.running) { if (!state.paused) SF.game.handleHit(lane); return; }
+    // outside a song the pad drives the menus (song select / result)
+    SF.ui.menuLane(lane);
   }
 
   function initKeyboard() {
@@ -67,6 +75,9 @@
       if (e.code === "Escape" && state.running) { SF.game.togglePause(); return; }
       const lane = laneForKeyCode(e.code);
       if (lane) {
+        if (!state.running && isTyping()) return;
+        // on menus, keep a mapped key (e.g. Space) from also "clicking" a focused button
+        if (!state.running) e.preventDefault();
         state.laneHeld[lane] = true;
         if (e.repeat) return; // OS auto-repeat while held — state already recorded, don't re-judge
         dispatchPress(lane);
@@ -141,5 +152,5 @@
     initPointerLanes();
   }
 
-  SF.input = { init, assignMapping, renderPadSlot, laneForKeyCode, laneForGamepadButton };
+  SF.input = { init, assignMapping, renderPadSlot, laneForKeyCode, laneForGamepadButton, isTyping };
 })();

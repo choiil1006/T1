@@ -1,24 +1,43 @@
-// Screen management + the setup screen: music upload, saved-song library,
-// BPM tap/auto-detect, difficulty, sync-offset calibration, and wiring the
+// Screen management + the song select screen (library list, search, random,
+// selected-song panel, difficulty, start), menu navigation from the pad or
+// keyboard, the settings screen's upload/sync controls, and wiring the
 // result/pause screens' buttons back into the game.
 (function () {
   "use strict";
 
   const state = SF.state;
+  const DIFFS = ["easy", "normal", "hard"];
+  let resultReadyAt = 0; // pad input on the result screen is ignored until this time
 
   function showScreen(name) {
-    Object.values(SF.screens).forEach((s) => s.classList.remove("active"));
-    SF.screens[name].classList.add("active");
+    const prev = document.body.dataset.screen;
+    Object.values(SF.screens).forEach((s) => s.classList.remove("active", "enter"));
+    const el = SF.screens[name];
+    el.classList.add("active");
+    if (prev !== name) { void el.offsetWidth; el.classList.add("enter"); }
     document.body.dataset.screen = name; // lets CSS show things on one screen only (see #bgLogo)
-    if (name === "setup") renderBestPopup(false); // a game may just have set a new record
+    if (name === "setup") {
+      renderBestPopup(false); // a game may just have set a new record
+      scrollActiveSongIntoView(false);
+    }
+    if (name === "result") resultReadyAt = performance.now() + 900;
   }
 
-  // the current song's name is shown in two places — the compact summary on
-  // the main screen, and the upload label inside the settings screen — so
-  // they're kept in sync from one place
+  // the current song's name is shown on the song select panel, in game, on
+  // the result screen and in the settings upload label — kept in one place
   function setCurrentSongDisplay(name) {
-    SF.$("fnameText").textContent = name || "아직 곡을 불러오지 않았어요 — 설정에서 불러오세요";
+    state.currentSongName = name || "";
+    const title = SF.$("fnameText");
+    title.textContent = name || "곡을 선택하세요";
+    title.classList.toggle("empty", !name);
     SF.$("fnameTextSettings").textContent = name || "MP3 / WAV 파일 선택…";
+  }
+
+  function setStartEnabled(enabled) {
+    const btn = SF.$("startBtn");
+    btn.disabled = !enabled;
+    btn.querySelector(".startMain").textContent = enabled ? "START" : "곡을 선택하세요";
+    SF.$("openEditorBtn").disabled = !enabled;
   }
 
   // in-page toast — window.alert()/confirm() are silently suppressed inside
@@ -62,9 +81,8 @@
     });
   }
 
-  // the small card under the song list: the selected song's best record on
-  // each difficulty, with the currently chosen difficulty highlighted.
-  // `pop` replays the pop-in animation (used when a song gets selected).
+  // the selected song's best record on each difficulty, with the currently
+  // chosen difficulty highlighted. `pop` replays the pop-in animation.
   async function renderBestPopup(pop) {
     const box = SF.$("bestPopup");
     if (!state.currentSongId) { box.style.display = "none"; return; }
@@ -75,9 +93,9 @@
     box.textContent = "";
     const title = document.createElement("div");
     title.className = "bpTitle";
-    title.textContent = "최고 기록";
+    title.textContent = "BEST RECORD";
     box.appendChild(title);
-    ["easy", "normal", "hard"].forEach((d) => {
+    DIFFS.forEach((d) => {
       const row = document.createElement("div");
       row.className = "bpRow" + (d === state.difficulty ? " active" : "");
       const label = document.createElement("span");
@@ -86,7 +104,7 @@
       const value = document.createElement("span");
       const rec = scores[d];
       value.textContent = rec
-        ? `${rec.grade} · ${rec.score.toLocaleString()}점 · ${rec.accuracy.toFixed(1)}%`
+        ? `${rec.grade} · ${rec.score.toLocaleString()} · ${rec.accuracy.toFixed(1)}%`
         : "기록 없음";
       if (!rec) value.className = "bpNone";
       row.append(label, value);
@@ -107,9 +125,7 @@
     state.audioURL = URL.createObjectURL(blob);
     state.onset = null; // a different song invalidates any cached onset envelope
     setCurrentSongDisplay(name);
-    SF.$("startBtn").disabled = false;
-    SF.$("startBtn").textContent = "게임 시작";
-    SF.$("openEditorBtn").disabled = false;
+    setStartEnabled(true);
 
     state.phaseOffsetMs = (meta && meta.phaseOffsetMs) || 0;
     SF.$("bpmInput").value = (meta && meta.bpm) || 120;
@@ -121,7 +137,7 @@
     if (!state.songAnalyzed) {
       runAutoAnalysis(); // never analyzed before — do it now instead of making the user press a button
     } else {
-      SF.$("tapHint").textContent = `저장된 BPM ${SF.$("bpmInput").value}을 사용합니다. 다르게 느껴지면 숫자를 직접 수정하세요.`;
+      SF.$("tapHint").textContent = "저장된 BPM";
     }
     renderBestPopup(true);
   }
@@ -161,8 +177,8 @@
         if (state.audioURL) URL.revokeObjectURL(state.audioURL);
         state.currentSongId = null; state.audioURL = null; state.audioFile = null;
         setCurrentSongDisplay(null);
-        SF.$("startBtn").disabled = true; SF.$("startBtn").textContent = "음악을 먼저 불러오세요";
-        SF.$("openEditorBtn").disabled = true;
+        setStartEnabled(false);
+        SF.$("tapHint").textContent = "";
       }
       showToast("곡을 삭제했습니다.");
       renderSongList();
@@ -172,13 +188,19 @@
     }
   }
 
-  // main screen: just a clickable name — click it to select that song
-  function buildCompactSongRow(entry) {
+  // song select: number + name, click (or pad) to select
+  function buildCompactSongRow(entry, i) {
     const row = document.createElement("div");
     row.className = "songRow songRow-compact" + (entry.id === state.currentSongId ? " active" : "");
+    row.dataset.id = entry.id;
     row.tabIndex = 0;
-    row.addEventListener("click", () => selectSong(entry.id));
+    row.addEventListener("click", () => { SF.sfx.unlock(); SF.sfx.playMenu("move"); selectSong(entry.id); });
     row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectSong(entry.id); } });
+
+    const no = document.createElement("span");
+    no.className = "songNo";
+    no.textContent = String(i + 1).padStart(2, "0");
+    row.appendChild(no);
 
     const nameWrap = document.createElement("div");
     nameWrap.className = "songName";
@@ -186,13 +208,6 @@
     nameSpan.textContent = entry.name;
     nameWrap.appendChild(nameSpan);
     row.appendChild(nameWrap);
-
-    if (entry.id === state.currentSongId) {
-      const tag = document.createElement("span");
-      tag.className = "songSelectedTag";
-      tag.textContent = "선택됨";
-      row.appendChild(tag);
-    }
     return row;
   }
 
@@ -271,9 +286,28 @@
     return q ? sorted.filter((s) => normalizeForSearch(s.name).includes(q)) : sorted;
   }
 
+  function scrollActiveSongIntoView(smooth) {
+    const row = document.querySelector("#songListContainer .songRow-compact.active");
+    if (row) row.scrollIntoView({ block: "center", behavior: smooth ? "smooth" : "auto" });
+  }
+
   function renderCompactList() {
     const container = SF.$("songListContainer");
     container.innerHTML = "";
+    SF.$("songCount").textContent = songIndexCache.length ? `${songIndexCache.length} SONGS` : "";
+    if (!songIndexCache.length) {
+      const empty = document.createElement("div");
+      empty.className = "songEmpty";
+      empty.textContent = "아직 저장된 곡이 없어요.";
+      const btn = document.createElement("button");
+      btn.className = "btn primary";
+      btn.textContent = "음악 불러오기";
+      btn.addEventListener("click", () => SF.$("audioFile").click());
+      empty.appendChild(document.createElement("br"));
+      empty.appendChild(btn);
+      container.appendChild(empty);
+      return;
+    }
     const visible = visibleSongs();
     if (!visible.length) {
       const empty = document.createElement("div");
@@ -282,7 +316,7 @@
       container.appendChild(empty);
       return;
     }
-    visible.forEach((entry) => container.appendChild(buildCompactSongRow(entry)));
+    visible.forEach((entry, i) => container.appendChild(buildCompactSongRow(entry, i)));
   }
 
   // picks among the songs currently listed (so with a search active it's a
@@ -294,10 +328,10 @@
     let pool = candidates.filter((s) => s.id !== state.currentSongId);
     if (!pool.length) pool = candidates;
     const pick = pool[Math.floor(Math.random() * pool.length)];
+    SF.sfx.playMenu("select");
     await selectSong(pick.id);
     showToast("랜덤 선택: " + pick.name);
-    const row = document.querySelector("#songListContainer .songRow-compact.active");
-    if (row) row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    scrollActiveSongIntoView(true);
   }
 
   function initSongTools() {
@@ -305,29 +339,116 @@
       songSearchQuery = e.target.value;
       renderCompactList();
     });
-    SF.$("randomSongBtn").addEventListener("click", pickRandomSong);
+    SF.$("randomSongBtn").addEventListener("click", () => { SF.sfx.unlock(); pickRandomSong(); });
   }
 
   async function renderSongList() {
     let index;
     try { index = await SF.storage.getSongIndex(); } catch (err) { index = []; }
     songIndexCache = index;
-    const card = SF.$("songListCard"), container = SF.$("songListContainer");
     const manageCard = SF.$("songManageCard"), manageContainer = SF.$("songManageContainer");
-    if (!index.length) {
-      card.style.display = "none"; container.innerHTML = "";
-      manageCard.style.display = "none"; manageContainer.innerHTML = "";
-      renderBestPopup(false);
-      return;
-    }
-    card.style.display = "block";
-    manageCard.style.display = "block";
 
     renderCompactList();
 
     manageContainer.innerHTML = "";
+    manageCard.style.display = index.length ? "block" : "none";
     index.slice().sort(compareSongs).forEach((entry) => manageContainer.appendChild(buildManageSongRow(entry)));
     renderBestPopup(false);
+  }
+
+  // ---- menu navigation (pad / keyboard) ----
+
+  // id we're moving to, so quick repeated presses step from the latest
+  // target instead of the song that's still loading
+  let navTargetId = null;
+
+  async function moveSong(delta) {
+    const list = visibleSongs();
+    if (!list.length) return;
+    const fromId = navTargetId || state.currentSongId;
+    let idx = list.findIndex((s) => s.id === fromId);
+    idx = idx < 0 ? (delta > 0 ? 0 : list.length - 1) : (idx + delta + list.length) % list.length;
+    const id = list[idx].id;
+    navTargetId = id;
+    SF.sfx.playMenu("move");
+    await selectSong(id);
+    if (navTargetId === id) navTargetId = null;
+    scrollActiveSongIntoView(true);
+  }
+
+  function setDifficulty(d) {
+    if (!DIFFS.includes(d)) return;
+    state.difficulty = d;
+    document.querySelectorAll(".diffBtn").forEach((b) => b.classList.toggle("sel", b.dataset.diff === d));
+    SF.storage.persistGlobalSettings();
+    renderBestPopup(false);
+  }
+
+  function stepDifficulty(delta) {
+    const i = DIFFS.indexOf(state.difficulty);
+    const next = Math.max(0, Math.min(DIFFS.length - 1, i + delta));
+    if (next === i) return;
+    SF.sfx.playMenu("diff");
+    setDifficulty(DIFFS[next]);
+  }
+
+  function startSelected() {
+    if (SF.$("startBtn").disabled) return;
+    SF.sfx.unlock();
+    SF.sfx.playMenu("select");
+    SF.game.startGame();
+  }
+
+  function backToSelect() {
+    SF.sfx.playMenu("back");
+    showScreen("setup");
+  }
+
+  function retry() {
+    SF.sfx.playMenu("select");
+    SF.game.startGame();
+  }
+
+  // a pad press while no song is running: arcade-style menu controls
+  //   song select:  ↙ previous song  ↘ next song  ↖ easier  ↗ harder  ⊙ start
+  //   result:       ⊙ back to song select  ↗ play again
+  function menuLane(lane) {
+    SF.sfx.unlock();
+    const screen = document.body.dataset.screen;
+    if (screen === "setup") {
+      if (lane === "DL") moveSong(-1);
+      else if (lane === "DR") moveSong(1);
+      else if (lane === "UL") stepDifficulty(-1);
+      else if (lane === "UR") stepDifficulty(1);
+      else if (lane === "CN") startSelected();
+    } else if (screen === "result") {
+      if (performance.now() < resultReadyAt) return;
+      if (lane === "CN") backToSelect();
+      else if (lane === "UR") retry();
+    }
+  }
+
+  // arrow keys / Enter / Esc mirror the pad on menus (mapped lane keys are
+  // already handled through menuLane, so they're skipped here)
+  function initMenuKeys() {
+    window.addEventListener("keydown", (e) => {
+      if (state.running || state.listeningLane || SF.input.isTyping()) return;
+      if (SF.input.laneForKeyCode(e.code)) return;
+      const screen = document.body.dataset.screen;
+      const onControl = document.activeElement && document.activeElement !== document.body;
+      if (screen === "setup") {
+        if (e.key === "ArrowUp") { e.preventDefault(); moveSong(-1); }
+        else if (e.key === "ArrowDown") { e.preventDefault(); moveSong(1); }
+        else if (e.key === "ArrowLeft") { e.preventDefault(); stepDifficulty(-1); }
+        else if (e.key === "ArrowRight") { e.preventDefault(); stepDifficulty(1); }
+        else if (e.key === "Enter" && !onControl) { e.preventDefault(); startSelected(); }
+      } else if (screen === "result") {
+        if (performance.now() < resultReadyAt) return;
+        if (e.key === "Enter" && !onControl) { e.preventDefault(); backToSelect(); }
+      } else if (screen === "settings" && e.key === "Escape") {
+        backToSelect();
+      }
+    });
   }
 
   function initMusicUpload() {
@@ -342,9 +463,7 @@
       state.onset = null;
       state.songAnalyzed = false;
       setCurrentSongDisplay(f.name);
-      SF.$("startBtn").disabled = false;
-      SF.$("startBtn").textContent = "게임 시작";
-      SF.$("openEditorBtn").disabled = false;
+      setStartEnabled(true);
       // a freshly uploaded song starts with no custom chart of its own
       state.useCustomChart = false;
       state.customChart = null;
@@ -352,33 +471,40 @@
       const id = await SF.storage.addSongToLibrary(f);
       state.currentSongId = id;
       await SF.storage.persistSongMeta();
-      renderSongList();
+      await renderSongList();
       renderBestPopup(true);
       runAutoAnalysis(); // new song, never analyzed — measure its BPM automatically
+      e.target.value = "";
     });
   }
 
   // runs the moment a song becomes current and hasn't been analyzed before —
-  // there are no TAP/analyze buttons to press, this just happens on its own
+  // there are no TAP/analyze buttons to press, this just happens on its own.
+  // If another song gets selected while it's still working, the result is
+  // dropped rather than written onto the wrong song.
   async function runAutoAnalysis() {
     if (!state.audioFile) return;
-    SF.$("tapHint").textContent = "곡을 분석해서 BPM을 자동으로 측정하는 중입니다…";
+    const songId = state.currentSongId, file = state.audioFile;
+    SF.$("tapHint").textContent = "BPM 분석 중…";
     try {
-      const { bpm, phaseMs, onset } = await SF.audioAnalysis.analyzeBPM(state.audioFile);
+      const { bpm, phaseMs, onset } = await SF.audioAnalysis.analyzeBPM(file);
+      if (state.currentSongId !== songId) return;
       SF.$("bpmInput").value = bpm;
       state.phaseOffsetMs = phaseMs;
       state.onset = onset;
       state.songAnalyzed = true;
-      SF.$("tapHint").textContent = `자동 측정 완료: BPM ${bpm} (첫 박 위치 보정, 채보에도 비트 강도가 반영됩니다). 다르게 느껴지면 숫자를 직접 수정하세요.`;
+      SF.$("tapHint").textContent = "자동 측정됨";
       SF.storage.persistSongMeta();
     } catch (err) {
-      SF.$("tapHint").textContent = "자동 분석에 실패했습니다. 숫자를 직접 입력해 BPM을 맞춰주세요.";
+      if (state.currentSongId !== songId) return;
+      SF.$("tapHint").textContent = "자동 분석 실패 — 직접 입력하세요";
     }
   }
 
   function initTempoControls() {
     SF.$("bpmInput").addEventListener("change", () => {
       state.songAnalyzed = true; // a manual correction counts as "settled" — don't overwrite it later
+      SF.$("tapHint").textContent = "직접 입력함";
       SF.storage.persistSongMeta();
     });
   }
@@ -387,11 +513,9 @@
     SF.$("diffGrid").addEventListener("click", (e) => {
       const el = e.target.closest(".diffBtn");
       if (!el) return;
-      document.querySelectorAll(".diffBtn").forEach((b) => b.classList.remove("sel"));
-      el.classList.add("sel");
-      state.difficulty = el.dataset.diff;
-      SF.storage.persistGlobalSettings();
-      renderBestPopup(false);
+      SF.sfx.unlock();
+      if (el.dataset.diff !== state.difficulty) SF.sfx.playMenu("diff");
+      setDifficulty(el.dataset.diff);
     });
   }
 
@@ -413,11 +537,12 @@
   }
 
   function initStartAndResultButtons() {
-    SF.$("startBtn").addEventListener("click", () => { SF.sfx.unlock(); SF.game.startGame(); });
+    SF.$("startBtn").addEventListener("click", startSelected);
     SF.$("resumeBtn").addEventListener("click", SF.game.togglePause);
+    SF.$("pauseBtn").addEventListener("click", () => { if (state.running) SF.game.togglePause(); });
     SF.$("quitBtn").addEventListener("click", SF.game.quit);
-    SF.$("retryBtn").addEventListener("click", SF.game.startGame);
-    SF.$("backBtn").addEventListener("click", () => showScreen("setup"));
+    SF.$("retryBtn").addEventListener("click", retry);
+    SF.$("backBtn").addEventListener("click", backToSelect);
   }
 
   async function restoreFromStorage() {
@@ -449,14 +574,14 @@
         let lastId = null;
         try { lastId = await SF.storage.idbGet("lastSelectedId"); } catch (e) { /* ignore */ }
         const target = index.find((s) => s.id === lastId) || index.slice().sort((a, b) => b.addedAt - a.addedAt)[0];
-        if (target) await selectSong(target.id);
+        if (target) { await selectSong(target.id); scrollActiveSongIntoView(false); }
       }
     } catch (err) { /* ignore */ }
   }
 
   function initSettingsScreen() {
-    SF.$("openSettingsBtn").addEventListener("click", () => showScreen("settings"));
-    SF.$("settingsBackBtn").addEventListener("click", () => showScreen("setup"));
+    SF.$("openSettingsBtn").addEventListener("click", () => { SF.sfx.unlock(); SF.sfx.playMenu("select"); showScreen("settings"); });
+    SF.$("settingsBackBtn").addEventListener("click", backToSelect);
   }
 
   function init() {
@@ -466,6 +591,8 @@
     SF.screens.result = SF.$("resultScreen");
     SF.screens.editor = SF.$("editorScreen");
 
+    setCurrentSongDisplay(null);
+    setStartEnabled(false);
     initMusicUpload();
     initSongTools();
     initTempoControls();
@@ -473,7 +600,8 @@
     initSyncOffset();
     initSettingsScreen();
     initStartAndResultButtons();
+    initMenuKeys();
   }
 
-  SF.ui = { init, showScreen, renderSongList, selectSong, restoreFromStorage, showToast, wireDangerButton };
+  SF.ui = { init, showScreen, renderSongList, selectSong, restoreFromStorage, showToast, wireDangerButton, menuLane };
 })();

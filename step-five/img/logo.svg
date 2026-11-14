@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 8 200 204">
+  <g transform="rotate(-31 100 110)">
+    <!-- green swoosh ring (upper): outer ellipse minus an offset inner one, so it thins on one side -->
+    <path fill="#1f9a4b" fill-rule="evenodd" d="
+      M 4 98 a 96 46 0 1 0 192 0 a 96 46 0 1 0 -192 0 Z
+      M 22 104 a 81 34 0 1 0 162 0 a 81 34 0 1 0 -162 0 Z"/>
+    <!-- red swoosh ring (lower), thinning on the opposite side -->
+    <path fill="#e2242f" fill-rule="evenodd" d="
+      M 4 124 a 96 46 0 1 0 192 0 a 96 46 0 1 0 -192 0 Z
+      M 16 118 a 81 34 0 1 0 162 0 a 81 34 0 1 0 -162 0 Z"/>
+  </g>
+  <!-- blue badge with the white "e" -->
+  <g transform="translate(90 114) scale(0.82) translate(-94 -112)">
+    <circle cx="94" cy="112" r="21" fill="#1662a6"/>
+    <path fill="#fff" d="
+      M 104.5 114 L 85.6 114 C 86.3 119.2 90 122.4 95 122.4 C 98.4 122.4 101 121.1 103.1 118.7 L 106.6 121.5
+      C 103.6 125 99.7 126.8 94.8 126.8 C 86.5 126.8 80.6 120.7 80.6 112.3 C 80.6 103.9 86.6 97.6 94.6 97.6
+      C 102.6 97.6 108.2 103.6 108.2 111.6 C 108.2 112.4 108.2 113.2 108.1 114 Z
+      M 85.8 109.9 L 103.1 109.9 C 102.4 105 99.1 101.9 94.6 101.9 C 90.1 101.9 86.6 105 85.8 109.9 Z"/>
+  </g>
+</svg>

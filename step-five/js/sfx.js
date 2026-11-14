@@ -47,9 +47,28 @@
     blip({ freq: 1500, duration: 0.04, type: "square", gain: 0.08 });
   }
 
+  function later(ms, fn) { setTimeout(fn, ms); }
+
+  // menu sounds: moving through songs, switching difficulty, confirming,
+  // going back, and the combo-milestone fanfare in game
+  const MENU_SFX = {
+    move:   () => blip({ freq: 880,  duration: 0.045, type: "triangle", gain: 0.09 }),
+    diff:   () => blip({ freq: 1320, duration: 0.05,  type: "square",   gain: 0.05 }),
+    select: () => { blip({ freq: 660, duration: 0.07, type: "square", gain: 0.06 });
+                    later(70, () => blip({ freq: 1320, duration: 0.14, type: "square", gain: 0.06 })); },
+    back:   () => blip({ freq: 620,  duration: 0.12, type: "triangle", gain: 0.09, slideTo: 360 }),
+    milestone: () => [784, 988, 1175, 1568].forEach((f, i) =>
+                    later(i * 55, () => blip({ freq: f, duration: 0.12, type: "triangle", gain: 0.08 }))),
+  };
+
+  function playMenu(kind) {
+    const fn = MENU_SFX[kind];
+    if (fn) fn();
+  }
+
   function setEnabled(v) { enabled = !!v; }
   function isEnabled() { return enabled; }
   function unlock() { ensureCtx(); } // call from a user gesture to satisfy autoplay policies
 
-  SF.sfx = { playJudge, playEditorTick, setEnabled, isEnabled, unlock };
+  SF.sfx = { playJudge, playEditorTick, playMenu, setEnabled, isEnabled, unlock };
 })();

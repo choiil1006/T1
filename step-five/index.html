@@ -4,146 +4,185 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>STEP FIVE — 펌프 리듬게임</title>
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-screen="setup">
-<div id="bgGlow"></div>
+<div id="bgBase"></div>
 <div id="bgLogo"></div>
+<div id="bgScan"></div>
 <div id="toastStack"></div>
 <div id="app">
 
-  <!-- ============ SETUP SCREEN ============ -->
+  <!-- ============ SETUP (SONG SELECT) SCREEN ============ -->
   <div class="screen active" id="setupScreen">
-    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:36px 0 4px;">
-      <h1 class="logo" style="margin:0;">STEP FIVE</h1>
-      <button class="btn small" id="openSettingsBtn">⚙ 설정</button>
-    </div>
-    <div class="tagline">발판으로 즐기는 5패널 리듬게임</div>
-
-    <div class="card">
-      <h2><span class="num">♪</span>현재 곡</h2>
-      <div class="fname" id="fnameText" style="color:var(--sub);font-size:14px;">아직 곡을 불러오지 않았어요 — 설정에서 불러오세요</div>
-    </div>
-
-    <div class="card" id="songListCard" style="display:none;">
-      <h2><span class="num">♪</span>저장된 곡</h2>
-      <div class="songTools">
-        <input type="search" id="songSearch" placeholder="곡 검색" autocomplete="off" spellcheck="false">
-        <button class="btn small" id="randomSongBtn">랜덤 선택</button>
+    <header class="topBar">
+      <div class="brand">
+        <img src="img/logo.svg" alt="" class="brandMark">
+        <div class="brandText">
+          <h1 class="wordmark">STEP <span>FIVE</span></h1>
+          <div class="tagline">5-PANEL RHYTHM ACTION</div>
+        </div>
       </div>
-      <div id="songListContainer"></div>
-    </div>
+      <button class="btn ghost" id="openSettingsBtn"><span class="ico">⚙</span>설정</button>
+    </header>
 
-    <div id="bestPopup"></div>
+    <main class="selectLayout">
+      <!-- left: song list -->
+      <section class="cut panel songPanel" id="songListCard">
+        <div class="panelHead">
+          <span class="panelTag">SONG SELECT</span>
+          <span class="panelCount" id="songCount"></span>
+        </div>
+        <div class="songTools">
+          <input type="search" id="songSearch" placeholder="곡 검색" autocomplete="off" spellcheck="false">
+          <button class="btn small" id="randomSongBtn">🎲 랜덤</button>
+        </div>
+        <div id="songListContainer"></div>
+      </section>
 
-    <div class="card">
-      <h2><span class="num">1</span>템포 (BPM)</h2>
-      <div class="bpmRow">
-        <input type="number" id="bpmInput" value="120" min="40" max="300">
-      </div>
-      <div id="tapHint">곡을 선택하면 파일 분석으로 BPM이 자동으로 측정됩니다. 추정치이니 다르게 느껴지면 숫자를 직접 수정하세요. 자동 분석 시 채보도 실제 비트 강도에 맞춰 생성됩니다.</div>
-    </div>
+      <!-- right: selected song info + start -->
+      <section class="cut panel infoPanel">
+        <div class="panelHead"><span class="panelTag">NOW SELECTED</span></div>
+        <div class="songTitle" id="fnameText">곡을 선택하세요</div>
+        <div class="metaRow">
+          <label class="chip bpmChip">BPM <input type="number" id="bpmInput" value="120" min="40" max="300"></label>
+          <span class="metaStatus" id="tapHint"></span>
+        </div>
 
-    <div class="card">
-      <h2><span class="num">2</span>난이도</h2>
-      <div class="diffGrid" id="diffGrid">
-        <div class="diffBtn" data-diff="easy"><b>EASY</b><span>느리게, 넓은 판정</span></div>
-        <div class="diffBtn sel" data-diff="normal"><b>NORMAL</b><span>기본 템포</span></div>
-        <div class="diffBtn" data-diff="hard"><b>HARD</b><span>노말과 동일한 채보, 판정만 엄격</span></div>
-      </div>
-    </div>
+        <div class="diffGrid" id="diffGrid">
+          <button class="diffBtn" data-diff="easy"><b>EASY</b><span>넓은 판정</span></button>
+          <button class="diffBtn sel" data-diff="normal"><b>NORMAL</b><span>기본</span></button>
+          <button class="diffBtn" data-diff="hard"><b>HARD</b><span>엄격한 판정</span></button>
+        </div>
 
-    <div class="card">
-      <h2><span class="num">3</span>동기화 보정</h2>
-      <div class="offsetRow">
-        <button class="btn" id="offsetMinus">−10</button>
-        <input type="number" id="offsetInput" value="0" min="-300" max="300" step="10">
-        <span class="unit">ms</span>
-        <button class="btn" id="offsetPlus">+10</button>
-      </div>
-      <div id="offsetHint">노트가 계속 늦게(빠르게) 맞는 것처럼 느껴지면 조절하세요. 소리가 늦게 들리는 스피커/블루투스 환경이면 양수로, 반대면 음수로 설정합니다.</div>
-    </div>
+        <div id="bestPopup"></div>
 
-    <button class="btn primary" id="startBtn" disabled style="width:min(560px,92vw);">음악을 먼저 불러오세요</button>
+        <button class="btn startBtn" id="startBtn" disabled>
+          <span class="startMain">곡을 선택하세요</span>
+          <span class="startSub">⊙ 가운데 발판</span>
+        </button>
+      </section>
+    </main>
+
+    <footer class="padLegend" aria-label="발판 조작">
+      <span><i class="pk pk-dl"></i>이전 곡</span>
+      <span><i class="pk pk-dr"></i>다음 곡</span>
+      <span><i class="pk pk-ul"></i>쉽게</span>
+      <span><i class="pk pk-ur"></i>어렵게</span>
+      <span><i class="pk pk-cn"></i>시작</span>
+    </footer>
   </div>
 
   <!-- ============ SETTINGS SCREEN ============ -->
   <div class="screen" id="settingsScreen">
-    <div style="width:min(560px,92vw);display:flex;align-items:center;gap:14px;margin:30px 0 6px;">
-      <button class="btn small" id="settingsBackBtn">← 나가기</button>
-      <h1 class="logo" style="margin:0;font-size:26px;">설정</h1>
-    </div>
+    <header class="topBar narrow">
+      <button class="btn ghost" id="settingsBackBtn">← 돌아가기</button>
+      <h1 class="screenTitle">SETTINGS</h1>
+      <span></span>
+    </header>
 
-    <div class="card">
-      <h2><span class="num">1</span>음악 불러오기</h2>
-      <label id="fileLabel">
-        <span class="fname" id="fnameTextSettings">MP3 / WAV 파일 선택…</span>
-        <span class="btn small">파일 선택</span>
-        <input type="file" id="audioFile" accept="audio/*" style="display:none">
-      </label>
-      <div style="font-size:12px;color:var(--sub);margin-top:8px;">
-        불러온 곡은 이 브라우저에 자동으로 저장돼서, 메인 화면의 저장된 곡 목록에서 다시 선택할 수 있어요.
-      </div>
-    </div>
+    <div class="settingsBody">
+      <section class="cut panel card">
+        <div class="panelHead"><span class="panelTag">MUSIC</span><span class="panelSub">음악 불러오기</span></div>
+        <label id="fileLabel">
+          <span class="fname" id="fnameTextSettings">MP3 / WAV 파일 선택…</span>
+          <span class="btn small">파일 선택</span>
+          <input type="file" id="audioFile" accept="audio/*" style="display:none">
+        </label>
+        <p class="hint">불러온 곡은 이 브라우저에 저장되어 곡 선택 화면에 나타납니다.</p>
+      </section>
 
-    <div class="card" id="songManageCard" style="display:none;">
-      <h2><span class="num">2</span>저장된 곡 관리</h2>
-      <div id="songManageContainer"></div>
-    </div>
+      <section class="cut panel card" id="songManageCard" style="display:none;">
+        <div class="panelHead"><span class="panelTag">LIBRARY</span><span class="panelSub">저장된 곡 관리</span></div>
+        <div id="songManageContainer"></div>
+      </section>
 
-    <div class="card">
-      <h2><span class="num">3</span>발판 / 키 설정</h2>
-      <div class="padGrid" id="padGrid">
-        <div class="padSlot" data-lane="DL"><div class="lbl">DOWN-LEFT</div><div class="key">Num1</div></div>
-        <div class="padSlot" data-lane="UL"><div class="lbl">UP-LEFT</div><div class="key">Num7</div></div>
-        <div class="padSlot" data-lane="CN"><div class="lbl">CENTER</div><div class="key">Num5</div></div>
-        <div class="padSlot" data-lane="UR"><div class="lbl">UP-RIGHT</div><div class="key">Num9</div></div>
-        <div class="padSlot" data-lane="DR"><div class="lbl">DOWN-RIGHT</div><div class="key">Num3</div></div>
-      </div>
-      <div id="padStatus">각 칸을 클릭한 뒤, 해당 발판을 밟거나 키를 누르면 자동 등록됩니다. (게임패드로 연결된 발판 자동 인식, 화면의 레인을 직접 클릭/터치해도 플레이할 수 있어요)</div>
-    </div>
+      <section class="cut panel card">
+        <div class="panelHead"><span class="panelTag">CONTROLS</span><span class="panelSub">발판 / 키 설정</span></div>
+        <div class="padGrid" id="padGrid">
+          <div class="padSlot" data-lane="DL"><div class="lbl">DOWN-LEFT</div><div class="key">Num1</div></div>
+          <div class="padSlot" data-lane="UL"><div class="lbl">UP-LEFT</div><div class="key">Num7</div></div>
+          <div class="padSlot" data-lane="CN"><div class="lbl">CENTER</div><div class="key">Num5</div></div>
+          <div class="padSlot" data-lane="UR"><div class="lbl">UP-RIGHT</div><div class="key">Num9</div></div>
+          <div class="padSlot" data-lane="DR"><div class="lbl">DOWN-RIGHT</div><div class="key">Num3</div></div>
+        </div>
+        <div id="padStatus">칸을 누른 뒤 발판을 밟거나 키를 누르면 등록됩니다.</div>
+      </section>
 
-    <div class="card" style="margin-bottom:40px;">
-      <h2><span class="num">4</span>패턴 에디터</h2>
-      <button class="btn" id="openEditorBtn" disabled style="width:100%;">패턴 에디터 열기</button>
+      <section class="cut panel card">
+        <div class="panelHead"><span class="panelTag">SYNC</span><span class="panelSub">동기화 보정</span></div>
+        <div class="offsetRow">
+          <button class="btn" id="offsetMinus">−10</button>
+          <input type="number" id="offsetInput" value="0" min="-300" max="300" step="10">
+          <span class="unit">ms</span>
+          <button class="btn" id="offsetPlus">+10</button>
+        </div>
+        <p class="hint">노트가 늘 늦게 맞는 것 같으면 +, 빠르게 맞는 것 같으면 − 로 조절하세요.</p>
+      </section>
+
+      <section class="cut panel card">
+        <div class="panelHead"><span class="panelTag">EDITOR</span><span class="panelSub">패턴 에디터</span></div>
+        <button class="btn" id="openEditorBtn" disabled style="width:100%;">패턴 에디터 열기</button>
+      </section>
     </div>
   </div>
 
   <!-- ============ GAME SCREEN ============ -->
   <div class="screen" id="gameScreen">
-    <div id="hud">
-      <div class="block">
-        <div class="label">SCORE</div>
-        <div class="value" id="scoreVal">0</div>
-      </div>
-      <div class="block right">
-        <div class="label">ACCURACY</div>
-        <div class="value" id="accVal">100%</div>
-      </div>
-    </div>
-    <div id="comboWrap"><div id="comboNum">0</div><div id="comboLbl">COMBO</div></div>
+    <div id="gBeat"></div>
+    <div class="gStage">
+      <aside class="gSide gLeft">
+        <div class="cut panel gCard">
+          <div class="panelTag">NOW PLAYING</div>
+          <div class="gTitle" id="gSongTitle">-</div>
+          <div class="gMeta"><span class="diffBadge" id="gDiff">NORMAL</span><span class="gBpm" id="gBpm">BPM 120</span></div>
+          <div class="gProgress"><div class="gProgressFill" id="gProgress"></div></div>
+          <div class="gTime"><span id="gTimeNow">0:00</span><span id="gTimeTotal">0:00</span></div>
+        </div>
+      </aside>
 
-    <div id="arena">
-      <div id="lanes">
-        <div class="lane" data-lane="DL"><div class="judgeLine"></div><div class="receptor"></div></div>
-        <div class="lane" data-lane="UL"><div class="judgeLine"></div><div class="receptor"></div></div>
-        <div class="lane" data-lane="CN"><div class="judgeLine"></div><div class="receptor"></div></div>
-        <div class="lane" data-lane="UR"><div class="judgeLine"></div><div class="receptor"></div></div>
-        <div class="lane" data-lane="DR"><div class="judgeLine"></div><div class="receptor"></div></div>
-      </div>
-      <div id="judgeText"></div>
-      <div id="countdown"></div>
-      <div id="pauseOverlay">
-        <div style="font-family:'Orbitron';font-size:28px;letter-spacing:3px;">PAUSED</div>
-        <div class="row">
-          <button class="btn primary" id="resumeBtn">계속하기</button>
-          <button class="btn" id="quitBtn">그만두기</button>
+      <div id="arena">
+        <div id="comboWrap"><div id="comboNum">0</div><div id="comboLbl">COMBO</div></div>
+        <div id="lanes">
+          <div class="lane" data-lane="DL"><div class="judgeLine"></div><div class="receptor"></div></div>
+          <div class="lane" data-lane="UL"><div class="judgeLine"></div><div class="receptor"></div></div>
+          <div class="lane" data-lane="CN"><div class="judgeLine"></div><div class="receptor"></div></div>
+          <div class="lane" data-lane="UR"><div class="judgeLine"></div><div class="receptor"></div></div>
+          <div class="lane" data-lane="DR"><div class="judgeLine"></div><div class="receptor"></div></div>
+        </div>
+        <div id="judgeText"></div>
+        <div id="milestone"></div>
+        <div id="countdown"></div>
+        <div id="pauseOverlay">
+          <div class="pauseTitle">PAUSED</div>
+          <div class="row">
+            <button class="btn primary" id="resumeBtn">계속하기</button>
+            <button class="btn" id="quitBtn">그만두기</button>
+          </div>
         </div>
       </div>
+
+      <aside class="gSide gRight">
+        <div class="cut panel gCard">
+          <div class="panelTag">SCORE</div>
+          <div class="gScore" id="scoreVal">0</div>
+          <div class="gAccRow"><span>ACCURACY</span><b id="accVal">100.0%</b></div>
+          <div class="gCounts">
+            <div class="gc j-perfect"><span>PERFECT</span><b id="gcPerfect">0</b></div>
+            <div class="gc j-great"><span>GREAT</span><b id="gcGreat">0</b></div>
+            <div class="gc j-good"><span>GOOD</span><b id="gcGood">0</b></div>
+            <div class="gc j-bad"><span>BAD</span><b id="gcBad">0</b></div>
+            <div class="gc j-miss"><span>MISS</span><b id="gcMiss">0</b></div>
+          </div>
+          <div class="gGradeRow"><span>예상 등급</span><b id="gGrade">-</b></div>
+        </div>
+      </aside>
     </div>
+    <button class="btn pauseBtn" id="pauseBtn" aria-label="일시정지">❚❚</button>
   </div>
 
   <!-- ============ PATTERN EDITOR SCREEN ============ -->
@@ -151,7 +190,7 @@
     <div id="editorTop">
       <button class="btn small" id="edBackBtn">← 나가기</button>
       <div class="grp">BPM
-        <input type="number" id="edBpmInput" value="120" min="40" max="300" style="width:70px;background:var(--bg2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:5px;font-family:'JetBrains Mono';">
+        <input type="number" id="edBpmInput" value="120" min="40" max="300">
       </div>
       <div class="grp">그리드
         <select id="edGridSelect">
@@ -171,7 +210,7 @@
       <button class="btn small" id="edPlayBtn">▶ 재생</button>
       <span id="editTimeVal">0.00s</span>
       <button class="btn small" id="recBtn">● REC</button>
-      <span style="font-size:12px;color:var(--sub);">REC 중 발판/키 입력 시 현재 위치에 노트 기록</span>
+      <span class="edHint">REC 중 발판/키 입력 시 현재 위치에 노트 기록</span>
     </div>
     <div id="editorBody">
       <div id="editorRuler"></div>
@@ -197,26 +236,45 @@
 
   <!-- ============ RESULT SCREEN ============ -->
   <div class="screen" id="resultScreen">
-    <h1 class="logo" style="margin-top:60px;">RESULT</h1>
-    <div class="card" id="resultCard">
-      <div class="gradeLetter" id="gradeLetter">S</div>
-      <div id="newRecordBadge">NEW RECORD</div>
-      <div class="statGrid">
-        <div class="stat"><div class="l">SCORE</div><div class="v" id="rScore">0</div></div>
-        <div class="stat"><div class="l">MAX COMBO</div><div class="v" id="rCombo">0</div></div>
-        <div class="stat"><div class="l">ACCURACY</div><div class="v" id="rAcc">0%</div></div>
-        <div class="stat"><div class="l">DIFFICULTY</div><div class="v" id="rDiff">-</div></div>
+    <div class="rWrap">
+      <div class="rHead">
+        <div class="screenTitle">RESULT</div>
+        <div class="rSong"><span id="rSongTitle">-</span><span class="diffBadge" id="rDiff">-</span></div>
       </div>
-      <div class="judgeBreak"><span style="color:var(--cn)">PERFECT</span><span id="bPerfect">0</span></div>
-      <div class="judgeBreak"><span style="color:var(--good)">GREAT</span><span id="bGreat">0</span></div>
-      <div class="judgeBreak"><span style="color:#8fb4ff">GOOD</span><span id="bGood">0</span></div>
-      <div class="judgeBreak"><span style="color:#c98fff">BAD</span><span id="bBad">0</span></div>
-      <div class="judgeBreak"><span style="color:var(--warn)">MISS</span><span id="bMiss">0</span></div>
-      <div class="judgeBreak"><span style="color:var(--sub)">EMPTY PRESS</span><span id="bEmpty">0</span></div>
-      <div class="row" style="margin-top:20px;justify-content:center;">
+
+      <div class="rMain">
+        <div class="cut panel rGradeBox">
+          <div class="panelTag">GRADE</div>
+          <div class="gradeLetter" id="gradeLetter">S</div>
+          <div id="newRecordBadge">NEW RECORD</div>
+        </div>
+
+        <div class="cut panel rStats">
+          <div class="panelTag">SCORE</div>
+          <div class="rScore" id="rScore">0</div>
+          <div class="rSubStats">
+            <div><span>ACCURACY</span><b id="rAcc">0%</b></div>
+            <div><span>MAX COMBO</span><b id="rCombo">0</b></div>
+          </div>
+          <div class="rBars">
+            <div class="rBar j-perfect"><span>PERFECT</span><i><em></em></i><b id="bPerfect">0</b></div>
+            <div class="rBar j-great"><span>GREAT</span><i><em></em></i><b id="bGreat">0</b></div>
+            <div class="rBar j-good"><span>GOOD</span><i><em></em></i><b id="bGood">0</b></div>
+            <div class="rBar j-bad"><span>BAD</span><i><em></em></i><b id="bBad">0</b></div>
+            <div class="rBar j-miss"><span>MISS</span><i><em></em></i><b id="bMiss">0</b></div>
+          </div>
+          <div class="rEmpty">빈 발판 누름 <b id="bEmpty">0</b></div>
+        </div>
+      </div>
+
+      <div class="rBtns">
         <button class="btn primary" id="retryBtn">다시 플레이</button>
-        <button class="btn" id="backBtn">곡 다시 선택</button>
+        <button class="btn" id="backBtn">곡 선택으로</button>
       </div>
+      <footer class="padLegend">
+        <span><i class="pk pk-cn"></i>곡 선택</span>
+        <span><i class="pk pk-ur"></i>다시 플레이</span>
+      </footer>
     </div>
   </div>
 

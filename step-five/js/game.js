@@ -15,16 +15,51 @@
     });
   }
 
+  // ---- side-panel / effects state ----
+  let shownScore = 0;        // the rolling number on screen, easing toward state.score
+  let durationSec = 0;       // song length, for the progress bar
+  let countdownToken = 0;    // bumps on quit so a pending countdown never starts the song
+  let finished = false;      // finishGame runs once per play
+  const MILESTONE_EVERY = 50;
+  const hud = {};            // last values written, so the per-frame HUD skips no-op DOM writes
+
+  function fmtTime(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
+  }
+
+  function setText(id, value) {
+    if (hud[id] === value) return;
+    hud[id] = value;
+    SF.$(id).textContent = value;
+  }
+
   function startGame() {
     const bpm = Math.max(40, Math.min(300, parseInt(SF.$("bpmInput").value, 10) || 120));
     state.bpm = bpm;
 
     if (state.audioEl) { state.audioEl.pause(); state.audioEl = null; }
+    countdownToken++;
+    state.running = false;
+    finished = false;
     state.audioEl = new Audio(state.audioURL);
     state.audioEl.preload = "auto";
 
+    // left panel: what's playing
+    const diffLabel = SF.DIFF[state.difficulty].label;
+    SF.$("gSongTitle").textContent = state.currentSongName || "-";
+    SF.$("gDiff").textContent = diffLabel;
+    SF.$("gDiff").dataset.diff = state.difficulty;
+    SF.$("gBpm").textContent = "BPM " + bpm;
+    SF.$("gProgress").style.width = "0%";
+    SF.$("gTimeNow").textContent = "0:00";
+    SF.$("gTimeTotal").textContent = "-:--";
+    durationSec = 0;
+
     state.audioEl.addEventListener("loadedmetadata", () => {
       const dur = isFinite(state.audioEl.duration) ? state.audioEl.duration : 180;
+      durationSec = dur;
+      SF.$("gTimeTotal").textContent = fmtTime(dur);
       if (state.useCustomChart && state.customChart && state.customChart.length) {
         state.notes = state.customChart.map((n) => ({
           time: n.time, lane: n.lane, hold: false, holdEnd: null, hit: false, judged: false, el: null, tailEl: null, holdState: null,
@@ -43,22 +78,41 @@
     state.counts = { perfect: 0, great: 0, good: 0, bad: 0, miss: 0, empty: 0 };
     state.totalJudged = 0;
     state.paused = false;
-    document.querySelectorAll(".note").forEach((n) => n.remove());
-    document.querySelectorAll(".holdTail").forEach((n) => n.remove());
+    SF.$("pauseOverlay").style.display = "none";
+    clearPlayfield();
+    shownScore = 0;
+    for (const k in hud) delete hud[k];
+    SF.$("milestone").classList.remove("show");
+    SF.$("gameScreen").style.setProperty("--beat", 0);
+    SF.$("gameScreen").style.setProperty("--heat", 0);
 
     updateHUD();
     SF.ui.showScreen("game");
   }
 
+  function clearPlayfield() {
+    document.querySelectorAll("#lanes .note, #lanes .holdTail, #lanes .hitBeam, #lanes .hitRing").forEach((n) => n.remove());
+    document.querySelectorAll("#lanes .lane.missFlash").forEach((l) => l.classList.remove("missFlash"));
+  }
+
+  function showCountdown(cd, text) {
+    cd.textContent = text;
+    cd.classList.remove("tick");
+    void cd.offsetWidth;
+    cd.classList.add("tick");
+  }
+
   function beginCountdown() {
     const cd = SF.$("countdown");
+    const token = countdownToken;
     cd.style.display = "flex";
     let n = 3;
-    cd.textContent = n;
+    showCountdown(cd, n);
     const iv = setInterval(() => {
+      if (token !== countdownToken) { clearInterval(iv); cd.style.display = "none"; return; }
       n--;
-      if (n > 0) { cd.textContent = n; }
-      else if (n === 0) { cd.textContent = "GO!"; }
+      if (n > 0) { showCountdown(cd, n); }
+      else if (n === 0) { showCountdown(cd, "GO!"); }
       else {
         clearInterval(iv);
         cd.style.display = "none";
@@ -82,6 +136,20 @@
       const diff = SF.DIFF[state.difficulty];
       const approach = diff.approach;
       const missWindow = diff.windows.bad;
+
+      // beat pulse (1 on the beat, decaying to 0 before the next) and combo
+      // "heat" drive the background glow, lane glow and judge line via CSS vars
+      const beatMs = 60000 / state.bpm;
+      const frac = ((((now - state.phaseOffsetMs) % beatMs) + beatMs) % beatMs) / beatMs;
+      const gs = SF.$("gameScreen");
+      gs.style.setProperty("--beat", Math.pow(1 - frac, 3).toFixed(3));
+      gs.style.setProperty("--heat", Math.min(1, state.combo / 100).toFixed(2));
+
+      if (durationSec > 0) {
+        const t = state.audioEl.currentTime;
+        SF.$("gProgress").style.width = Math.min(100, t / durationSec * 100).toFixed(2) + "%";
+        setText("gTimeNow", fmtTime(t));
+      }
 
       for (const note of state.notes) {
         if (note.judged) continue;
@@ -308,6 +376,9 @@
     syncScore();
     SF.sfx.playJudge(grade);
     popJudgeText(grade);
+    if (grade === "miss") missFlash(lane); else hitFx(lane, grade);
+    bumpCombo();
+    if (grade !== "miss" && state.combo % MILESTONE_EVERY === 0) showMilestone(state.combo);
     updateHUD();
   }
 
@@ -318,7 +389,52 @@
     syncScore();
     SF.sfx.playJudge("miss"); // shown the same as a miss — it's an incorrect press either way
     popJudgeText("miss");
+    missFlash(lane);
     updateHUD();
+  }
+
+  // a light beam up the lane plus a diamond ring bursting off the receptor
+  function hitFx(lane, grade) {
+    const laneEl = laneEls[lane];
+    if (!laneEl) return;
+    const perfect = grade === "perfect";
+    const beam = document.createElement("div");
+    beam.className = "hitBeam" + (perfect ? " perfect" : "");
+    const ring = document.createElement("div");
+    ring.className = "hitRing" + (perfect ? " perfect" : "");
+    laneEl.insertBefore(beam, laneEl.firstChild); // under the notes
+    laneEl.appendChild(ring);
+    // timer rather than animationend: that never fires when animations are
+    // off (reduced motion, background tab) and the elements would pile up
+    setTimeout(() => { beam.remove(); ring.remove(); }, 380);
+  }
+
+  function missFlash(lane) {
+    const laneEl = laneEls[lane];
+    if (!laneEl) return;
+    laneEl.classList.remove("missFlash");
+    void laneEl.offsetWidth;
+    laneEl.classList.add("missFlash");
+    clearTimeout(laneEl._missTimer);
+    laneEl._missTimer = setTimeout(() => laneEl.classList.remove("missFlash"), 320);
+  }
+
+  function bumpCombo() {
+    const wrap = SF.$("comboWrap");
+    wrap.classList.toggle("zero", state.combo < 2);
+    if (state.combo < 2) return;
+    wrap.classList.remove("bump");
+    void wrap.offsetWidth;
+    wrap.classList.add("bump");
+  }
+
+  function showMilestone(combo) {
+    const m = SF.$("milestone");
+    m.textContent = combo + " COMBO!";
+    m.classList.remove("show");
+    void m.offsetWidth;
+    m.classList.add("show");
+    SF.sfx.playMenu("milestone");
   }
 
   function popJudgeText(grade) {
@@ -335,10 +451,23 @@
       : 100;
   }
 
+  // called every frame while playing and after every judgement: the score
+  // rolls toward its real value instead of jumping
   function updateHUD() {
-    SF.$("scoreVal").textContent = state.score;
-    SF.$("comboNum").textContent = state.combo;
-    SF.$("accVal").textContent = computeAccuracy(state.counts, state.totalJudged).toFixed(1) + "%";
+    const gap = state.score - shownScore;
+    shownScore = Math.abs(gap) < 2 ? state.score : shownScore + gap * 0.22;
+    setText("scoreVal", Math.round(shownScore).toLocaleString());
+    setText("comboNum", String(state.combo));
+    SF.$("comboWrap").classList.toggle("zero", state.combo < 2);
+    const acc = computeAccuracy(state.counts, state.totalJudged);
+    setText("accVal", acc.toFixed(1) + "%");
+    const c = state.counts;
+    setText("gcPerfect", String(c.perfect));
+    setText("gcGreat", String(c.great));
+    setText("gcGood", String(c.good));
+    setText("gcBad", String(c.bad));
+    setText("gcMiss", String(c.miss + c.empty));
+    setText("gGrade", state.totalJudged + c.empty > 0 ? gradeFor(acc) : "-");
   }
 
   function togglePause() {
@@ -349,10 +478,11 @@
 
   function quit() {
     state.running = false;
+    countdownToken++;
     if (state.audioEl) state.audioEl.pause();
     SF.$("pauseOverlay").style.display = "none";
-    document.querySelectorAll(".note").forEach((n) => n.remove());
-    document.querySelectorAll(".holdTail").forEach((n) => n.remove());
+    clearPlayfield();
+    SF.sfx.playMenu("back");
     SF.ui.showScreen("setup");
   }
 
@@ -362,22 +492,27 @@
   }
 
   async function finishGame() {
+    if (finished) return;
+    finished = true;
     state.running = false;
-    document.querySelectorAll(".note").forEach((n) => n.remove());
-    document.querySelectorAll(".holdTail").forEach((n) => n.remove());
+    clearPlayfield();
     const c = state.counts;
     const acc = computeAccuracy(c, state.totalJudged);
     const grade = gradeFor(acc);
 
-    SF.$("rScore").textContent = state.score;
+    SF.$("rSongTitle").textContent = state.currentSongName || "-";
+    SF.$("rDiff").textContent = SF.DIFF[state.difficulty].label;
+    SF.$("rDiff").dataset.diff = state.difficulty;
+    SF.$("rScore").textContent = "0";
     SF.$("rCombo").textContent = state.maxCombo;
     SF.$("rAcc").textContent = acc.toFixed(1) + "%";
-    SF.$("rDiff").textContent = SF.DIFF[state.difficulty].label;
-    SF.$("bPerfect").textContent = c.perfect;
-    SF.$("bGreat").textContent = c.great;
-    SF.$("bGood").textContent = c.good;
-    SF.$("bBad").textContent = c.bad;
-    SF.$("bMiss").textContent = c.miss;
+    const bars = { perfect: "bPerfect", great: "bGreat", good: "bGood", bad: "bBad", miss: "bMiss" };
+    const total = Math.max(1, c.perfect + c.great + c.good + c.bad + c.miss);
+    Object.entries(bars).forEach(([k, id]) => {
+      const b = SF.$(id);
+      b.textContent = c[k];
+      b.parentElement.querySelector("em").style.width = "0%";
+    });
     SF.$("bEmpty").textContent = c.empty;
     SF.$("gradeLetter").textContent = grade;
 
@@ -387,10 +522,37 @@
       const { isNewBest } = await SF.storage.reportScore(state.currentSongId, state.difficulty, {
         score: state.score, maxCombo: state.maxCombo, accuracy: acc, grade, at: Date.now(),
       });
-      if (isNewBest) badge.style.display = "block";
+      if (isNewBest) badge.style.display = "inline-block";
     } catch (err) { /* scoreboard is a bonus, never block the result screen on it */ }
 
+    // staged reveal: bars grow and the score counts up, then the grade
+    // stamps in (CSS delays on #resultScreen.reveal)
+    const rs = SF.$("resultScreen");
+    rs.classList.remove("reveal");
     SF.ui.showScreen("result");
+    void rs.offsetWidth;
+    rs.classList.add("reveal");
+    setTimeout(() => {
+      Object.entries(bars).forEach(([k, id]) => {
+        SF.$(id).parentElement.querySelector("em").style.width = (c[k] / total * 100).toFixed(1) + "%";
+      });
+    }, 60);
+    countUp(SF.$("rScore"), state.score, 1000);
+  }
+
+  function countUp(el, target, ms) {
+    const t0 = performance.now();
+    let done = false;
+    const step = (t) => {
+      if (done) return;
+      const p = Math.min(1, (t - t0) / ms);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased).toLocaleString();
+      if (p < 1) requestAnimationFrame(step); else done = true;
+    };
+    requestAnimationFrame(step);
+    // guarantees the final number even if frames aren't being drawn
+    setTimeout(() => { done = true; el.textContent = target.toLocaleString(); }, ms + 80);
   }
 
   SF.game = { cacheLaneEls, startGame, handleHit, togglePause, quit, finishGame };

@@ -4,7 +4,7 @@
 
   SF.state = {
     audioURL: null, audioFile: null, audioEl: null, bpm: 120, difficulty: "normal",
-    phaseOffsetMs: 0, currentSongId: null,
+    phaseOffsetMs: 0, currentSongId: null, currentSongName: "",
     songAnalyzed: false, // has automatic BPM/onset analysis already run for the current song?
 
     // signed ms: how far the perceived beat lags the audio element's reported
