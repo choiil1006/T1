@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STEP FIVE Tests</title>
+<style>
+  :root{color-scheme:dark;}
+  body{margin:0;padding:20px 16px 40px;background:#0b0b14;color:#e8e8f0;font:14px/1.5 ui-monospace,Consolas,monospace;}
+  h1{font-size:18px;margin:0 0 4px;}
+  .sub{color:#8a8aa0;margin-bottom:14px;}
+  button{font:inherit;padding:8px 16px;background:#ffd542;color:#0b0b14;border:0;font-weight:700;cursor:pointer;}
+  #summary{margin:14px 0;font-weight:700;font-size:16px;}
+  #summary.ok{color:#39ff8a;} #summary.bad{color:#ff5a5a;}
+  .row{padding:3px 0;border-bottom:1px solid #1d1d2c;word-break:break-word;}
+  .pass{color:#39ff8a;} .fail{color:#ff5a5a;} .skip{color:#e0b34a;}
+  .group{margin-top:16px;color:#8fb4ff;font-weight:700;}
+  iframe{width:100%;max-width:960px;height:540px;border:1px solid #2a2a3c;margin-top:18px;background:#000;}
+</style>
+</head>
+<body>
+<h1>STEP FIVE — 자동 테스트</h1>
+<div class="sub">채보 규칙 · 음원 분석 · 재생 시계 · 실제 게임 자동 플레이. 게임 코드를 고친 뒤 이 페이지를 열면 모두 다시 확인합니다.</div>
+<button id="runBtn">다시 실행</button>
+<div id="summary">실행 중…</div>
+<div id="out"></div>
+<iframe id="game" title="game under test"></iframe>
+
+<script src="js/constants.js"></script>
+<script src="js/state.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/audio-analysis.js"></script>
+<script src="js/player.js"></script>
+<script src="js/chart-generator.js"></script>
+<script src="tests/tests.js"></script>
+</body>
+</html>

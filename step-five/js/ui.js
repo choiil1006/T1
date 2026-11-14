@@ -123,7 +123,6 @@
     state.currentSongId = id;
     state.audioFile = blob;
     state.audioURL = URL.createObjectURL(blob);
-    state.onset = null; // a different song invalidates any cached onset envelope
     setCurrentSongDisplay(name);
     setStartEnabled(true);
 
@@ -460,7 +459,6 @@
       state.audioURL = URL.createObjectURL(f);
       state.audioFile = f;
       state.phaseOffsetMs = 0;
-      state.onset = null;
       state.songAnalyzed = false;
       setCurrentSongDisplay(f.name);
       setStartEnabled(true);
@@ -487,11 +485,10 @@
     const songId = state.currentSongId, file = state.audioFile;
     SF.$("tapHint").textContent = "BPM 분석 중…";
     try {
-      const { bpm, phaseMs, onset } = await SF.audioAnalysis.analyzeBPM(file);
+      const { bpm, phaseMs } = await SF.audioAnalysis.analyzeBPM(file);
       if (state.currentSongId !== songId) return;
       SF.$("bpmInput").value = bpm;
       state.phaseOffsetMs = phaseMs;
-      state.onset = onset;
       state.songAnalyzed = true;
       SF.$("tapHint").textContent = "자동 측정됨";
       SF.storage.persistSongMeta();
@@ -547,6 +544,11 @@
 
   async function restoreFromStorage() {
     await SF.storage.migrateLegacySingleSong();
+    try {
+      if (await SF.storage.resetScoresIfChartChanged()) {
+        showToast("채보 생성 방식이 바뀌어 기존 최고기록을 초기화했습니다.", { duration: 5000 });
+      }
+    } catch (err) { /* ignore */ }
 
     try {
       const settings = await SF.storage.loadGlobalSettings();

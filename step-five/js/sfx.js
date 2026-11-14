@@ -70,5 +70,12 @@
   function isEnabled() { return enabled; }
   function unlock() { ensureCtx(); } // call from a user gesture to satisfy autoplay policies
 
-  SF.sfx = { playJudge, playEditorTick, playMenu, setEnabled, isEnabled, unlock };
+  // any key/tap/click resumes a suspended context, so a session started
+  // from a gamepad-only press still gets sound once anything is touched
+  ["pointerdown", "keydown"].forEach((ev) =>
+    window.addEventListener(ev, () => { if (ctx && ctx.state === "suspended") ctx.resume(); }, true));
+
+  // the song player (player.js) shares this context, so music and hit
+  // sounds run on one clock and one output
+  SF.sfx = { playJudge, playEditorTick, playMenu, setEnabled, isEnabled, unlock, context: ensureCtx };
 })();

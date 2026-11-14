@@ -50,6 +50,10 @@
   }
 
   async function addSongToLibrary(file) {
+    // ask the browser not to evict the library when disk runs low (granted
+    // silently in Chromium for sites in use; asked here, on a user action,
+    // so browsers that prompt don't do it on page load)
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* ignore */ }
     const id = "s" + Date.now() + Math.random().toString(36).slice(2, 7);
     try {
       await idbSet("song:" + id, { blob: file, name: file.name });
@@ -115,6 +119,20 @@
     return { isNewBest, best: scores[difficulty] };
   }
 
+  // records are only comparable on the same chart: when the generator's
+  // output changes (SF.CHART_VERSION), every stored best is cleared once.
+  // Returns true if any records were actually deleted.
+  async function resetScoresIfChartChanged() {
+    const stored = await idbGet("chartVersion");
+    if (stored === SF.CHART_VERSION) return false;
+    let cleared = false;
+    for (const s of await getSongIndex()) {
+      if (await idbGet("scores:" + s.id)) { await idbDelete("scores:" + s.id); cleared = true; }
+    }
+    await idbSet("chartVersion", SF.CHART_VERSION);
+    return cleared;
+  }
+
   async function migrateLegacySingleSong() {
     // migrate the old single-song scheme (from an earlier version) into the library, once
     try {
@@ -142,7 +160,7 @@
     getSongIndex, setSongIndex, addSongToLibrary,
     persistGlobalSettings, loadGlobalSettings,
     persistSongMeta, getSongMeta, deleteSongRecord,
-    getHighScores, reportScore,
+    getHighScores, reportScore, resetScoresIfChartChanged,
     migrateLegacySingleSong,
   };
 })();

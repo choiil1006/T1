@@ -251,14 +251,21 @@ p.hint{font-size:12px;color:var(--sub);margin:10px 0 0;line-height:1.6;}
 .diffBadge[data-diff="hard"]{--dc:var(--hard);}
 
 /* ---------- gameplay screen ---------- */
-#gameScreen{justify-content:center;overflow:hidden;--beat:0;--heat:0;}
-/* a glow behind the lanes that kicks on every beat and grows with combo */
-#gBeat{position:absolute;inset:0;pointer-events:none;z-index:0;
+#gameScreen{justify-content:center;overflow:hidden;--beatDur:500ms;--beatDelay:0ms;}
+/* a glow behind the lanes that kicks on every beat and grows with combo.
+   The pulse is a CSS animation exactly one beat long, started in phase with
+   the song by game.js (setBeat) — opacity/transform only, so the compositor
+   runs it without any per-frame script or layout work. --heat (combo) is
+   set on #gBeat itself and only changes on judgements. */
+#gBeat{position:absolute;inset:0;pointer-events:none;z-index:0;--heat:0;
+  opacity:calc(.18 + var(--heat) * .28);}
+#gBeat::before{content:"";position:absolute;inset:0;
   background:
     radial-gradient(ellipse 34% 70% at 50% 62%, rgba(58,160,255,.55), transparent 70%),
     radial-gradient(ellipse 48% 40% at 50% 100%, rgba(255,138,61,.5), transparent 70%);
-  opacity:calc(.08 + var(--beat) * (.10 + var(--heat) * .28));
-  transform:scale(calc(1 + var(--beat) * .035));}
+  opacity:.45;}
+#gameScreen.beating #gBeat::before{animation:beatGlow var(--beatDur) cubic-bezier(.15,.7,.35,1) var(--beatDelay) infinite;}
+@keyframes beatGlow{from{opacity:1;transform:scale(1.035);}to{opacity:.45;transform:scale(1);}}
 .gStage{position:relative;z-index:1;display:flex;justify-content:center;align-items:stretch;gap:26px;
   width:100%;height:100%;padding:18px 0 24px;}
 .gSide{width:250px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;}
@@ -268,7 +275,7 @@ p.hint{font-size:12px;color:var(--sub);margin:10px 0 0;line-height:1.6;}
 .gMeta{display:flex;align-items:center;gap:10px;}
 .gBpm{font-family:var(--f-num);font-size:12px;color:var(--sub);font-weight:700;}
 .gProgress{height:6px;background:rgba(255,255,255,.07);clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);}
-.gProgressFill{height:100%;width:0;background:linear-gradient(90deg,var(--dl),var(--cn));}
+.gProgressFill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--dl),var(--cn));}
 .gTime{display:flex;justify-content:space-between;font-family:var(--f-num);font-size:11px;color:var(--sub);}
 .gScore{font-family:var(--f-num);font-weight:800;font-size:34px;letter-spacing:1px;line-height:1;
   font-variant-numeric:tabular-nums;text-shadow:0 0 16px rgba(255,213,66,.25);}
@@ -281,15 +288,23 @@ p.hint{font-size:12px;color:var(--sub);margin:10px 0 0;line-height:1.6;}
 
 #arena{position:relative;width:min(620px,96vw);flex-shrink:1;z-index:1;}
 #lanes{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr);gap:3px;}
-.lane{position:relative;overflow:hidden;
+/* contain: whatever moves inside a lane (notes, trails, effects) never
+   makes the browser re-lay-out anything outside it */
+.lane{position:relative;overflow:hidden;contain:layout paint;
   background:linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,.045));
   box-shadow:inset 1px 0 0 rgba(255,255,255,.05), inset -1px 0 0 rgba(255,255,255,.05);}
 .lane::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(to top, currentColor, transparent 32%);opacity:calc(.05 + var(--beat) * .06);}
+  background:linear-gradient(to top, currentColor, transparent 32%);opacity:.05;}
 .lane.touchable{cursor:pointer;}
 
 .judgeLine{position:absolute;left:0;right:0;height:4px;bottom:13%;background:currentColor;
-  box-shadow:0 0 14px currentColor;opacity:calc(.55 + var(--beat) * .45);}
+  box-shadow:0 0 14px currentColor;opacity:.55;}
+#gameScreen.beating .lane::before{animation:beatLaneGlow var(--beatDur) cubic-bezier(.15,.7,.35,1) var(--beatDelay) infinite;}
+#gameScreen.beating .judgeLine{animation:beatLine var(--beatDur) cubic-bezier(.15,.7,.35,1) var(--beatDelay) infinite;}
+@keyframes beatLaneGlow{from{opacity:.11;}to{opacity:.05;}}
+@keyframes beatLine{from{opacity:1;}to{opacity:.55;}}
+/* notes/trails are positioned with `translate` (see game.js) */
+.note,.holdTail{will-change:translate;}
 
 /* ---- shared panel geometry: notes and receptors (chevrons + gold octagon center) ---- */
 .receptor{position:absolute;left:50%;width:var(--panelSize);height:var(--panelSize);

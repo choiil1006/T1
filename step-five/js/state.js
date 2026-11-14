@@ -3,7 +3,7 @@
   "use strict";
 
   SF.state = {
-    audioURL: null, audioFile: null, audioEl: null, bpm: 120, difficulty: "normal",
+    audioURL: null, audioFile: null, bpm: 120, difficulty: "normal",
     phaseOffsetMs: 0, currentSongId: null, currentSongName: "",
     songAnalyzed: false, // has automatic BPM/onset analysis already run for the current song?
 
@@ -36,11 +36,6 @@
     customChart: null,
     edRecording: false,
     laneHeld: { DL: false, UL: false, CN: false, UR: false, DR: false },
-
-    // populated only after "파일 분석으로 자동 측정" runs; lets chart
-    // generation bias note density toward the song's real onsets instead of
-    // being fully random. Not persisted — it's cheap to recompute.
-    onset: null, // {envelope:Float32Array, fps:number, max:number}
   };
 
   SF.screens = {}; // filled in by ui.js once the DOM is ready

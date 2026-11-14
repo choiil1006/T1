@@ -1,5 +1,11 @@
 // Core gameplay: countdown, the per-frame note loop, hit judging (including
 // hold notes), scoring, HUD, pause/quit, and the results handoff.
+//
+// Timing comes from SF.player (Web Audio clock — see player.js). Rendering
+// moves notes with the CSS `translate` property in pixels (compositor work,
+// no page layout per note per frame), the beat pulse is a CSS animation
+// started in phase with the song instead of a per-frame style write, and the
+// note loop only walks the notes that can currently be on screen.
 (function () {
   "use strict";
 
@@ -7,12 +13,23 @@
   const laneEls = {};
   const receptorEls = {};
   const HOLD_RELEASE_GRACE_MS = 70;
+  const JUDGE_Y = 0.87; // judge line position as a fraction of lane height
 
   function cacheLaneEls() {
     SF.LANES.forEach((l) => {
       laneEls[l] = document.querySelector(`.lane[data-lane="${l}"]`);
       receptorEls[l] = laneEls[l].querySelector(".receptor");
     });
+    window.addEventListener("resize", measure);
+  }
+
+  // lane/panel sizes in px, read once (and on resize) instead of every frame
+  let laneH = 1, panelH = 0;
+  function measure() {
+    const lane = laneEls.DL;
+    if (!lane) return;
+    laneH = lane.clientHeight || laneH;
+    panelH = receptorEls.DL.clientHeight || panelH;
   }
 
   // ---- side-panel / effects state ----
@@ -20,6 +37,7 @@
   let durationSec = 0;       // song length, for the progress bar
   let countdownToken = 0;    // bumps on quit so a pending countdown never starts the song
   let finished = false;      // finishGame runs once per play
+  let liveFrom = 0;          // notes before this index are all judged
   const MILESTONE_EVERY = 50;
   const hud = {};            // last values written, so the per-frame HUD skips no-op DOM writes
 
@@ -38,40 +56,23 @@
     const bpm = Math.max(40, Math.min(300, parseInt(SF.$("bpmInput").value, 10) || 120));
     state.bpm = bpm;
 
-    if (state.audioEl) { state.audioEl.pause(); state.audioEl = null; }
+    SF.player.stop();
     countdownToken++;
+    const token = countdownToken;
     state.running = false;
     finished = false;
-    state.audioEl = new Audio(state.audioURL);
-    state.audioEl.preload = "auto";
+    state.notes = [];
+    liveFrom = 0;
 
     // left panel: what's playing
-    const diffLabel = SF.DIFF[state.difficulty].label;
     SF.$("gSongTitle").textContent = state.currentSongName || "-";
-    SF.$("gDiff").textContent = diffLabel;
+    SF.$("gDiff").textContent = SF.DIFF[state.difficulty].label;
     SF.$("gDiff").dataset.diff = state.difficulty;
     SF.$("gBpm").textContent = "BPM " + bpm;
-    SF.$("gProgress").style.width = "0%";
+    SF.$("gProgress").style.transform = "scaleX(0)";
     SF.$("gTimeNow").textContent = "0:00";
     SF.$("gTimeTotal").textContent = "-:--";
     durationSec = 0;
-
-    state.audioEl.addEventListener("loadedmetadata", () => {
-      const dur = isFinite(state.audioEl.duration) ? state.audioEl.duration : 180;
-      durationSec = dur;
-      SF.$("gTimeTotal").textContent = fmtTime(dur);
-      if (state.useCustomChart && state.customChart && state.customChart.length) {
-        state.notes = state.customChart.map((n) => ({
-          time: n.time, lane: n.lane, hold: false, holdEnd: null, hit: false, judged: false, el: null, tailEl: null, holdState: null,
-        }));
-      } else {
-        state.notes = SF.chartGenerator.generateChart(state.bpm, state.difficulty, dur, state.phaseOffsetMs, state.currentSongId);
-      }
-      state.maxRawScore = computeMaxRawScore(state.notes);
-      beginCountdown();
-    }, { once: true });
-
-    state.audioEl.addEventListener("ended", finishGame);
 
     // reset stats
     state.score = 0; state.rawScore = 0; state.combo = 0; state.maxCombo = 0;
@@ -83,11 +84,39 @@
     shownScore = 0;
     for (const k in hud) delete hud[k];
     SF.$("milestone").classList.remove("show");
-    SF.$("gameScreen").style.setProperty("--beat", 0);
-    SF.$("gameScreen").style.setProperty("--heat", 0);
+    setBeat(false);
+    setHeat();
 
     updateHUD();
     SF.ui.showScreen("game");
+    measure();
+
+    // decode + analyze while the countdown runs (on slow machines this is
+    // what the countdown hides), then build the chart from the result
+    const songId = state.currentSongId, songName = state.currentSongName;
+    const prepared = SF.player.load(songId, state.audioFile).then((loaded) => {
+      if (!loaded || token !== countdownToken) return false;
+      const dur = loaded.buffer.duration;
+      durationSec = dur;
+      SF.$("gTimeTotal").textContent = fmtTime(dur);
+      if (state.useCustomChart && state.customChart && state.customChart.length) {
+        state.notes = state.customChart.map((n) => ({
+          time: n.time, lane: n.lane, hold: false, holdEnd: null, hit: false, judged: false, el: null, tailEl: null, holdState: null,
+        })).sort((a, b) => a.time - b.time);
+      } else {
+        state.notes = SF.chartGenerator.generateChart(state.bpm, state.difficulty, dur, state.phaseOffsetMs, songId, loaded.features);
+      }
+      state.maxRawScore = computeMaxRawScore(state.notes);
+      return true;
+    }).catch((err) => {
+      console.warn("song load failed", err);
+      if (token === countdownToken) {
+        SF.ui.showToast(`"${songName}"을(를) 재생할 수 없습니다.`, { type: "error" });
+        quit();
+      }
+      return false;
+    });
+    beginCountdown(token, prepared);
   }
 
   function clearPlayfield() {
@@ -102,172 +131,185 @@
     cd.classList.add("tick");
   }
 
-  function beginCountdown() {
+  function beginCountdown(token, prepared) {
     const cd = SF.$("countdown");
-    const token = countdownToken;
     cd.style.display = "flex";
     let n = 3;
     showCountdown(cd, n);
     const iv = setInterval(() => {
       if (token !== countdownToken) { clearInterval(iv); cd.style.display = "none"; return; }
       n--;
-      if (n > 0) { showCountdown(cd, n); }
-      else if (n === 0) { showCountdown(cd, "GO!"); }
-      else {
-        clearInterval(iv);
+      if (n > 0) { showCountdown(cd, n); return; }
+      if (n === 0) { showCountdown(cd, "GO!"); return; }
+      clearInterval(iv);
+      let waiting = true;
+      // still decoding (slow machine, long song): say so instead of freezing on "GO!"
+      setTimeout(() => { if (waiting && token === countdownToken) showCountdown(cd, "LOADING"); }, 50);
+      prepared.then((ok) => {
+        waiting = false;
+        if (!ok || token !== countdownToken) return;
         cd.style.display = "none";
-        state.audioEl.currentTime = 0;
-        state.audioEl.play();
+        measure();
+        SF.player.play(0, finishGame);
         state.running = true;
+        setBeat(true);
         loop();
-      }
+      });
     }, 700);
   }
 
   // perceived song time, corrected for the user's audio-latency calibration
   function currentSongMs() {
-    return state.audioEl.currentTime * 1000 - state.syncOffsetMs;
+    return SF.player.time() * 1000 - state.syncOffsetMs;
+  }
+
+  // beat pulse: a CSS animation one beat long, started at the right phase,
+  // so the browser runs it on its own — no per-frame style writes
+  function setBeat(on) {
+    const gs = SF.$("gameScreen");
+    gs.classList.remove("beating");
+    if (!on) return;
+    const beatMs = 60000 / state.bpm;
+    const phase = (((currentSongMs() - state.phaseOffsetMs) % beatMs) + beatMs) % beatMs;
+    gs.style.setProperty("--beatDur", beatMs.toFixed(2) + "ms");
+    gs.style.setProperty("--beatDelay", (-phase).toFixed(1) + "ms");
+    void gs.offsetWidth;
+    gs.classList.add("beating");
+  }
+
+  // combo "heat" brightens the background glow; only changes on judgements
+  function setHeat() {
+    SF.$("gBeat").style.setProperty("--heat", Math.min(1, state.combo / 100).toFixed(2));
   }
 
   function loop() {
     if (!state.running) return;
-    if (!state.paused) {
-      const now = currentSongMs();
-      const diff = SF.DIFF[state.difficulty];
-      const approach = diff.approach;
-      const missWindow = diff.windows.bad;
-
-      // beat pulse (1 on the beat, decaying to 0 before the next) and combo
-      // "heat" drive the background glow, lane glow and judge line via CSS vars
-      const beatMs = 60000 / state.bpm;
-      const frac = ((((now - state.phaseOffsetMs) % beatMs) + beatMs) % beatMs) / beatMs;
-      const gs = SF.$("gameScreen");
-      gs.style.setProperty("--beat", Math.pow(1 - frac, 3).toFixed(3));
-      gs.style.setProperty("--heat", Math.min(1, state.combo / 100).toFixed(2));
-
-      if (durationSec > 0) {
-        const t = state.audioEl.currentTime;
-        SF.$("gProgress").style.width = Math.min(100, t / durationSec * 100).toFixed(2) + "%";
-        setText("gTimeNow", fmtTime(t));
-      }
-
-      for (const note of state.notes) {
-        if (note.judged) continue;
-
-        // hold notes already being held: check for completion or early release
-        if (note.hold && note.holdState === "holding") {
-          const HOLD_TAIL_GRACE = 150; // releasing slightly early near the very end still counts
-          const nearEnd = now >= note.holdEnd - HOLD_TAIL_GRACE;
-          if (state.laneHeld[note.lane]) {
-            note.releasedAt = null;
-            if (now >= note.holdEnd - 1) { finalizeHold(note, true); continue; }
-          } else if (nearEnd) {
-            // let go while already close enough to the end — counts as a clean finish
-            finalizeHold(note, true);
-            continue;
-          } else {
-            // released mid-hold: a single dropped polling frame or a dance-pad
-            // switch's contact bounce can read as "not held" for just one tick,
-            // so don't cancel the hold until it's stayed unheld for a short
-            // grace window — only a real release survives that long
-            if (note.releasedAt == null) note.releasedAt = now;
-            if (now - note.releasedAt >= HOLD_RELEASE_GRACE_MS) {
-              finalizeHold(note, false);
-              continue;
-            }
-          }
-        }
-
-        const appearAt = note.time - approach;
-        const baseDisappear = note.time + missWindow + 40;
-        // only extend the disappear window while a hold is actively being held;
-        // an UNPRESSED hold note must miss promptly, just like a normal tap
-        const effectiveDisappear = (note.hold && note.holdState === "holding")
-          ? Math.max(baseDisappear, note.holdEnd + 60)
-          : baseDisappear;
-
-        if (now >= appearAt && now <= effectiveDisappear) {
-          if (!note.el) {
-            const el = document.createElement("div");
-            el.className = "note note-" + note.lane;
-            laneEls[note.lane].appendChild(el);
-            note.el = el;
-            if (note.hold) {
-              const tail = document.createElement("div");
-              tail.className = "holdTail hold-" + note.lane;
-              laneEls[note.lane].insertBefore(tail, el);
-              note.tailEl = tail;
-            }
-          }
-          let headProgress = (now - appearAt) / approach;
-          headProgress = Math.max(0, headProgress);
-          const pinned = note.holdState === "holding"; // actively held -> stays put at the judge line
-          // an unpressed note doesn't stop dead at the judge line and then
-          // pop out of existence — it keeps sliding on past it, off the
-          // bottom of the lane (which clips it — see .lane{overflow:hidden})
-          // exactly like it would if you'd just let it fall through
-          const headVisualProgress = pinned ? Math.min(1, headProgress) : headProgress;
-          note.el.style.top = (headVisualProgress * 87) + "%";
-          note.el.classList.toggle("held", pinned);
-
-          if (note.hold && note.tailEl) {
-            const tailAppearAt = note.holdEnd - approach;
-            let tailProgress = (now - tailAppearAt) / approach;
-            tailProgress = Math.max(0, Math.min(1, tailProgress));
-            // the trail reaches well into each panel's own box (the panels
-            // are drawn on top — see DOM order — so they simply paint over
-            // it there, like layer order in an image editor)
-            const laneH = laneEls[note.lane].clientHeight || 1;
-            const panelH = receptorEls[note.lane].clientHeight || 0;
-            const panelPct = (panelH / laneH) * 100;
-            const insertPct = panelPct * 0.7;
-            // until the release marker actually enters its own approach
-            // window, there's nothing yet to cut the trail's top edge against
-            // — rather than show that edge floating in mid-lane, run the top
-            // off past the visible arena so the lane's own clipping (see
-            // .lane{overflow:hidden}) is what cuts it, like the ribbon is
-            // simply continuing down from off-screen
-            const topPct = now < tailAppearAt ? -60 : (tailProgress * 87 + panelPct - insertPct);
-            const holding = pinned;
-            // once actually held, the head panel is hidden (see .note.held)
-            // and the judge line is the only thing left to justify a bottom
-            // edge — stop exactly there (no insertion past it) and use a
-            // flat cut (see the .holdActive clip-path override) instead of
-            // the normal slanted corner poking below it. If it was never
-            // pressed at all, headVisualProgress is the same unclamped value
-            // driving the head above, so the tail keeps sliding down with it
-            // instead of the head sliding on alone while the tail freezes.
-            const bottomPct = holding ? (headVisualProgress * 87) : (headVisualProgress * 87 + insertPct);
-            note.tailEl.style.top = topPct + "%";
-            note.tailEl.style.height = Math.max(0, bottomPct - topPct) + "%";
-            note.tailEl.classList.toggle("holdActive", holding);
-
-            // the release-point arrow only enters once we're actually inside
-            // its own approach window (same timing rule as any other note) —
-            // it must not sit pinned at the top of the lane before that
-            if (now >= tailAppearAt) {
-              if (!note.capEl) {
-                const cap = document.createElement("div");
-                cap.className = "note note-" + note.lane + " tailCap";
-                laneEls[note.lane].appendChild(cap);
-                note.capEl = cap;
-              }
-              note.capEl.style.top = (tailProgress * 87) + "%";
-              note.capEl.classList.toggle("capHeld", note.holdState === "holding");
-            }
-          }
-        } else if (now > effectiveDisappear) {
-          // never hit at all — miss
-          if (note.el) { note.el.remove(); note.el = null; }
-          if (note.tailEl) { note.tailEl.remove(); note.tailEl = null; }
-          if (note.capEl) { note.capEl.remove(); note.capEl = null; }
-          note.judged = true;
-          registerJudgement("miss", note.lane);
-        }
-      }
-      updateHUD();
-    }
+    if (!state.paused) frame();
     state.rafId = requestAnimationFrame(loop);
+  }
+
+  // one frame of game logic + drawing (exported so tests can step it)
+  function frame() {
+    const now = currentSongMs();
+    const diff = SF.DIFF[state.difficulty];
+    const approach = diff.approach;
+    const missWindow = diff.windows.bad;
+    const travel = JUDGE_Y * laneH;          // px from lane top to judge line
+    const insert = panelH * 0.7;             // how far a hold trail tucks under its panels
+
+    if (durationSec > 0) {
+      const t = Math.max(0, now / 1000);
+      SF.$("gProgress").style.transform = "scaleX(" + Math.min(1, t / durationSec).toFixed(4) + ")";
+      setText("gTimeNow", fmtTime(t));
+      // backstop in case the source's ended event never arrives
+      if (t > durationSec + 1.5 && SF.player.isPlaying()) { finishGame(); return; }
+    }
+
+    const notes = state.notes;
+    while (liveFrom < notes.length && notes[liveFrom].judged) liveFrom++;
+
+    for (let i = liveFrom; i < notes.length; i++) {
+      const note = notes[i];
+      if (note.judged) continue;
+      const appearAt = note.time - approach;
+      if (now < appearAt) break; // sorted by time: nothing later is on screen yet
+
+      // hold notes already being held: check for completion or early release
+      if (note.hold && note.holdState === "holding") {
+        const HOLD_TAIL_GRACE = 150; // releasing slightly early near the very end still counts
+        const nearEnd = now >= note.holdEnd - HOLD_TAIL_GRACE;
+        if (state.laneHeld[note.lane]) {
+          note.releasedAt = null;
+          if (now >= note.holdEnd - 1) { finalizeHold(note, true); continue; }
+        } else if (nearEnd) {
+          // let go while already close enough to the end — counts as a clean finish
+          finalizeHold(note, true);
+          continue;
+        } else {
+          // released mid-hold: a single dropped polling frame or a dance-pad
+          // switch's contact bounce can read as "not held" for just one tick,
+          // so don't cancel the hold until it's stayed unheld for a short
+          // grace window — only a real release survives that long
+          if (note.releasedAt == null) note.releasedAt = now;
+          if (now - note.releasedAt >= HOLD_RELEASE_GRACE_MS) {
+            finalizeHold(note, false);
+            continue;
+          }
+        }
+      }
+
+      const baseDisappear = note.time + missWindow + 40;
+      // only extend the disappear window while a hold is actively being held;
+      // an UNPRESSED hold note must miss promptly, just like a normal tap
+      const effectiveDisappear = (note.hold && note.holdState === "holding")
+        ? Math.max(baseDisappear, note.holdEnd + 60)
+        : baseDisappear;
+
+      if (now <= effectiveDisappear) {
+        if (!note.el) {
+          const el = document.createElement("div");
+          el.className = "note note-" + note.lane;
+          el.style.top = "0";
+          laneEls[note.lane].appendChild(el);
+          note.el = el;
+          if (note.hold) {
+            const tail = document.createElement("div");
+            tail.className = "holdTail hold-" + note.lane;
+            tail.style.top = "0";
+            laneEls[note.lane].insertBefore(tail, el);
+            note.tailEl = tail;
+          }
+        }
+        const headProgress = Math.max(0, (now - appearAt) / approach);
+        const pinned = note.holdState === "holding"; // actively held -> stays put at the judge line
+        // an unpressed note doesn't stop dead at the judge line and then
+        // pop out of existence — it keeps sliding on past it, off the
+        // bottom of the lane (which clips it — see .lane{overflow:hidden})
+        const headY = (pinned ? Math.min(1, headProgress) : headProgress) * travel;
+        note.el.style.translate = "0 " + headY.toFixed(1) + "px";
+        if (note.pinnedShown !== pinned) { note.el.classList.toggle("held", pinned); note.pinnedShown = pinned; }
+
+        if (note.hold && note.tailEl) {
+          const tailAppearAt = note.holdEnd - approach;
+          const tailProgress = Math.max(0, Math.min(1, (now - tailAppearAt) / approach));
+          // the trail reaches well into each panel's own box (the panels are
+          // drawn on top — see DOM order — so they simply paint over it
+          // there). Until the release marker enters its own approach window
+          // the top runs off past the visible lane, which clips it, so the
+          // ribbon reads as continuing down from off-screen.
+          const topY = now < tailAppearAt ? -0.6 * laneH : tailProgress * travel + panelH - insert;
+          // once actually held, the head panel is hidden (see .note.held) and
+          // the judge line is the only edge left — stop exactly there with a
+          // flat cut (.holdActive) instead of the slanted corner poking below
+          const bottomY = pinned ? headY : headY + insert;
+          note.tailEl.style.translate = "0 " + topY.toFixed(1) + "px";
+          note.tailEl.style.height = Math.max(0, bottomY - topY).toFixed(1) + "px";
+          if (note.tailActiveShown !== pinned) { note.tailEl.classList.toggle("holdActive", pinned); note.tailActiveShown = pinned; }
+
+          // the release-point arrow only enters once we're inside its own
+          // approach window (same timing rule as any other note)
+          if (now >= tailAppearAt) {
+            if (!note.capEl) {
+              const cap = document.createElement("div");
+              cap.className = "note note-" + note.lane + " tailCap";
+              cap.style.top = "0";
+              laneEls[note.lane].appendChild(cap);
+              note.capEl = cap;
+            }
+            note.capEl.style.translate = "0 " + (tailProgress * travel).toFixed(1) + "px";
+            if (note.capHeldShown !== pinned) { note.capEl.classList.toggle("capHeld", pinned); note.capHeldShown = pinned; }
+          }
+        }
+      } else {
+        // never hit at all — miss
+        if (note.el) { note.el.remove(); note.el = null; }
+        if (note.tailEl) { note.tailEl.remove(); note.tailEl = null; }
+        if (note.capEl) { note.capEl.remove(); note.capEl = null; }
+        note.judged = true;
+        registerJudgement("miss", note.lane);
+      }
+    }
+    updateHUD();
   }
 
   function finalizeHold(note, success) {
@@ -296,14 +338,21 @@
 
   function handleHit(lane) {
     if (!state.running || state.paused) return;
+    const notes = state.notes;
     // ignore repeated/auto-repeat presses while a hold in this lane is actively being held
-    if (state.notes.some((n) => n.hold && n.holdState === "holding" && !n.judged && n.lane === lane)) return;
+    for (let i = liveFrom; i < notes.length; i++) {
+      const n = notes[i];
+      if (n.time > currentSongMs()) break;
+      if (n.hold && n.holdState === "holding" && !n.judged && n.lane === lane) return;
+    }
     flashReceptor(lane);
     const now = currentSongMs();
     const diff = SF.DIFF[state.difficulty];
     // find closest unjudged note in this lane within the outer (bad) window
     let best = null, bestDelta = Infinity;
-    for (const note of state.notes) {
+    for (let i = liveFrom; i < notes.length; i++) {
+      const note = notes[i];
+      if (note.time - now > diff.windows.bad) break;
       if (note.judged || note.lane !== lane) continue;
       if (note.hold && note.holdState === "holding") continue;
       const delta = Math.abs(now - note.time);
@@ -321,7 +370,7 @@
         best.holdState = "holding";
         best.headGrade = grade;
         best.releasedAt = null;
-        // note stays alive (judged=false) until the hold resolves in loop()
+        // note stays alive (judged=false) until the hold resolves in frame()
       } else {
         best.judged = true; best.hit = true;
         if (best.el) { best.el.classList.add("hitpop"); const el = best.el; best.el = null; setTimeout(() => el.remove(), 200); }
@@ -378,6 +427,7 @@
     popJudgeText(grade);
     if (grade === "miss") missFlash(lane); else hitFx(lane, grade);
     bumpCombo();
+    setHeat();
     if (grade !== "miss" && state.combo % MILESTONE_EVERY === 0) showMilestone(state.combo);
     updateHUD();
   }
@@ -390,6 +440,7 @@
     SF.sfx.playJudge("miss"); // shown the same as a miss — it's an incorrect press either way
     popJudgeText("miss");
     missFlash(lane);
+    setHeat();
     updateHUD();
   }
 
@@ -458,7 +509,6 @@
     shownScore = Math.abs(gap) < 2 ? state.score : shownScore + gap * 0.22;
     setText("scoreVal", Math.round(shownScore).toLocaleString());
     setText("comboNum", String(state.combo));
-    SF.$("comboWrap").classList.toggle("zero", state.combo < 2);
     const acc = computeAccuracy(state.counts, state.totalJudged);
     setText("accVal", acc.toFixed(1) + "%");
     const c = state.counts;
@@ -471,15 +521,19 @@
   }
 
   function togglePause() {
+    if (!state.running) return;
     state.paused = !state.paused;
     SF.$("pauseOverlay").style.display = state.paused ? "flex" : "none";
-    if (state.paused) { state.audioEl.pause(); } else { state.audioEl.play(); }
+    if (state.paused) { SF.player.pause(); setBeat(false); }
+    else { SF.player.resume(); setBeat(true); }
   }
 
   function quit() {
     state.running = false;
     countdownToken++;
-    if (state.audioEl) state.audioEl.pause();
+    SF.player.stop();
+    setBeat(false);
+    SF.$("countdown").style.display = "none";
     SF.$("pauseOverlay").style.display = "none";
     clearPlayfield();
     SF.sfx.playMenu("back");
@@ -492,9 +546,11 @@
   }
 
   async function finishGame() {
-    if (finished) return;
+    if (finished || !state.running) return;
     finished = true;
     state.running = false;
+    SF.player.stop();
+    setBeat(false);
     clearPlayfield();
     const c = state.counts;
     const acc = computeAccuracy(c, state.totalJudged);
@@ -555,5 +611,5 @@
     setTimeout(() => { done = true; el.textContent = target.toLocaleString(); }, ms + 80);
   }
 
-  SF.game = { cacheLaneEls, startGame, handleHit, togglePause, quit, finishGame };
+  SF.game = { cacheLaneEls, startGame, handleHit, togglePause, quit, finishGame, frame, currentSongMs };
 })();

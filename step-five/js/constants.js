@@ -16,6 +16,9 @@ SF.JUDGE_SCORE = { perfect: 100, great: 70, good: 35, bad: 10, miss: -20 };
 // makes harder difficulties able to reach a higher top score on any song
 SF.MAX_SCORE = { easy: 500000, normal: 750000, hard: 1000000 };
 SF.EMPTY_PRESS_PENALTY = 15;
+// bump whenever generated charts change, so old best records (set on a
+// different chart) are cleared — see storage.resetScoresIfChartChanged
+SF.CHART_VERSION = 2;
 SF.GRADE_THRESHOLDS = [
   { min: 98, grade: "SS" },
   { min: 94, grade: "S" },

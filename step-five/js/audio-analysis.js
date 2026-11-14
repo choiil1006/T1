@@ -1,7 +1,7 @@
 // Automatic BPM + phase detection from the uploaded audio file itself (via
-// onset autocorrelation), run automatically whenever a song is selected. It
-// also hands back the onset envelope, which chart-generator.js uses to bias
-// note placement toward the song's real beats.
+// onset autocorrelation), run automatically whenever a song is selected, plus
+// the per-band onset features chart-generator.js builds charts from
+// (computed from the decoded song each time it's played — see player.js).
 (function () {
   "use strict";
 
@@ -13,17 +13,17 @@
     return out;
   }
 
-  async function analyzeBPM(file) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    const ac = new AC();
-    const arrayBuffer = await file.arrayBuffer();
-    const audioBuffer = await ac.decodeAudioData(arrayBuffer);
-    const data = mixToMono(audioBuffer);
-    const sr = audioBuffer.sampleRate;
+  const FPS = 100;
 
-    // 1) energy envelope at ~100 fps
-    const fps = 100;
-    const hop = Math.round(sr / fps);
+  // RMS energy per frame (FPS frames/sec) -> onset strength = positive rise
+  function onsetFromEnergy(energy) {
+    const onset = new Float32Array(energy.length);
+    for (let i = 1; i < energy.length; i++) onset[i] = Math.max(0, energy[i] - energy[i - 1]);
+    return onset;
+  }
+
+  function fullBandOnset(data, sr) {
+    const hop = Math.round(sr / FPS);
     const frames = Math.floor(data.length / hop);
     const energy = new Float32Array(frames);
     for (let i = 0; i < frames; i++) {
@@ -32,13 +32,68 @@
       for (let j = start; j < end; j++) { const v = data[j]; sum += v * v; }
       energy[i] = Math.sqrt(sum / hop);
     }
-    // 2) onset strength = positive energy rise
-    const onset = new Float32Array(frames);
-    let onsetMax = 0;
-    for (let i = 1; i < frames; i++) {
-      onset[i] = Math.max(0, energy[i] - energy[i - 1]);
-      if (onset[i] > onsetMax) onsetMax = onset[i];
+    return onsetFromEnergy(energy);
+  }
+
+  // scale to [0,1] by a high percentile rather than the single loudest
+  // frame, so one spike doesn't flatten the rest of the song
+  function normalize(arr) {
+    const sorted = Array.from(arr).filter((v) => v > 0).sort((a, b) => a - b);
+    const ref = sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.99))] : 1;
+    const out = new Float32Array(arr.length);
+    const k = 1 / Math.max(1e-9, ref);
+    for (let i = 0; i < arr.length; i++) out[i] = Math.min(1, arr[i] * k);
+    return out;
+  }
+
+  // what the chart generator reads: onset strength for the whole mix, the
+  // low end (kick/bass, < ~150 Hz) and the top end (snare/hats, > ~3 kHz),
+  // each [0,1] at FPS frames per second. Low/high come from cheap one-pole
+  // filters — plenty to tell "a kick hit" from "a hi-hat tick".
+  function computeFeatures(audioBuffer) {
+    const data = mixToMono(audioBuffer);
+    const sr = audioBuffer.sampleRate;
+    const hop = Math.round(sr / FPS);
+    const frames = Math.floor(data.length / hop);
+    const aLow = 1 - Math.exp(-2 * Math.PI * 150 / sr);
+    const aHigh = 1 - Math.exp(-2 * Math.PI * 3000 / sr);
+    const eLow = new Float32Array(frames), eHigh = new Float32Array(frames);
+    let lp1 = 0, lp2 = 0, lpH = 0;
+    for (let i = 0; i < frames; i++) {
+      let sL = 0, sH = 0;
+      const start = i * hop, end = start + hop;
+      for (let j = start; j < end; j++) {
+        const x = data[j];
+        lp1 += aLow * (x - lp1);
+        lp2 += aLow * (lp1 - lp2);
+        lpH += aHigh * (x - lpH);
+        const h = x - lpH;
+        sL += lp2 * lp2; sH += h * h;
+      }
+      eLow[i] = Math.sqrt(sL / hop);
+      eHigh[i] = Math.sqrt(sH / hop);
     }
+    return {
+      fps: sr / hop, // exact frame rate (hop is rounded, e.g. 221 samples at 22.05 kHz)
+      full: normalize(fullBandOnset(data, sr)),
+      low: normalize(onsetFromEnergy(eLow)),
+      high: normalize(onsetFromEnergy(eHigh)),
+    };
+  }
+
+  async function analyzeBPM(file) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ac = new AC();
+    const arrayBuffer = await file.arrayBuffer();
+    const audioBuffer = await ac.decodeAudioData(arrayBuffer);
+    ac.close();
+    const data = mixToMono(audioBuffer);
+    const sr = audioBuffer.sampleRate;
+
+    // 1-2) onset strength (positive rise of the ~100 fps energy envelope)
+    const fps = sr / Math.round(sr / FPS); // exactly 100 at 44.1/48 kHz
+    const onset = fullBandOnset(data, sr);
+    const frames = onset.length;
 
     // 3) autocorrelation over plausible tempo range (60-200 BPM), weighted by
     //    a tempo prior to avoid octave errors. Plain unweighted autocorrelation
@@ -83,53 +138,8 @@
     }
     const phaseMs = (bestPhase / fps) * 1000;
 
-    ac.close();
-    return { bpm, phaseMs, onset: { envelope: onset, fps, max: onsetMax || 1 } };
+    return { bpm, phaseMs };
   }
 
-  // strength in [0,1] of the song's onset envelope near time `ms`; 0.5 (flat)
-  // if no analysis has been run for the current audio.
-  function onsetStrengthAt(ms) {
-    const o = SF.state.onset;
-    if (!o) return 0.5;
-    const idx = Math.round((ms / 1000) * o.fps);
-    if (idx < 0 || idx >= o.envelope.length) return 0;
-    return Math.min(1, o.envelope[idx] / o.max);
-  }
-
-  // the tallest onset value within +-halfWindowMs of `ms` — used for
-  // "is there really a hit near this beat-grid slot" checks, which is more
-  // forgiving of small phase/quantization error than sampling one instant
-  function onsetPeakNear(ms, halfWindowMs) {
-    const o = SF.state.onset;
-    if (!o) return 0.5;
-    const half = Math.max(1, Math.round((halfWindowMs / 1000) * o.fps));
-    const center = Math.round((ms / 1000) * o.fps);
-    let peak = 0;
-    for (let i = center - half; i <= center + half; i++) {
-      if (i < 0 || i >= o.envelope.length) continue;
-      const v = o.envelope[i] / o.max;
-      if (v > peak) peak = v;
-    }
-    return Math.min(1, peak);
-  }
-
-  // the average onset strength over a wide window around `ms` (several
-  // seconds) — a smoothed read of "how busy is this section of the song",
-  // for verse/chorus-scale density decisions rather than single-beat ones
-  function onsetWindowAvg(ms, windowMs) {
-    const o = SF.state.onset;
-    if (!o) return 0.5;
-    const half = Math.max(1, Math.round((windowMs / 2 / 1000) * o.fps));
-    const center = Math.round((ms / 1000) * o.fps);
-    let sum = 0, count = 0;
-    for (let i = center - half; i <= center + half; i++) {
-      if (i < 0 || i >= o.envelope.length) continue;
-      sum += o.envelope[i] / o.max;
-      count++;
-    }
-    return count > 0 ? sum / count : 0;
-  }
-
-  SF.audioAnalysis = { analyzeBPM, onsetStrengthAt, onsetPeakNear, onsetWindowAvg };
+  SF.audioAnalysis = { analyzeBPM, computeFeatures };
 })();
