@@ -86,8 +86,19 @@
         useCustomChart: s.useCustomChart,
         customChart: s.customChart,
         analyzed: !!s.songAnalyzed,
+        previewStart: s.previewStartSec,
       });
     } catch (err) { console.warn("song meta save failed", err); }
+  }
+
+  // merge fields into one song's stored meta — for results that finish
+  // after the user may have moved on to another song (unlike
+  // persistSongMeta, which writes whatever song is current)
+  async function updateSongMeta(id, patch) {
+    try {
+      const meta = (await idbGet("songMeta:" + id)) || {};
+      await idbSet("songMeta:" + id, { ...meta, ...patch });
+    } catch (err) { console.warn("song meta update failed", err); }
   }
 
   async function getSongMeta(id) {
@@ -159,7 +170,7 @@
     idbGet, idbSet, idbDelete,
     getSongIndex, setSongIndex, addSongToLibrary,
     persistGlobalSettings, loadGlobalSettings,
-    persistSongMeta, getSongMeta, deleteSongRecord,
+    persistSongMeta, updateSongMeta, getSongMeta, deleteSongRecord,
     getHighScores, reportScore, resetScoresIfChartChanged,
     migrateLegacySingleSong,
   };

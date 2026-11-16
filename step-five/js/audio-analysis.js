@@ -22,7 +22,8 @@
     return onset;
   }
 
-  function fullBandOnset(data, sr) {
+  // RMS loudness per ~10 ms frame
+  function energyEnvelope(data, sr) {
     const hop = Math.round(sr / FPS);
     const frames = Math.floor(data.length / hop);
     const energy = new Float32Array(frames);
@@ -32,7 +33,68 @@
       for (let j = start; j < end; j++) { const v = data[j]; sum += v * v; }
       energy[i] = Math.sqrt(sum / hop);
     }
-    return onsetFromEnergy(energy);
+    return energy;
+  }
+
+  function fullBandOnset(data, sr) {
+    return onsetFromEnergy(energyEnvelope(data, sr));
+  }
+
+  const PREVIEW_SEC = 15;
+
+  // Where the song's highlight (usually the chorus) starts, in seconds: the
+  // loudest/busiest PREVIEW_SEC stretch, pulled back to where that loud part
+  // begins, then snapped to a bar line so the preview starts on the beat.
+  // The intro (first 10%) and the very end are skipped.
+  function findHighlight(energy, onset, fps, durationSec, bpm, phaseMs) {
+    if (durationSec < PREVIEW_SEC + 10) return 0;
+    const blockSec = 0.5, per = Math.max(1, Math.round(fps * blockSec));
+    const nb = Math.floor(energy.length / per);
+    const blocks = new Float64Array(nb);
+    for (let b = 0; b < nb; b++) {
+      let e = 0, o = 0;
+      for (let i = b * per; i < (b + 1) * per; i++) { e += energy[i]; o += onset[i]; }
+      blocks[b] = e / per + (o / per) * 4; // loud AND busy beats loud-but-flat
+    }
+    const prefix = new Float64Array(nb + 1);
+    for (let b = 0; b < nb; b++) prefix[b + 1] = prefix[b] + blocks[b];
+    const w = Math.round(PREVIEW_SEC / blockSec);
+    const lo = Math.floor((durationSec * 0.1) / blockSec);
+    const hi = Math.floor((durationSec - PREVIEW_SEC - 3) / blockSec);
+    if (hi <= lo) return Math.max(0, Math.min(durationSec * 0.3, durationSec - PREVIEW_SEC));
+    let best = lo, bestSum = -1;
+    for (let s = lo; s <= hi; s++) {
+      const sum = prefix[s + w] - prefix[s];
+      if (sum > bestSum) { bestSum = sum; best = s; }
+    }
+    // the loudest window often starts mid-chorus: back up (up to 8 s) while
+    // the music is still about as loud, to catch the start of that section
+    const thr = 0.8 * (bestSum / w);
+    let s = best;
+    while (s > lo && s > best - 16 && blocks[s - 1] >= thr) s--;
+    let startSec = s * blockSec;
+    if (bpm > 0) {
+      const bar = (4 * 60) / bpm, ph = (phaseMs || 0) / 1000;
+      startSec = ph + Math.round((startSec - ph) / bar) * bar;
+    }
+    return Math.round(Math.max(0, Math.min(durationSec - PREVIEW_SEC, startSec)) * 100) / 100;
+  }
+
+  async function decodeMono(file) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ac = new AC();
+    try {
+      const audioBuffer = await ac.decodeAudioData(await file.arrayBuffer());
+      return { data: mixToMono(audioBuffer), sr: audioBuffer.sampleRate, duration: audioBuffer.duration };
+    } finally { ac.close(); }
+  }
+
+  // highlight only, for songs analyzed before highlights existed
+  async function analyzeHighlight(file, bpm, phaseMs) {
+    const { data, sr, duration } = await decodeMono(file);
+    const fps = sr / Math.round(sr / FPS);
+    const energy = energyEnvelope(data, sr);
+    return findHighlight(energy, onsetFromEnergy(energy), fps, duration, bpm, phaseMs);
   }
 
   // scale to [0,1] by a high percentile rather than the single loudest
@@ -82,17 +144,12 @@
   }
 
   async function analyzeBPM(file) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    const ac = new AC();
-    const arrayBuffer = await file.arrayBuffer();
-    const audioBuffer = await ac.decodeAudioData(arrayBuffer);
-    ac.close();
-    const data = mixToMono(audioBuffer);
-    const sr = audioBuffer.sampleRate;
+    const { data, sr, duration } = await decodeMono(file);
 
     // 1-2) onset strength (positive rise of the ~100 fps energy envelope)
     const fps = sr / Math.round(sr / FPS); // exactly 100 at 44.1/48 kHz
-    const onset = fullBandOnset(data, sr);
+    const energy = energyEnvelope(data, sr);
+    const onset = onsetFromEnergy(energy);
     const frames = onset.length;
 
     // 3) autocorrelation over plausible tempo range (60-200 BPM), weighted by
@@ -138,8 +195,9 @@
     }
     const phaseMs = (bestPhase / fps) * 1000;
 
-    return { bpm, phaseMs };
+    const highlightSec = findHighlight(energy, onset, fps, duration, bpm, phaseMs);
+    return { bpm, phaseMs, highlightSec };
   }
 
-  SF.audioAnalysis = { analyzeBPM, computeFeatures };
+  SF.audioAnalysis = { analyzeBPM, analyzeHighlight, findHighlight, computeFeatures, PREVIEW_SEC };
 })();

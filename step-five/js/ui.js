@@ -19,8 +19,52 @@
     if (name === "setup") {
       renderBestPopup(false); // a game may just have set a new record
       scrollActiveSongIntoView(false);
+      schedulePreview(prev === name ? 350 : 150);
+    } else {
+      clearTimeout(previewTimer);
+      SF.preview.stop();
     }
     if (name === "result") resultReadyAt = performance.now() + 900;
+  }
+
+  // ---- highlight preview of the selected song (song select screen only) ----
+  let previewTimer = null;
+  let analysisRunningFor = null; // song id whose BPM/highlight analysis is in flight
+  let highlightJob = null;       // {id, promise} — highlight-only analysis for older songs
+
+  // waits a moment so flicking through the list with the pad doesn't start
+  // (and decode) every song passed on the way
+  function schedulePreview(delay = 350) {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(startPreviewForCurrent, delay);
+  }
+
+  // songs analyzed before highlights existed: find it once and save it
+  function ensureHighlight(id, blob) {
+    if (highlightJob && highlightJob.id === id) return highlightJob.promise;
+    const bpm = parseInt(SF.$("bpmInput").value, 10) || 120;
+    const promise = SF.audioAnalysis.analyzeHighlight(blob, bpm, state.phaseOffsetMs)
+      .then((sec) => {
+        SF.storage.updateSongMeta(id, { previewStart: sec });
+        if (state.currentSongId === id) state.previewStartSec = sec;
+        return sec;
+      })
+      .catch(() => null)
+      .finally(() => { if (highlightJob && highlightJob.id === id) highlightJob = null; });
+    highlightJob = { id, promise };
+    return promise;
+  }
+
+  async function startPreviewForCurrent() {
+    const id = state.currentSongId, blob = state.audioFile;
+    if (!id || !blob || document.body.dataset.screen !== "setup") return;
+    let start = state.previewStartSec;
+    if (start == null) {
+      if (analysisRunningFor === id) return; // runAutoAnalysis starts the preview when it's done
+      start = await ensureHighlight(id, blob);
+      if (state.currentSongId !== id || document.body.dataset.screen !== "setup") return;
+    }
+    SF.preview.play(id, blob, start); // start null -> preview falls back to ~30% in
   }
 
   // the current song's name is shown on the song select panel, in game, on
@@ -120,7 +164,9 @@
 
   function applyLoadedSong(id, name, blob, meta) {
     if (state.audioURL) URL.revokeObjectURL(state.audioURL);
+    if (state.currentSongId !== id) SF.preview.stop();
     state.currentSongId = id;
+    state.previewStartSec = meta && typeof meta.previewStart === "number" ? meta.previewStart : null;
     state.audioFile = blob;
     state.audioURL = URL.createObjectURL(blob);
     setCurrentSongDisplay(name);
@@ -139,6 +185,7 @@
       SF.$("tapHint").textContent = "저장된 BPM";
     }
     renderBestPopup(true);
+    schedulePreview();
   }
 
   async function selectSong(id) {
@@ -173,6 +220,7 @@
       const index = (await SF.storage.getSongIndex()).filter((s) => s.id !== id);
       await SF.storage.setSongIndex(index);
       if (state.currentSongId === id) {
+        SF.preview.stop();
         if (state.audioURL) URL.revokeObjectURL(state.audioURL);
         state.currentSongId = null; state.audioURL = null; state.audioFile = null;
         setCurrentSongDisplay(null);
@@ -455,11 +503,13 @@
       const f = e.target.files[0];
       if (!f) return;
       SF.sfx.unlock();
+      SF.preview.stop();
       if (state.audioURL) URL.revokeObjectURL(state.audioURL);
       state.audioURL = URL.createObjectURL(f);
       state.audioFile = f;
       state.phaseOffsetMs = 0;
       state.songAnalyzed = false;
+      state.previewStartSec = null;
       setCurrentSongDisplay(f.name);
       setStartEnabled(true);
       // a freshly uploaded song starts with no custom chart of its own
@@ -478,23 +528,32 @@
 
   // runs the moment a song becomes current and hasn't been analyzed before —
   // there are no TAP/analyze buttons to press, this just happens on its own.
-  // If another song gets selected while it's still working, the result is
-  // dropped rather than written onto the wrong song.
+  // It also finds the song's highlight for the song select preview. If
+  // another song gets selected while it's still working, the result is saved
+  // to the song it belongs to without touching the screen.
   async function runAutoAnalysis() {
     if (!state.audioFile) return;
     const songId = state.currentSongId, file = state.audioFile;
+    analysisRunningFor = songId;
     SF.$("tapHint").textContent = "BPM 분석 중…";
     try {
-      const { bpm, phaseMs } = await SF.audioAnalysis.analyzeBPM(file);
-      if (state.currentSongId !== songId) return;
+      const { bpm, phaseMs, highlightSec } = await SF.audioAnalysis.analyzeBPM(file);
+      if (state.currentSongId !== songId) {
+        SF.storage.updateSongMeta(songId, { bpm, phaseOffsetMs: phaseMs, analyzed: true, previewStart: highlightSec });
+        return;
+      }
       SF.$("bpmInput").value = bpm;
       state.phaseOffsetMs = phaseMs;
       state.songAnalyzed = true;
+      state.previewStartSec = highlightSec;
       SF.$("tapHint").textContent = "자동 측정됨";
       SF.storage.persistSongMeta();
     } catch (err) {
       if (state.currentSongId !== songId) return;
       SF.$("tapHint").textContent = "자동 분석 실패 — 직접 입력하세요";
+    } finally {
+      if (analysisRunningFor === songId) analysisRunningFor = null;
+      if (state.currentSongId === songId) schedulePreview(0);
     }
   }
 

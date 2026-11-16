@@ -6,6 +6,7 @@
     audioURL: null, audioFile: null, bpm: 120, difficulty: "normal",
     phaseOffsetMs: 0, currentSongId: null, currentSongName: "",
     songAnalyzed: false, // has automatic BPM/onset analysis already run for the current song?
+    previewStartSec: null, // where the current song's highlight starts (song select preview); null = not known yet
 
     // signed ms: how far the perceived beat lags the audio element's reported
     // currentTime (positive = your speakers/headphones are late). Judge time

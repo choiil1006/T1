@@ -102,6 +102,31 @@
     check("값이 0~1 범위", [f.full, f.low, f.high].every((a) => a.every((x) => x >= 0 && x <= 1)));
   }
 
+  // a song whose `chorus` ranges ([fromSec, toSec]) are louder and busier
+  function songWithChorus(chorus, sec = 90, sr = 22050) {
+    const n = sec * sr, data = new Float32Array(n), noise = lcg(7), beat = 0.5; // 120 BPM
+    for (let k = 0; k * beat < sec; k++) {
+      const t = k * beat, loud = chorus.some(([a, b]) => t >= a && t < b), a0 = Math.floor(t * sr);
+      for (let i = 0; i < 0.2 * sr && a0 + i < n; i++) data[a0 + i] += (loud ? 0.9 : 0.35) * Math.exp(-i / sr * 22) * Math.sin(2 * Math.PI * 55 * i / sr);
+      (loud ? [0.25, 0.5, 0.75] : [0.5]).forEach((f) => {
+        const h = Math.floor((t + f * beat) * sr);
+        for (let i = 0; i < 0.05 * sr && h + i < n; i++) data[h + i] += (loud ? 0.35 : 0.12) * Math.exp(-i / sr * 90) * noise();
+      });
+      if (loud) for (let i = 0; i < beat * sr && a0 + i < n; i++) data[a0 + i] += 0.12 * Math.sin(2 * Math.PI * 330 * (a0 + i) / sr);
+    }
+    return { data, sr };
+  }
+
+  async function testHighlight() {
+    group("곡 미리듣기 하이라이트");
+    for (const [chorus, expect] of [[[[40, 60], [75, 85]], 40], [[[22, 38]], 22], [[[50, 70]], 50]]) {
+      const r = await SF.audioAnalysis.analyzeBPM(wavBlob(songWithChorus(chorus)));
+      check(`후렴이 ${expect}초에 시작하는 곡 → 하이라이트 ${expect}초`, Math.abs(r.highlightSec - expect) <= 0.5 && r.bpm === 120, `${r.highlightSec}s, ${r.bpm} BPM`);
+    }
+    const short = await SF.audioAnalysis.analyzeHighlight(wavBlob(synthSong(120, 20)), 120, 0);
+    check("짧은 곡은 처음부터", short === 0, short);
+  }
+
   // ---------- 2. chart rules ----------
   function chartProblems(notes, bpm, difficulty, durationSec) {
     const diff = SF.DIFF[difficulty];
@@ -348,6 +373,7 @@
     Object.assign(results, { pass: 0, fail: 0, skip: 0, done: false, failures: [] });
     summary.className = ""; summary.textContent = "실행 중…";
     try { testFeatures(); } catch (e) { report("fail", "음원 분석 테스트 오류", e.stack || String(e)); }
+    try { await testHighlight(); } catch (e) { report("fail", "하이라이트 테스트 오류", e.stack || String(e)); }
     try { testCharts(); } catch (e) { report("fail", "채보 테스트 오류", e.stack || String(e)); }
     try { await testClock(); } catch (e) { report("fail", "재생 시계 테스트 오류", e.stack || String(e)); }
     try { await testAutoplay(); } catch (e) { report("fail", "자동 플레이 테스트 오류", e.stack || String(e)); }
