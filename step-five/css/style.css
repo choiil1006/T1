@@ -53,7 +53,7 @@ button{font-family:inherit;}
 /* logo watermark, main screen only */
 #bgLogo{position:fixed;z-index:0;pointer-events:none;right:-6vw;top:50%;
   width:min(78vh,760px);aspect-ratio:200/204;transform:translateY(-50%) rotate(-8deg);
-  background:url("../img/logo.svg") center / contain no-repeat;
+  background:url("../img/logo.png") center / contain no-repeat;
   opacity:0;transition:opacity .4s ease;}
 body[data-screen="setup"] #bgLogo{opacity:.075;}
 /* faint CRT scanlines over everything */
