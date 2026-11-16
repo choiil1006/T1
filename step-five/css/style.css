@@ -110,7 +110,7 @@ p.hint{font-size:12px;color:var(--sub);margin:10px 0 0;line-height:1.6;}
 .brand{display:flex;align-items:center;gap:14px;}
 .brandMark{height:56px;width:auto;filter:drop-shadow(0 0 14px rgba(58,160,255,.25));}
 .wordmark{margin:0;font-family:var(--f-disp);font-weight:400;font-size:clamp(30px,4.2vw,46px);
-  letter-spacing:2px;line-height:1;transform:skewX(-9deg);
+  letter-spacing:1px;line-height:1;transform:skewX(-9deg);white-space:nowrap;
   text-shadow:0 0 22px rgba(255,213,66,.25), 3px 3px 0 rgba(255,138,61,.35);}
 .wordmark span{color:var(--cn);}
 .tagline{font-family:var(--f-num);font-size:11px;letter-spacing:5px;color:var(--sub);margin-top:6px;}
