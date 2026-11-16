@@ -20,9 +20,9 @@ body{background:linear-gradient(180deg,#0b0420 0%,#1d0b45 38%,#4a0f6b 62%,#12042
  -webkit-mask:linear-gradient(180deg,transparent,#000 40%)}
 .wrap{position:absolute;inset:0;padding:64px 70px}
 .top{display:flex;justify-content:space-between;align-items:center;font-family:Orbitron;letter-spacing:6px;font-size:22px;color:#7ff9ff;text-shadow:0 0 12px #2ef0ff}
-.title{margin:28px auto 0;height:180px;border:4px dashed #ff7ad9;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;
- color:#ffb8ee;font-family:'Black Han Sans';font-size:64px;text-shadow:0 0 18px #ff3fd8;box-shadow:0 0 30px #ff3fd855 inset;background:#0b0420cc}
-.title small{font-family:'Gothic A1';font-size:22px;color:#ffd6f4;margin-top:8px;text-shadow:none;letter-spacing:2px}
+.title{margin:28px auto 0;height:180px;border:4px solid #ff7ad9;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ color:#ffe3f6;font-family:'Black Han Sans';font-size:100px;line-height:1;text-shadow:0 0 10px #ff3fd8,0 0 30px #ff3fd8;box-shadow:0 0 30px #ff3fd855 inset;background:#0b0420cc}
+.title small{font-family:Orbitron;font-weight:700;font-size:22px;color:#7ff9ff;margin-top:12px;text-shadow:0 0 10px #2ef0ff;letter-spacing:10px}
 .team{margin-top:26px;display:flex;align-items:center;gap:22px;justify-content:center}
 .team .name{font-family:'Black Han Sans';font-size:46px;color:#fff;text-shadow:0 0 14px #2ef0ff,0 0 30px #2ef0ff}
 .team .bar{width:3px;height:44px;background:#7ff9ff;box-shadow:0 0 10px #2ef0ff}
@@ -49,7 +49,7 @@ def variantA():
     pad=pad_svg(360,{'ul':'#ff4f6d','ur':'#ff4f6d','c':'#ffe36e','dl':'#2ef0ff','dr':'#2ef0ff'},stroke=6,fill_alpha=0.15)
     b=f"""<div class="stars"></div><div class="sun"></div><div class="floor"></div><div class="wrap">
 <div class="top"><span>{TEAM_EN}</span><span>RHYTHM · LOAD CELL · PLC</span></div>
-<div class="title">작품 제목<small>TITLE AREA</small></div>
+<div class="title">리듬 에너지<small>RHYTHM ENERGY</small></div>
 <div class="team"><span class="name">조 이름 {TEAM}</span><span class="bar"></span><span class="mem">{' · '.join(MEMBERS)}</span></div>
 <div class="mid"><div class="padbox">{pad}</div><div class="photo">사진 자리<span>완성품 또는 제작 과정 사진</span></div></div>
 <div class="card"><div class="h"><b>동작설명</b><i>OPERATION</i></div>{li(OPS)}</div>
@@ -70,8 +70,8 @@ body:after{content:"";position:absolute;inset:0;background:repeating-linear-grad
 .hud{display:flex;justify-content:space-between;font-family:Orbitron;font-weight:700;font-size:20px;letter-spacing:4px;color:#b6ff3b;text-shadow:0 0 10px #8cff00}
 .hud em{font-style:normal;color:#ff4fa8;text-shadow:0 0 10px #ff2a8a}
 .title{position:relative;margin-top:26px;height:200px;border:3px solid #b6ff3b;display:flex;flex-direction:column;align-items:center;justify-content:center;
- font-family:'Black Han Sans';font-size:62px;color:#d8ff9a;text-shadow:0 0 16px #8cff00;background:#b6ff3b0d}
-.title small{font-family:Orbitron;font-size:18px;letter-spacing:6px;margin-top:6px;color:#b6ff3baa;text-shadow:none}
+ font-family:'Black Han Sans';font-size:100px;line-height:1;color:#efffd6;text-shadow:0 0 10px #8cff00,0 0 28px #8cff00;background:#b6ff3b0d}
+.title small{font-family:Orbitron;font-weight:700;font-size:20px;letter-spacing:10px;margin-top:12px;color:#ff4fa8;text-shadow:0 0 10px #ff2a8a}
 .corner{position:absolute;width:26px;height:26px;border:5px solid #ff4fa8;box-shadow:0 0 10px #ff2a8a}
 .tl{left:-12px;top:-12px;border-right:0;border-bottom:0}.tr{right:-12px;top:-12px;border-left:0;border-bottom:0}
 .bl{left:-12px;bottom:-12px;border-right:0;border-top:0}.br{right:-12px;bottom:-12px;border-left:0;border-top:0}
@@ -112,7 +112,7 @@ def variantB():
     pad=pad_svg(300,{'ul':'#ff4f6d','ur':'#ff4f6d','c':'#ffe36e','dl':'#2ef0ff','dr':'#2ef0ff'},stroke=5,fill_alpha=0.12,gid="gb")
     b=f"""<div class="lanes">{lanes}</div><div class="judge"></div><div class="wrap">
 <div class="hud"><span>STAGE 01</span><span><em>●</em> INSERT FOOT</span><span>SCORE 0000000</span></div>
-<div class="title"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>작품 제목<small>TITLE AREA</small></div>
+<div class="title"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>리듬 에너지<small>RHYTHM ENERGY</small></div>
 <div class="players"><div class="pl team"><span class="tag">TEAM</span><span class="nm">{TEAM}</span></div>
 <div class="pl"><span class="tag">1P</span><span class="nm">{MEMBERS[0]}</span></div><div class="pl"><span class="tag">2P</span><span class="nm">{MEMBERS[1]}</span></div></div>
 <div class="mid"><div class="padbox">{pad}</div><div class="photo">사진 자리<span>완성품 또는 제작 과정 사진</span></div></div>
@@ -131,9 +131,9 @@ body{color:#fff3ea;position:relative;
  repeating-linear-gradient(90deg,#00000044 0 3px,transparent 3px 140px),#1a1418}
 .wrap{position:absolute;inset:0;padding:70px 76px}
 .title{height:230px;border-radius:120px;border:6px solid #ff5aa0;display:flex;flex-direction:column;align-items:center;justify-content:center;
- box-shadow:0 0 14px #ff5aa0,0 0 44px #ff2d7a,inset 0 0 14px #ff5aa0,inset 0 0 40px #ff2d7a88;font-family:Jua;font-size:66px;color:#ffe3ef;
+ box-shadow:0 0 14px #ff5aa0,0 0 44px #ff2d7a,inset 0 0 14px #ff5aa0,inset 0 0 40px #ff2d7a88;font-family:Jua;font-size:104px;line-height:1;color:#fff0f6;
  text-shadow:0 0 8px #ff7ab4,0 0 24px #ff2d7a}
-.title small{font-family:'Gothic A1';font-size:22px;letter-spacing:3px;margin-top:6px;text-shadow:0 0 8px #ff2d7a;color:#ffc6dc}
+.title small{font-family:Orbitron;font-weight:700;font-size:22px;letter-spacing:10px;margin-top:10px;text-shadow:0 0 8px #ff2d7a;color:#ffc6dc}
 .team{margin-top:34px;text-align:center}
 .team .t{font-family:Monoton;font-size:62px;color:#fff6c7;letter-spacing:6px;text-shadow:0 0 6px #ffcf3f,0 0 22px #ff9b00,0 0 44px #ff9b00}
 .team .k{font-family:Jua;font-size:40px;color:#fff6c7;text-shadow:0 0 10px #ff9b00;margin-left:10px}
@@ -161,7 +161,7 @@ body{color:#fff3ea;position:relative;
 def variantC():
     pad=pad_svg(390,{'ul':'#ff5aa0','ur':'#ff5aa0','c':'#ffcf3f','dl':'#57f0ff','dr':'#57f0ff'},stroke=7,fill_alpha=0.0,tube=True,gid="gc")
     b=f"""<div class="wrap">
-<div class="title">작품 제목<small>TITLE AREA</small></div>
+<div class="title">리듬 에너지<small>RHYTHM ENERGY</small></div>
 <div class="team"><span class="t">T1</span><span class="k">티원</span><div class="m">{' ✦ '.join(MEMBERS)}</div></div>
 <div class="mid"><div class="padbox">{pad}</div><div class="photo">사진 자리<span>완성품 또는 제작 과정 사진</span></div></div>
 <div class="row"><div class="box"><div class="h">동작설명<i>OPERATION</i></div>{li(OPS)}</div>
