@@ -54,14 +54,15 @@
     // silently in Chromium for sites in use; asked here, on a user action,
     // so browsers that prompt don't do it on page load)
     try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* ignore */ }
+    // throws if the song couldn't be stored (quota, private browsing…) so
+    // the caller can say so — a swallowed failure here used to leave the
+    // song selected on screen but missing from the list
     const id = "s" + Date.now() + Math.random().toString(36).slice(2, 7);
-    try {
-      await idbSet("song:" + id, { blob: file, name: file.name });
-      const index = await getSongIndex();
-      index.push({ id, name: file.name, addedAt: Date.now() });
-      await setSongIndex(index);
-      await idbSet("lastSelectedId", id);
-    } catch (err) { console.warn("song save failed", err); }
+    await idbSet("song:" + id, { blob: file, name: file.name });
+    const index = await getSongIndex();
+    index.push({ id, name: file.name, addedAt: Date.now() });
+    await idbSet("songIndex", index);
+    await idbSet("lastSelectedId", id);
     return id;
   }
 

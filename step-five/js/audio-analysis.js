@@ -196,8 +196,29 @@
     const phaseMs = (bestPhase / fps) * 1000;
 
     const highlightSec = findHighlight(energy, onset, fps, duration, bpm, phaseMs);
-    return { bpm, phaseMs, highlightSec };
+    return { bpm, phaseMs, highlightSec, durationSec: duration };
   }
 
-  SF.audioAnalysis = { analyzeBPM, analyzeHighlight, findHighlight, computeFeatures, PREVIEW_SEC };
+  // a short, human reason why `file` couldn't be decoded, from what its
+  // bytes actually are (the extension often lies: downloaders save web
+  // pages or other formats under ".mp3")
+  async function describeUnreadable(file) {
+    if (!file.size) return "빈 파일이에요 (0바이트). 다시 다운로드해 주세요.";
+    const head = new Uint8Array(await file.slice(0, 64).arrayBuffer());
+    const ascii = String.fromCharCode(...head).toLowerCase();
+    const at = (i, ...bytes) => bytes.every((b, k) => head[i + k] === b);
+    if (/^\s*(<!doctype|<html|<head|<\?xml|\{)/.test(ascii)) return "음악이 아니라 웹페이지/텍스트 파일이에요. 다운로드가 제대로 안 된 것 같아요 — 다시 받아 주세요.";
+    if (at(4, 0x66, 0x74, 0x79, 0x70)) return "이름은 MP3지만 실제로는 M4A/MP4 파일인데, 이 브라우저가 해당 코덱을 지원하지 않아요. Chrome에서 열거나 MP3로 변환해 주세요.";
+    if (at(0, 0x1a, 0x45, 0xdf, 0xa3)) return "실제로는 WebM/MKV 파일인데 이 브라우저에서 해독하지 못했어요. MP3로 변환해 주세요.";
+    if (at(0, 0x4f, 0x67, 0x67, 0x53)) return "실제로는 OGG 파일인데 이 브라우저에서 해독하지 못했어요. MP3로 변환해 주세요.";
+    if (at(0, 0x30, 0x26, 0xb2, 0x75)) return "실제로는 WMA 파일이에요 — 브라우저가 지원하지 않는 형식이라 MP3로 변환해 주세요.";
+    if (at(0, 0x49, 0x44, 0x33) || (head[0] === 0xff && (head[1] & 0xe0) === 0xe0)) {
+      return file.size < 100 * 1024
+        ? "MP3지만 너무 작아요 — 다운로드가 중간에 끊긴 것 같아요."
+        : "MP3 파일이지만 손상됐거나 일부가 잘려 있어요. 다시 받아 주세요.";
+    }
+    return "지원하지 않는 형식이거나 손상된 파일이에요. MP3로 변환해 주세요.";
+  }
+
+  SF.audioAnalysis = { analyzeBPM, describeUnreadable, analyzeHighlight, findHighlight, computeFeatures, PREVIEW_SEC };
 })();

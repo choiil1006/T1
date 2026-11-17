@@ -498,31 +498,77 @@
     });
   }
 
+  const MIN_SONG_SEC = 20;
+
   function initMusicUpload() {
     SF.$("audioFile").addEventListener("change", async (e) => {
       const f = e.target.files[0];
+      // clear right away: picking the same file again (e.g. after a failed
+      // attempt) must still fire "change"
+      e.target.value = "";
       if (!f) return;
       SF.sfx.unlock();
+
+      // the same song again (often re-picked after thinking it failed):
+      // select the one already there instead of adding a duplicate
+      const existing = songIndexCache.find((s) => s.name === f.name);
+      if (existing) {
+        await selectSong(existing.id);
+        scrollActiveSongIntoView(true);
+        showToast(`"${f.name}"은(는) 이미 목록에 있어서 그 곡을 선택했어요.`);
+        return;
+      }
+
+      // decode + analyze BEFORE adding it, so a file the browser can't read
+      // gets a clear reason instead of becoming a broken library entry
+      showToast(`"${f.name}" 불러오는 중…`, { duration: 1800 });
+      let analysis;
+      try {
+        analysis = await SF.audioAnalysis.analyzeBPM(f);
+      } catch (err) {
+        const why = await SF.audioAnalysis.describeUnreadable(f);
+        console.warn("upload: cannot decode", f.name, f.type, f.size, why, err);
+        showToast(`"${f.name}"을(를) 읽을 수 없습니다 — ${why}`, { type: "error", duration: 7000 });
+        return;
+      }
+      // a few seconds of audio (a broken download, a ringtone clip) can't
+      // carry a chart: notes need a 4-beat lead-in and the last 3 s stay empty
+      if (analysis.durationSec < MIN_SONG_SEC) {
+        showToast(`"${f.name}"은(는) ${Math.round(analysis.durationSec)}초밖에 안 돼요 — 다운로드가 중간에 끊긴 것 같아요. 다시 받아 주세요.`, { type: "error", duration: 7000 });
+        return;
+      }
+
+      let id;
+      try {
+        id = await SF.storage.addSongToLibrary(f);
+      } catch (err) {
+        console.warn("upload: save failed", err);
+        showToast("곡을 저장하지 못했습니다 — 저장 공간이 부족하거나 브라우저가 저장을 막고 있어요(사생활 보호 모드 등).", { type: "error", duration: 7000 });
+        return;
+      }
+
       SF.preview.stop();
       if (state.audioURL) URL.revokeObjectURL(state.audioURL);
       state.audioURL = URL.createObjectURL(f);
       state.audioFile = f;
-      state.phaseOffsetMs = 0;
-      state.songAnalyzed = false;
-      state.previewStartSec = null;
+      state.currentSongId = id;
+      SF.$("bpmInput").value = analysis.bpm;
+      state.phaseOffsetMs = analysis.phaseMs;
+      state.previewStartSec = analysis.highlightSec;
+      state.songAnalyzed = true;
+      SF.$("tapHint").textContent = "자동 측정됨";
       setCurrentSongDisplay(f.name);
       setStartEnabled(true);
       // a freshly uploaded song starts with no custom chart of its own
       state.useCustomChart = false;
       state.customChart = null;
       SF.editor.loadFromCustomChart(null);
-      const id = await SF.storage.addSongToLibrary(f);
-      state.currentSongId = id;
       await SF.storage.persistSongMeta();
       await renderSongList();
       renderBestPopup(true);
-      runAutoAnalysis(); // new song, never analyzed — measure its BPM automatically
-      e.target.value = "";
+      scrollActiveSongIntoView(true);
+      schedulePreview(0);
+      showToast(`"${f.name}" 추가됨 · BPM ${analysis.bpm}`);
     });
   }
 
