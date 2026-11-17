@@ -16,6 +16,7 @@
     el.classList.add("active");
     if (prev !== name) { void el.offsetWidth; el.classList.add("enter"); }
     document.body.dataset.screen = name; // lets CSS show things on one screen only (see #bgLogo)
+    if (prev !== name && SF.loadcell) SF.loadcell.screenChanged(name); // live load cell view on settings only
     if (name === "setup") {
       renderBestPopup(false); // a game may just have set a new record
       scrollActiveSongIntoView(false);

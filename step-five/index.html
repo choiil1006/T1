@@ -121,7 +121,14 @@
           <button class="btn primary" id="lcTareBtn" disabled>영점 재설정</button>
         </div>
         <div id="lcStatus"></div>
-        <p class="hint">발판에서 발을 모두 내린 상태에서 영점을 잡습니다. 버튼을 누르면 3초 뒤에 시작해요. 발판 보드의 펌웨어가 영점 명령(TARE)을 지원해야 합니다.</p>
+        <p class="hint">영점: 발판에서 발을 모두 내린 상태에서 잡습니다. 버튼을 누르면 3초 뒤에 시작해요.</p>
+        <div id="lcMonitor"></div>
+        <p class="hint">막대는 지금 칸에 걸린 값, 노란 선은 <b>ON(눌림)</b>, 회색 선은 <b>OFF(뗌)</b> 기준입니다. ON은 옆 칸을 세게 밟아도 닿지 않게, OFF는 옆 칸을 밟을 때 값보다 위로 두세요.</p>
+        <div class="lcRow">
+          <button class="btn" id="lcPresetBtn">권장값 (65,000 / 45,000)</button>
+          <button class="btn primary" id="lcSaveBtn" disabled>기준값 보드에 저장</button>
+        </div>
+        <p class="hint">발판 보드의 펌웨어가 영점·실시간 값·기준값 명령을 지원해야 합니다 (hardware/loadcell-serial-protocol.md).</p>
       </section>
 
       <section class="cut panel card">

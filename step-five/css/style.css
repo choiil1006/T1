@@ -247,6 +247,25 @@ p.hint{font-size:12px;color:var(--sub);margin:10px 0 0;line-height:1.6;}
 .lcRow .btn{flex:1;min-width:140px;}
 #lcStatus{font-size:12px;color:var(--sub);margin-top:10px;min-height:18px;}
 #lcStatus.ok{color:var(--good);} #lcStatus.err{color:var(--warn);}
+/* live per-pad readings + thresholds */
+#lcMonitor{display:flex;flex-direction:column;gap:8px;margin:12px 0 6px;opacity:.55;}
+#lcMonitor.live{opacity:1;}
+.lcPad{display:grid;grid-template-columns:62px 1fr 72px auto auto;align-items:center;gap:10px;font-size:12px;}
+.lcName{font-family:var(--f-num);font-weight:800;color:var(--sub);}
+.lcBar{position:relative;height:14px;background:rgba(255,255,255,.06);overflow:hidden;}
+.lcFill{position:absolute;inset:0;background:linear-gradient(90deg,var(--dl),#8fb4ff);transform-origin:left;transform:scaleX(0);}
+.lcPad.pressed .lcFill{background:linear-gradient(90deg,var(--cn),#ff9e3d);}
+.lcPad.pressed .lcName{color:var(--cn);}
+.lcOn,.lcOff{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;}
+.lcOn{background:var(--cn);} .lcOff{background:#9aa0b4;}
+.lcVal{font-family:var(--f-num);font-weight:800;text-align:right;font-variant-numeric:tabular-nums;}
+.lcPad label{display:flex;align-items:center;gap:4px;color:var(--sub);font-family:var(--f-num);font-size:11px;}
+.lcPad input{width:78px;padding:4px 6px;font:inherit;font-size:12px;}
+.lcPad.bad input{outline:1px solid var(--warn);}
+@media (max-width: 600px){
+  .lcPad{grid-template-columns:52px 1fr 64px;}
+  .lcPad label{grid-column:span 1;}
+}
 
 /* ---------- difficulty badge (game + result) ---------- */
 .diffBadge{--dc:var(--normal);display:inline-block;font-family:var(--f-num);font-size:11px;font-weight:800;letter-spacing:2px;
