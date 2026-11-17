@@ -60,7 +60,11 @@
   function dispatchPress(lane) {
     if (state.listeningLane) return; // calibration handled by the raw key/gamepad handlers
     if (state.edRecording) { SF.editor.recordNote(lane); return; }
-    if (state.running) { if (!state.paused) SF.game.handleHit(lane); return; }
+    if (state.running) {
+      if (state.paused) SF.game.pauseMenuLane(lane); // ⊙ resumes (holding ↖/↗ to quit is watched in game.js)
+      else SF.game.handleHit(lane);
+      return;
+    }
     // outside a song the pad drives the menus (song select / result)
     SF.ui.menuLane(lane);
   }

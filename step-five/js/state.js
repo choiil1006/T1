@@ -28,7 +28,7 @@
     // SF.MAX_SCORE[difficulty]; rawScore is the unscaled running total and
     // maxRawScore what a flawless run of the current chart would total
     score: 0, rawScore: 0, maxRawScore: 0, combo: 0, maxCombo: 0,
-    counts: { perfect: 0, great: 0, good: 0, bad: 0, miss: 0, empty: 0 },
+    counts: { perfect: 0, great: 0, good: 0, bad: 0, miss: 0 },
     totalJudged: 0,
     running: false, paused: false,
     rafId: null,

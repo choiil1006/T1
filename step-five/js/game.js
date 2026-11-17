@@ -76,9 +76,10 @@
 
     // reset stats
     state.score = 0; state.rawScore = 0; state.combo = 0; state.maxCombo = 0;
-    state.counts = { perfect: 0, great: 0, good: 0, bad: 0, miss: 0, empty: 0 };
+    state.counts = { perfect: 0, great: 0, good: 0, bad: 0, miss: 0 };
     state.totalJudged = 0;
     state.paused = false;
+    chordSince = null; chordLatched = true; // the pad pause chord must be released once before it can fire
     SF.$("pauseOverlay").style.display = "none";
     clearPlayfield();
     shownScore = 0;
@@ -185,7 +186,58 @@
   function loop() {
     if (!state.running) return;
     if (!state.paused) frame();
+    padCommands(performance.now());
+    if (!state.running) return; // a pad command may have just quit
     state.rafId = requestAnimationFrame(loop);
+  }
+
+  // ---- pad-only pause / quit ----
+  // Pause: hold ↖ + ↗ + ⊙ together for PAD_PAUSE_HOLD_MS. Charts never need
+  // more than two panels at once, so normal play can't trigger it.
+  // On the pause screen: ⊙ resumes (a fresh press), holding ↖ or ↗ for
+  // PAD_QUIT_HOLD_MS quits. Each hold must be released before it can fire
+  // again, so the chord that paused can't immediately count as "quit".
+  let chordSince = null, chordLatched = true; // latched until the chord lanes are first all released
+  let quitSince = null, quitArmed = false;
+  let pausedAt = 0;
+
+  function setHoldBar(el, p) {
+    el.style.setProperty("--hold", p.toFixed(3));
+    el.classList.toggle("holding", p > 0);
+  }
+
+  function padCommands(now) {
+    const held = state.laneHeld;
+    const hint = SF.$("padHoldHint");
+    if (!state.paused) {
+      const chord = SF.PAD_PAUSE_LANES.every((l) => held[l]);
+      if (!chord) {
+        chordSince = null;
+        if (!SF.PAD_PAUSE_LANES.some((l) => held[l])) chordLatched = false;
+        setHoldBar(hint, 0);
+        return;
+      }
+      if (chordLatched) return;
+      if (chordSince == null) chordSince = now;
+      const p = Math.min(1, (now - chordSince) / SF.PAD_PAUSE_HOLD_MS);
+      setHoldBar(hint, p);
+      if (p >= 1) { chordLatched = true; chordSince = null; setHoldBar(hint, 0); togglePause(); }
+      return;
+    }
+    const quitBtn = SF.$("quitBtn");
+    const corner = held.UL || held.UR;
+    if (!corner) { quitArmed = true; quitSince = null; setHoldBar(quitBtn, 0); return; }
+    if (!quitArmed) return;
+    if (quitSince == null) quitSince = now;
+    const p = Math.min(1, (now - quitSince) / SF.PAD_QUIT_HOLD_MS);
+    setHoldBar(quitBtn, p);
+    if (p >= 1) { quitSince = null; setHoldBar(quitBtn, 0); quit(); }
+  }
+
+  // a pad press while paused (see input.js dispatchPress)
+  function pauseMenuLane(lane) {
+    if (!state.running || !state.paused) return;
+    if (lane === "CN" && performance.now() - pausedAt > 300) togglePause();
   }
 
   // one frame of game logic + drawing (exported so tests can step it)
@@ -376,10 +428,10 @@
         if (best.el) { best.el.classList.add("hitpop"); const el = best.el; best.el = null; setTimeout(() => el.remove(), 200); }
       }
       registerJudgement(grade, lane);
-    } else {
-      // pressed with nothing nearby to hit — a small score penalty for hitting "thin air"
-      registerEmptyPress(lane);
     }
+    // nothing near enough to hit: no judgement at all. Feet rest on the pads
+    // and brush them constantly, so a stray press must never cost a miss,
+    // the combo or points — the receptor flash above is the only feedback.
   }
 
   function flashReceptor(lane) {
@@ -429,18 +481,6 @@
     bumpCombo();
     setHeat();
     if (grade !== "miss" && state.combo % MILESTONE_EVERY === 0) showMilestone(state.combo);
-    updateHUD();
-  }
-
-  function registerEmptyPress(lane) {
-    state.counts.empty++;
-    state.combo = 0;
-    state.rawScore = Math.max(0, state.rawScore - SF.EMPTY_PRESS_PENALTY);
-    syncScore();
-    SF.sfx.playJudge("miss"); // shown the same as a miss — it's an incorrect press either way
-    popJudgeText("miss");
-    missFlash(lane);
-    setHeat();
     updateHUD();
   }
 
@@ -516,15 +556,18 @@
     setText("gcGreat", String(c.great));
     setText("gcGood", String(c.good));
     setText("gcBad", String(c.bad));
-    setText("gcMiss", String(c.miss + c.empty));
-    setText("gGrade", state.totalJudged + c.empty > 0 ? gradeFor(acc) : "-");
+    setText("gcMiss", String(c.miss));
+    setText("gGrade", state.totalJudged > 0 ? gradeFor(acc) : "-");
   }
 
   function togglePause() {
     if (!state.running) return;
     state.paused = !state.paused;
     SF.$("pauseOverlay").style.display = state.paused ? "flex" : "none";
-    if (state.paused) { SF.player.pause(); setBeat(false); }
+    quitSince = null;
+    quitArmed = !(state.laneHeld.UL || state.laneHeld.UR); // corners still down from the pause chord don't count
+    setHoldBar(SF.$("quitBtn"), 0);
+    if (state.paused) { pausedAt = performance.now(); SF.player.pause(); setBeat(false); }
     else { SF.player.resume(); setBeat(true); }
   }
 
@@ -569,7 +612,6 @@
       b.textContent = c[k];
       b.parentElement.querySelector("em").style.width = "0%";
     });
-    SF.$("bEmpty").textContent = c.empty;
     SF.$("gradeLetter").textContent = grade;
 
     const badge = SF.$("newRecordBadge");
@@ -611,5 +653,5 @@
     setTimeout(() => { done = true; el.textContent = target.toLocaleString(); }, ms + 80);
   }
 
-  SF.game = { cacheLaneEls, startGame, handleHit, togglePause, quit, finishGame, frame, currentSongMs };
+  SF.game = { cacheLaneEls, startGame, handleHit, togglePause, pauseMenuLane, padCommands, quit, finishGame, frame, currentSongMs };
 })();

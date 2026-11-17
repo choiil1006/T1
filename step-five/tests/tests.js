@@ -192,7 +192,8 @@
     const cases = [];
     [92, 128, 150, 185].forEach((bpm) => [35, 120].forEach((sec) => [true, false].forEach((withF) => cases.push({ bpm, sec, withF }))));
     let total = 0, bad = 0;
-    const densities = { easy: [], normal: [] };
+    const densities = { easy: [], normal: [], hard: [] };
+    let easyMinGap = Infinity;
     cases.forEach(({ bpm, sec, withF }) => {
       const feats = withF ? featuresFor(bpm, sec) : null;
       ["easy", "normal", "hard"].forEach((d) => {
@@ -200,33 +201,35 @@
         total++;
         const probs = chartProblems(notes, bpm, d, sec);
         if (probs.length) { bad++; report("fail", `규칙 위반 ${d} ${bpm}BPM ${sec}s${withF ? "" : " (분석 없음)"}`, probs.slice(0, 4).join(" / ")); }
-        if (withF && d !== "hard") {
+        if (withF) {
           const beats = (sec * 1000 - 3000 - 4 * 60000 / bpm) / (60000 / bpm);
           densities[d].push(notes.length / Math.max(1, beats));
         }
+        if (d === "easy") for (let i = 1; i < notes.length; i++) if (notes[i].time > notes[i - 1].time) easyMinGap = Math.min(easyMinGap, notes[i].time - notes[i - 1].time);
       });
     });
     check(`${total}개 채보 모두 규칙 준수 (정렬·마지막 3초·CN 홀드 금지·동시 2개 이하·같은 레인 간격)`, bad === 0, `${bad}개 위반`);
 
     const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
-    check("EASY 밀도 (박자당 0.35~1.1 노트)", avg(densities.easy) > 0.35 && avg(densities.easy) < 1.1, avg(densities.easy).toFixed(2));
-    check("NORMAL 밀도 (박자당 0.7~2.0 노트)", avg(densities.normal) > 0.7 && avg(densities.normal) < 2.0, avg(densities.normal).toFixed(2));
+    check("EASY 밀도 (박자당 0.2~0.6 노트, 2박에 1개 꼴)", avg(densities.easy) > 0.2 && avg(densities.easy) < 0.6, avg(densities.easy).toFixed(2));
+    check("NORMAL 밀도 (박자당 0.35~1.1 노트)", avg(densities.normal) > 0.35 && avg(densities.normal) < 1.1, avg(densities.normal).toFixed(2));
+    check("HARD 밀도 (박자당 0.7~2.0 노트)", avg(densities.hard) > 0.7 && avg(densities.hard) < 2.0, avg(densities.hard).toFixed(2));
+    check("EASY 노트 간격은 185 BPM에서도 최소 0.6초", easyMinGap >= 590, `${easyMinGap.toFixed(0)}ms`);
 
     const f = featuresFor(128, 120);
     const strip = (ns) => JSON.stringify(ns.map((n) => [n.time, n.lane, n.hold, n.holdEnd]));
-    const a = gen(128, "normal", 120, 0, "same-song", f), b = gen(128, "normal", 120, 0, "same-song", f);
+    const a = gen(128, "hard", 120, 0, "same-song", f), b = gen(128, "hard", 120, 0, "same-song", f);
     check("같은 곡·난이도는 항상 같은 채보", strip(a) === strip(b));
-    const h = gen(128, "hard", 120, 0, "same-song", f);
-    check("NORMAL과 HARD는 같은 채보 (의도된 설계)", strip(a) === strip(h));
-    const other = gen(128, "normal", 120, 0, "other-song", f);
+    const nrm = gen(128, "normal", 120, 0, "same-song", f);
+    check("NORMAL과 HARD는 다른 채보", strip(a) !== strip(nrm));
+    const other = gen(128, "hard", 120, 0, "other-song", f);
     check("다른 곡이면 다른 채보", strip(a) !== strip(other));
 
-    const jumps = (() => { const c = {}; a.forEach((n) => { c[n.time] = (c[n.time] || 0) + 1; }); return Object.values(c).filter((x) => x === 2).length; })();
-    check("NORMAL에 점프(동시 밟기)가 등장", jumps > 0, "점프 0개");
+    const jumpCount = (ns) => { const c = {}; ns.forEach((n) => { c[n.time] = (c[n.time] || 0) + 1; }); return Object.values(c).filter((x) => x > 1).length; };
+    check("HARD에 점프(동시 밟기)가 등장", jumpCount(a) > 0, "점프 0개");
     check("홀드 노트가 등장", a.some((n) => n.hold), "홀드 0개");
     const e = gen(128, "easy", 120, 0, "same-song", f);
-    const eJumps = (() => { const c = {}; e.forEach((n) => { c[n.time] = (c[n.time] || 0) + 1; }); return Object.values(c).filter((x) => x > 1).length; })();
-    check("EASY에는 점프 없음", eJumps === 0, eJumps + "개");
+    check("EASY·NORMAL에는 점프 없음", jumpCount(e) === 0 && jumpCount(nrm) === 0, `${jumpCount(e)} / ${jumpCount(nrm)}개`);
 
     const rep = repeatedWindows(a, 128, 0);
     check("반복되는 구간에서 같은(또는 좌우 반전) 패턴 재사용", rep.repeats >= 3, `${rep.repeats}/${rep.windows} 구간`);
@@ -343,7 +346,7 @@
       const r = await autoplay(w, d, 0);
       if (r.error) { report("fail", `${d} 완벽 플레이`, r.error); continue; }
       const judgements = r.taps + r.holds * 2;
-      check(`${d}: 모든 판정 PERFECT (${judgements}개, 홀드 ${r.holds}개)`, r.counts.perfect === judgements && r.counts.miss === 0 && r.counts.empty === 0, JSON.stringify(r.counts));
+      check(`${d}: 모든 판정 PERFECT (${judgements}개, 홀드 ${r.holds}개)`, r.counts.perfect === judgements && r.counts.miss === 0, JSON.stringify(r.counts));
       check(`${d}: 점수가 최대치 ${r.max.toLocaleString()}`, r.score === r.max, r.score);
       check(`${d}: 최대 콤보 = 판정 수`, r.maxCombo === judgements, r.maxCombo);
       check(`${d}: 결과 화면 (점수 ${r.rScore}, 등급 ${r.grade})`, r.screen === "result" && r.rScore === r.max.toLocaleString() && r.grade === "SS", `${r.screen} ${r.rScore} ${r.grade}`);
@@ -352,7 +355,7 @@
     const m = await autoplay(w, "normal", 7);
     if (m.error) report("fail", "일부러 놓치기", m.error);
     else {
-      check(`놓친 노트 ${m.skipped}개가 정확히 MISS ${m.skipped}개로 집계`, m.counts.miss === m.skipped && m.counts.empty === 0, JSON.stringify(m.counts));
+      check(`놓친 노트 ${m.skipped}개가 정확히 MISS ${m.skipped}개로 집계`, m.counts.miss === m.skipped, JSON.stringify(m.counts));
       check("놓친 판이 최대 점수보다 낮음", m.score < m.max, m.score);
     }
 
@@ -366,6 +369,53 @@
     S.game.quit();
     await sleep(3200);
     check("카운트다운 중 그만두면 곡이 시작되지 않음", !S.state.running && !S.player.isPlaying());
+
+    // stray presses and pad-only pause / resume / quit
+    const st = S.state;
+    st.difficulty = "normal";
+    st.audioFile = wavBlob(synthSong(128, 40));
+    st.currentSongId = "__autoplay__";
+    S.game.startGame();
+    if (!(await waitFor(() => st.running, 15000))) { report("fail", "발판 조작 테스트", "게임이 시작되지 않음"); return; }
+    S.player.pause();
+    const lanesOff = () => S.LANES.forEach((l) => { st.laneHeld[l] = false; });
+    // a moment with nothing near DL
+    let quiet = 2000;
+    while (st.notes.some((n) => n.lane === "DL" && Math.abs(n.time - quiet) < 800)) quiet += 250;
+    S.player.seek((quiet + st.syncOffsetMs) / 1000); S.game.frame();
+    const before = JSON.stringify([st.counts, st.combo, st.score]);
+    S.game.handleHit("DL"); S.game.handleHit("DL"); S.game.handleHit("DL");
+    check("노트 없는 타이밍에 밟아도 MISS·콤보·점수 변화 없음", JSON.stringify([st.counts, st.combo, st.score]) === before, `${before} → ${JSON.stringify([st.counts, st.combo, st.score])}`);
+
+    let t = performance.now();
+    lanesOff(); S.game.padCommands(t);
+    st.laneHeld.UL = st.laneHeld.UR = true; S.game.padCommands(t); S.game.padCommands(t + 1500);
+    check("두 칸(↖+↗)을 계속 밟고 있어도 일시정지 안 됨", !st.paused);
+    lanesOff(); S.game.padCommands(t);
+    st.laneHeld.UL = st.laneHeld.UR = st.laneHeld.CN = true;
+    S.game.padCommands(t); S.game.padCommands(t + 600);
+    const earlyPause = st.paused;
+    S.game.padCommands(t + 1001);
+    check("↖+↗+⊙ 1초 누르면 일시정지 (0.6초에는 아직 아님)", !earlyPause && st.paused);
+    S.game.padCommands(t + 3000);
+    check("일시정지시킨 채로 계속 누르고 있어도 그만두기로 넘어가지 않음", st.paused && st.running);
+    S.game.pauseMenuLane("CN");
+    const tooSoon = st.paused;
+    await sleep(350);
+    lanesOff(); S.game.pauseMenuLane("CN");
+    check("일시정지 화면에서 ⊙ 밟으면 계속하기", tooSoon && !st.paused && st.running);
+
+    t = performance.now();
+    lanesOff(); S.game.padCommands(t);
+    st.laneHeld.UL = st.laneHeld.UR = st.laneHeld.CN = true;
+    S.game.padCommands(t); S.game.padCommands(t + 1001);
+    lanesOff(); S.game.padCommands(t + 1100);
+    st.laneHeld.UR = true;
+    S.game.padCommands(t + 1200); S.game.padCommands(t + 1700);
+    const stillPaused = st.paused && st.running;
+    S.game.padCommands(t + 2201);
+    check("일시정지 화면에서 ↗ 1초 누르면 그만두기 (0.5초에는 아직 아님)", stillPaused && !st.running && w.document.body.dataset.screen === "setup");
+    lanesOff();
   }
 
   async function runAll() {

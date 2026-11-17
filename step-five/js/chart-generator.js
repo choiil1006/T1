@@ -26,8 +26,7 @@
 //    the current foot position and falls back to fresh steps if it doesn't fit.
 //
 // Unchanged guarantees: the same song + difficulty recipe always gives the
-// same chart (seeded PRNG; NORMAL and HARD share their recipe, so they get
-// the identical chart on purpose), nothing in the last 3 seconds, no holds on
+// same chart (seeded PRNG), nothing in the last 3 seconds, no holds on
 // CN, never more than two panels engaged at once, and a minimum time before
 // the same panel is used again.
 (function () {
@@ -138,7 +137,10 @@
   function generateChart(bpm, difficulty, durationSec, phaseOffsetMs, songId, features) {
     const diff = SF.DIFF[difficulty];
     const beatMs = 60000 / bpm;
-    const subdiv = diff.subdiv;
+    // EASY steps every 2 beats; on fast songs the grid is coarsened further
+    // until steps are at least diff.minGapMs apart
+    let subdiv = diff.subdiv;
+    while (diff.minGapMs && beatMs / subdiv < diff.minGapMs && subdiv > 0.25) subdiv /= 2;
     const stepMs = beatMs / subdiv;
     const phase = (((phaseOffsetMs || 0) % beatMs) + beatMs) % beatMs;
     const leadInMs = phase + beatMs * 4; // align to detected downbeat, then 4 beat lead-in
@@ -147,9 +149,9 @@
     // of the song, so it finishes on a clear 3 seconds instead of a note
     const endMs = Math.max(0, durationMs - QUIET_TAIL_MS);
     const holdBase = diff.holdChance != null ? diff.holdChance : 0.08;
-    const isEasy = difficulty === "easy";
+    const simple = !!diff.simple; // beginner movement styles, no kick jumps, no extra 16ths
 
-    const seedKey = "v2|" + (songId || "nosong") + "|" + subdiv + "|" + diff.skip + "|" + diff.jump + "|" + holdBase;
+    const seedKey = "v2|" + (songId || "nosong") + "|" + diff.subdiv + "|" + diff.skip + "|" + diff.jump + "|" + holdBase;
     const rand = makeSeededRandom(seedKey);
     const rd = makeReader(features);
     const energyAt = rd ? sectionProfile(rd, durationMs) : () => 0.5;
@@ -157,7 +159,7 @@
     const minSameLaneGapMs = stepMs * 1.3;
     const postHoldRecoveryMs = stepMs * 2.5;
     const segMs = beatMs * 4;
-    const slotsPerSeg = 4 * subdiv;
+    const slotsPerSeg = Math.max(1, Math.round(4 * subdiv));
 
     // ---- 1) read every 4-beat segment of the music ----
     const segs = [];
@@ -267,7 +269,7 @@
 
     function chooseStyle(energy) {
       const r = rand();
-      if (isEasy) return r < 0.7 ? "free" : r < 0.85 ? "zigzag" : "center";
+      if (simple) return r < 0.7 ? "free" : r < 0.85 ? "zigzag" : "center";
       if (energy > 0.6) return r < 0.3 ? "drill" : r < 0.6 ? "zigzag" : "free";
       if (energy > 0.3) return r < 0.6 ? "free" : r < 0.85 ? "zigzag" : "center";
       return r < 0.7 ? "free" : "center";
@@ -314,7 +316,7 @@
         if (rand() < skip) return; // rhythmic rest
         events.push({ t: sl.t, onBeat: sl.onBeat, low: sl.low, bonus: false });
         // energetic sections can earn a 16th between grid steps where a real onset backs it up
-        if (!isEasy && rd) {
+        if (!simple && rd) {
           const midT = sl.t + stepMs / 2;
           const midEnergy = energyAt(midT);
           const midPeak = rd.peak("full", midT, stepMs * 0.3);
@@ -328,7 +330,7 @@
         const nextT = idx + 1 < events.length ? events[idx + 1].t : seg.start + segMs;
 
         // jumps: on strong on-beat kicks, never during a hold
-        if (!isEasy && ev.onBeat && !holdInForce(body, t)) {
+        if (!simple && ev.onBeat && !holdInForce(body, t)) {
           const jc = diff.jump * (0.6 + seg.energy * 1.2) * (rd ? (ev.low > 0.5 ? 1.8 : 0.5) : 1);
           if (rand() < jc) {
             const pair = pickJump(t);

@@ -243,6 +243,10 @@ p.hint{font-size:12px;color:var(--sub);margin:10px 0 0;line-height:1.6;}
 .padSlot[data-lane="DR"] .lbl{color:var(--dr)}
 #padStatus{font-size:12px;color:var(--sub);margin-top:10px;min-height:18px;}
 #padStatus.ok{color:var(--good);}
+.lcRow{display:flex;gap:10px;flex-wrap:wrap;}
+.lcRow .btn{flex:1;min-width:140px;}
+#lcStatus{font-size:12px;color:var(--sub);margin-top:10px;min-height:18px;}
+#lcStatus.ok{color:var(--good);} #lcStatus.err{color:var(--warn);}
 
 /* ---------- difficulty badge (game + result) ---------- */
 .diffBadge{--dc:var(--normal);display:inline-block;font-family:var(--f-num);font-size:11px;font-weight:800;letter-spacing:2px;
@@ -493,6 +497,20 @@ p.hint{font-size:12px;color:var(--sub);margin:10px 0 0;line-height:1.6;}
 #pauseOverlay{position:absolute;inset:0;background:rgba(6,6,12,0.86);z-index:7;
   display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
 .pauseTitle{font-family:var(--f-disp);font-size:52px;letter-spacing:6px;transform:skewX(-9deg);color:var(--cn);}
+.pauseKeys{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;color:var(--sub);}
+.pauseKeys span{display:flex;align-items:center;}
+.pauseKeys .pk{width:15px;height:15px;margin-right:6px;}
+/* a button that fills up while its pad command is being held (game.js setHoldBar) */
+.holdBtn{position:relative;overflow:hidden;--hold:0;}
+.holdBtn::after{content:"";position:absolute;inset:0;background:rgba(255,90,61,.55);
+  transform-origin:left;transform:scaleX(var(--hold));pointer-events:none;}
+/* the pad pause chord being held during play */
+#padHoldHint{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:6;pointer-events:none;
+  display:none;flex-direction:column;align-items:center;gap:8px;--hold:0;
+  font-family:var(--f-disp);font-size:24px;letter-spacing:3px;color:#fff;text-shadow:0 0 14px rgba(0,0,0,.8);}
+#padHoldHint.holding{display:flex;}
+#padHoldHint i{display:block;width:180px;height:8px;background:rgba(255,255,255,.15);position:relative;overflow:hidden;}
+#padHoldHint i::after{content:"";position:absolute;inset:0;background:var(--cn);transform-origin:left;transform:scaleX(var(--hold));}
 
 /* narrow screens: no side panels, just a compact score readout */
 @media (max-width: 1060px){
@@ -530,8 +548,6 @@ p.hint{font-size:12px;color:var(--sub);margin:10px 0 0;line-height:1.6;}
 .rBar i{display:block;height:10px;background:rgba(255,255,255,.06);clip-path:polygon(5px 0,100% 0,calc(100% - 5px) 100%,0 100%);}
 .rBar em{display:block;height:100%;width:0;background:currentColor;box-shadow:0 0 10px currentColor;transition:width .9s cubic-bezier(.2,.8,.2,1);}
 .rBar b{text-align:right;color:var(--text);}
-.rEmpty{margin-top:12px;font-size:12px;color:var(--sub);}
-.rEmpty b{font-family:var(--f-num);color:var(--text);margin-left:6px;}
 .rBtns{display:flex;justify-content:center;gap:12px;margin-top:22px;}
 .rBtns .btn{min-width:150px;padding:13px 22px;}
 /* staged reveal: score counts up (JS), bars grow, then the grade stamps in */
