@@ -18,10 +18,11 @@
 //   z          영점 다시 잡기
 //   i3         ③번 발판 방향 뒤집기 (밟으면 음수로 가는 발판)
 //   a3         ③번 발판 사용/안 함 바꾸기 (고장 난 발판을 잠시 끌 때)
-//   t4000      모든 발판 T_ON = 4000, T_OFF = 2000 (T_OFF는 자동으로 절반)
-//   t3:2500    ③번 발판만 T_ON = 2500, T_OFF = 1250
-//   f1500      모든 발판 T_OFF = 1500 (t 다음에 따로 정할 때)
-//   f3:1000    ③번 발판만 T_OFF = 1000
+//   t8000      모든 발판 T_ON = 8000, T_OFF = 4000 (T_OFF는 자동으로 절반, 클수록 둔함)
+//   t3:5000    ③번 발판만 T_ON = 5000, T_OFF = 2500
+//   f4000      모든 발판 T_OFF = 4000 (t 다음에 따로 정할 때)
+//   f3:2000    ③번 발판만 T_OFF = 2000
+//   n3         T_ON을 3번 연속 넘어야 눌림 (1~10, 클수록 둔함. 80SPS에서 1번 ≈ 12.5ms)
 //   x          공장 초기값으로 되돌리기
 //
 // 발판 번호와 핀
@@ -40,6 +41,8 @@ const uint8_t KEY[N]  = {HID_KEY_KEYPAD_1, HID_KEY_KEYPAD_7, HID_KEY_KEYPAD_5, H
 const char* NAME[N]   = {"1 좌하", "2 좌상", "3 중앙", "4 우상", "5 우하"};
 
 const uint8_t RELEASE_SAMPLES = 2;
+const int32_t DEF_T_ON = 8000;      // 기본 문턱값 (예전 3000 → 둔하게)
+const uint8_t DEF_PRESS_N = 3;      // 기본: T_ON을 넘은 샘플이 3번 연속이어야 눌림 (80SPS면 약 25ms)
 const uint8_t ZERO_N = 16;
 
 // ---------- 저장되는 설정 ----------
@@ -49,18 +52,20 @@ struct Config {
   uint8_t  invert;          // 비트 i = 발판 i 방향 뒤집기
   int32_t  tOn[N];
   int32_t  tOff[N];
+  uint8_t  pressN;          // 눌림으로 인정할 연속 샘플 수 (1~10)
 };
-const uint32_t MAGIC = 0x50414431;   // "PAD1"
+const uint32_t MAGIC = 0x50414432;   // "PAD2" (설정 형식이 바뀌면 숫자를 올림 → 초기값으로 다시 시작)
 Config cfg;
 
 void defaults() {
   cfg.magic = MAGIC; cfg.active = 0b11111; cfg.invert = 0;
-  for (uint8_t i = 0; i < N; i++) { cfg.tOn[i] = 3000; cfg.tOff[i] = 1500; }
+  for (uint8_t i = 0; i < N; i++) { cfg.tOn[i] = DEF_T_ON; cfg.tOff[i] = DEF_T_ON / 2; }
+  cfg.pressN = DEF_PRESS_N;
 }
 void saveCfg() { EEPROM.put(0, cfg); EEPROM.commit(); }
 void loadCfg() {
   EEPROM.get(0, cfg);
-  bool ok = cfg.magic == MAGIC;
+  bool ok = cfg.magic == MAGIC && cfg.pressN >= 1 && cfg.pressN <= 10;
   for (uint8_t i = 0; ok && i < N; i++) if (cfg.tOn[i] <= 0 || cfg.tOff[i] < 0 || cfg.tOff[i] >= cfg.tOn[i]) ok = false;
   if (!ok) { defaults(); saveCfg(); }
 }
@@ -72,6 +77,7 @@ Adafruit_USBD_HID usb_hid;
 int32_t  baseV[N];
 bool     down[N];
 uint8_t  lowCount[N];
+uint8_t  highCount[N];
 bool     zeroed[N];
 int64_t  zSum[N];
 uint8_t  zCnt[N];
@@ -106,12 +112,13 @@ void sendReport() {
   for (uint8_t i = 0; i < N; i++) digitalWrite(MIR[i], down[i] ? HIGH : LOW);
 }
 
-void restartZero(uint8_t i) { zeroed[i] = false; zSum[i] = 0; zCnt[i] = 0; down[i] = false; lowCount[i] = 0; }
+void restartZero(uint8_t i) { zeroed[i] = false; zSum[i] = 0; zCnt[i] = 0; down[i] = false; lowCount[i] = 0; highCount[i] = 0; }
 void zeroAll() { for (uint8_t i = 0; i < N; i++) restartZero(i); sendReport(); }
 
 // ---------- 시리얼 출력 ----------
 void showCfg() {
   Serial.println(F("--- 설정 ---"));
+  Serial.print(F("눌림 인정: T_ON을 ")); Serial.print((int)cfg.pressN); Serial.println(F("번 연속 넘을 때 (n 명령으로 변경)"));
   for (uint8_t i = 0; i < N; i++) {
     Serial.print(NAME[i]);
     Serial.print((cfg.active >> i) & 1 ? F("  사용") : F("  끔  "));
@@ -126,7 +133,8 @@ void showCfg() {
 }
 void help() {
   Serial.println(F("명령: s 설정 | r 속도 | d 값흐름 | z 영점 | i3 3번 방향뒤집기 | a3 3번 켜기/끄기"));
-  Serial.println(F("      t4000 전체 T_ON(T_OFF는 절반) | t3:2500 3번만 | f1500 전체 T_OFF | f3:1000 3번만 | x 초기화"));
+  Serial.println(F("      t8000 전체 T_ON(T_OFF는 절반) | t3:5000 3번만 | f4000 전체 T_OFF | f3:2000 3번만"));
+  Serial.println(F("      n3 눌림 인정 연속 횟수(1~10, 클수록 둔함) | x 초기화"));
 }
 
 // ---------- 명령 처리 ----------
@@ -177,6 +185,11 @@ void runCommand(const char* c) {
     if (k == 'i') cfg.invert ^= (1 << i); else cfg.active ^= (1 << i);
     restartZero(i); sendReport(); saveCfg(); showCfg();
   }
+  else if (k == 'n') {
+    int32_t v;
+    if (!parseNum(arg, v) || v < 1 || v > 10) { Serial.println(F("n 뒤에 1~10 (예: n3)")); return; }
+    cfg.pressN = (uint8_t)v; saveCfg(); showCfg();
+  }
   else if (k == 't') setThreshold(true, arg);
   else if (k == 'f') setThreshold(false, arg);
   else if (k == 'x') { defaults(); saveCfg(); zeroAll(); showCfg(); }
@@ -205,7 +218,7 @@ void setup() {
   for (uint8_t i = 0; i < N; i++) {
     pinMode(DT[i], INPUT_PULLUP); pinMode(SCK_[i], OUTPUT); digitalWrite(SCK_[i], LOW);
     pinMode(MIR[i], OUTPUT); digitalWrite(MIR[i], LOW);
-    down[i] = false; lowCount[i] = 0; lastSample[i] = 0; sampleCnt[i] = 0; lastRaw[i] = 0; baseV[i] = 0;
+    down[i] = false; lowCount[i] = 0; highCount[i] = 0; lastSample[i] = 0; sampleCnt[i] = 0; lastRaw[i] = 0; baseV[i] = 0;
   }
   for (uint8_t i = 0; i < 4; i++) { pinMode(CMD[i], OUTPUT); digitalWrite(CMD[i], LOW); }
   EEPROM.begin(256);
@@ -240,8 +253,12 @@ void loop() {
     }
     int32_t d = raw - baseV[i];
     if (!down[i]) {
-      if (d >= cfg.tOn[i]) { down[i] = true; lowCount[i] = 0; changed = true; }
-      else if (d > -cfg.tOn[i]) baseV[i] += d / 256;          // 빈 발판일 때만 영점을 천천히 따라감
+      if (d >= cfg.tOn[i]) {                                   // T_ON을 pressN번 연속 넘어야 눌림 (살짝 스친 것은 무시)
+        if (++highCount[i] >= cfg.pressN) { down[i] = true; highCount[i] = 0; lowCount[i] = 0; changed = true; }
+      } else {
+        highCount[i] = 0;
+        if (d > -cfg.tOn[i]) baseV[i] += d / 256;              // 빈 발판일 때만 영점을 천천히 따라감
+      }
     } else {
       if (d < cfg.tOff[i]) { if (++lowCount[i] >= RELEASE_SAMPLES) { down[i] = false; changed = true; } }
       else lowCount[i] = 0;
