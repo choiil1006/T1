@@ -23,6 +23,7 @@
 //   f4000      모든 발판 T_OFF = 4000 (t 다음에 따로 정할 때)
 //   f3:2000    ③번 발판만 T_OFF = 2000
 //   n3         T_ON을 3번 연속 넘어야 눌림 (1~10, 클수록 둔함. 80SPS에서 1번 ≈ 12.5ms)
+//   u15        눌림 고착 자동해제: 15초 넘게 눌린 채 값이 거의 안 변하면 영점 다시 (0 = 끔, 5~120초)
 //   x          공장 초기값으로 되돌리기
 //
 // 발판 번호와 핀
@@ -43,6 +44,8 @@ const char* NAME[N]   = {"1 좌하", "2 좌상", "3 중앙", "4 우상", "5 우�
 const uint8_t RELEASE_SAMPLES = 2;
 const int32_t DEF_T_ON = 8000;      // 기본 문턱값 (예전 3000 → 둔하게)
 const uint8_t DEF_PRESS_N = 3;      // 기본: T_ON을 넘은 샘플이 3번 연속이어야 눌림 (80SPS면 약 25ms)
+const uint8_t DEF_STUCK_S = 15;     // 기본: 15초 넘게 같은 값으로 눌려 있으면 고착으로 보고 영점 다시
+const uint32_t BLOCK_MS = 3000;     // 값이 "변하지 않는다"를 판단하는 구간 길이
 const uint8_t ZERO_N = 16;
 
 // ---------- 저장되는 설정 ----------
@@ -53,19 +56,21 @@ struct Config {
   int32_t  tOn[N];
   int32_t  tOff[N];
   uint8_t  pressN;          // 눌림으로 인정할 연속 샘플 수 (1~10)
+  uint8_t  stuckSec;        // 눌림 고착 자동해제 시간(초), 0 = 끔
 };
-const uint32_t MAGIC = 0x50414432;   // "PAD2" (설정 형식이 바뀌면 숫자를 올림 → 초기값으로 다시 시작)
+const uint32_t MAGIC = 0x50414433;   // "PAD3" (설정 형식이 바뀌면 숫자를 올림 → 초기값으로 다시 시작)
 Config cfg;
 
 void defaults() {
   cfg.magic = MAGIC; cfg.active = 0b11111; cfg.invert = 0;
   for (uint8_t i = 0; i < N; i++) { cfg.tOn[i] = DEF_T_ON; cfg.tOff[i] = DEF_T_ON / 2; }
   cfg.pressN = DEF_PRESS_N;
+  cfg.stuckSec = DEF_STUCK_S;
 }
 void saveCfg() { EEPROM.put(0, cfg); EEPROM.commit(); }
 void loadCfg() {
   EEPROM.get(0, cfg);
-  bool ok = cfg.magic == MAGIC && cfg.pressN >= 1 && cfg.pressN <= 10;
+  bool ok = cfg.magic == MAGIC && cfg.pressN >= 1 && cfg.pressN <= 10 && cfg.stuckSec <= 120;
   for (uint8_t i = 0; ok && i < N; i++) if (cfg.tOn[i] <= 0 || cfg.tOff[i] < 0 || cfg.tOff[i] >= cfg.tOn[i]) ok = false;
   if (!ok) { defaults(); saveCfg(); }
 }
@@ -78,6 +83,11 @@ int32_t  baseV[N];
 bool     down[N];
 uint8_t  lowCount[N];
 uint8_t  highCount[N];
+uint32_t downSince[N];   // 눌린 시각
+uint32_t negSince[N];    // 값이 -T_ON 아래로 내려간 시각 (0 = 아님)
+int32_t  wMin[N], wMax[N];
+uint32_t wStart[N];
+bool     steady[N];      // 직전 3초 구간에서 값이 거의 안 변했는가
 bool     zeroed[N];
 int64_t  zSum[N];
 uint8_t  zCnt[N];
@@ -112,13 +122,18 @@ void sendReport() {
   for (uint8_t i = 0; i < N; i++) digitalWrite(MIR[i], down[i] ? HIGH : LOW);
 }
 
-void restartZero(uint8_t i) { zeroed[i] = false; zSum[i] = 0; zCnt[i] = 0; down[i] = false; lowCount[i] = 0; highCount[i] = 0; }
+void restartZero(uint8_t i) {
+  zeroed[i] = false; zSum[i] = 0; zCnt[i] = 0; down[i] = false; lowCount[i] = 0; highCount[i] = 0;
+  negSince[i] = 0; steady[i] = false; wStart[i] = 0;
+}
 void zeroAll() { for (uint8_t i = 0; i < N; i++) restartZero(i); sendReport(); }
 
 // ---------- 시리얼 출력 ----------
 void showCfg() {
   Serial.println(F("--- 설정 ---"));
   Serial.print(F("눌림 인정: T_ON을 ")); Serial.print((int)cfg.pressN); Serial.println(F("번 연속 넘을 때 (n 명령으로 변경)"));
+  Serial.print(F("고착 자동해제: "));
+  if (cfg.stuckSec) { Serial.print((int)cfg.stuckSec); Serial.println(F("초 (u 명령으로 변경, u0 = 끔)")); } else Serial.println(F("꺼짐 (u15 처럼 켜기)"));
   for (uint8_t i = 0; i < N; i++) {
     Serial.print(NAME[i]);
     Serial.print((cfg.active >> i) & 1 ? F("  사용") : F("  끔  "));
@@ -134,7 +149,7 @@ void showCfg() {
 void help() {
   Serial.println(F("명령: s 설정 | r 속도 | d 값흐름 | z 영점 | i3 3번 방향뒤집기 | a3 3번 켜기/끄기"));
   Serial.println(F("      t8000 전체 T_ON(T_OFF는 절반) | t3:5000 3번만 | f4000 전체 T_OFF | f3:2000 3번만"));
-  Serial.println(F("      n3 눌림 인정 연속 횟수(1~10, 클수록 둔함) | x 초기화"));
+  Serial.println(F("      n3 눌림 인정 연속 횟수(1~10, 클수록 둔함) | u15 고착 자동해제 초(0=끔, 5~120) | x 초기화"));
 }
 
 // ---------- 명령 처리 ----------
@@ -190,6 +205,11 @@ void runCommand(const char* c) {
     if (!parseNum(arg, v) || v < 1 || v > 10) { Serial.println(F("n 뒤에 1~10 (예: n3)")); return; }
     cfg.pressN = (uint8_t)v; saveCfg(); showCfg();
   }
+  else if (k == 'u') {
+    int32_t v;
+    if (!parseNum(arg, v) || (v != 0 && (v < 5 || v > 120))) { Serial.println(F("u 뒤에 0(끔) 또는 5~120 (예: u15)")); return; }
+    cfg.stuckSec = (uint8_t)v; saveCfg(); showCfg();
+  }
   else if (k == 't') setThreshold(true, arg);
   else if (k == 'f') setThreshold(false, arg);
   else if (k == 'x') { defaults(); saveCfg(); zeroAll(); showCfg(); }
@@ -218,7 +238,7 @@ void setup() {
   for (uint8_t i = 0; i < N; i++) {
     pinMode(DT[i], INPUT_PULLUP); pinMode(SCK_[i], OUTPUT); digitalWrite(SCK_[i], LOW);
     pinMode(MIR[i], OUTPUT); digitalWrite(MIR[i], LOW);
-    down[i] = false; lowCount[i] = 0; highCount[i] = 0; lastSample[i] = 0; sampleCnt[i] = 0; lastRaw[i] = 0; baseV[i] = 0;
+    down[i] = false; lowCount[i] = 0; highCount[i] = 0; lastSample[i] = 0; downSince[i] = 0; negSince[i] = 0; wStart[i] = 0; steady[i] = false; sampleCnt[i] = 0; lastRaw[i] = 0; baseV[i] = 0;
   }
   for (uint8_t i = 0; i < 4; i++) { pinMode(CMD[i], OUTPUT); digitalWrite(CMD[i], LOW); }
   EEPROM.begin(256);
@@ -252,9 +272,37 @@ void loop() {
       continue;
     }
     int32_t d = raw - baseV[i];
+
+    // 3초 구간마다 값이 거의 안 변했는지(steady) 판단
+    if (wStart[i] == 0) { wStart[i] = now; wMin[i] = wMax[i] = d; }
+    else {
+      if (d < wMin[i]) wMin[i] = d;
+      if (d > wMax[i]) wMax[i] = d;
+      if (now - wStart[i] >= BLOCK_MS) {
+        int32_t lim = cfg.tOn[i] / 2; if (lim < 2000) lim = 2000;
+        steady[i] = (wMax[i] - wMin[i]) < lim;
+        wStart[i] = now; wMin[i] = wMax[i] = d;
+      }
+    }
+    // 눌림 고착 자동해제: stuckSec초 넘게 눌려 있고 값이 거의 안 변하면 영점 다시
+    if (cfg.stuckSec && down[i] && now - downSince[i] >= (uint32_t)cfg.stuckSec * 1000UL && steady[i]) {
+      restartZero(i); changed = true;
+      Serial.print(NAME[i]); Serial.println(F(": 눌림 고착 → 영점 다시 잡음"));
+      continue;
+    }
+    // 반대 경우: 영점이 사람 무게로 잡혀서 값이 계속 -T_ON 아래면 (6초 넘게, 안 변하면) 영점 다시
+    if (cfg.stuckSec && !down[i] && d <= -cfg.tOn[i]) {
+      if (!negSince[i]) negSince[i] = now;
+      else if (now - negSince[i] >= 2 * BLOCK_MS && steady[i]) {
+        restartZero(i);
+        Serial.print(NAME[i]); Serial.println(F(": 값이 계속 음수 → 영점 다시 잡음"));
+        continue;
+      }
+    } else negSince[i] = 0;
+
     if (!down[i]) {
       if (d >= cfg.tOn[i]) {                                   // T_ON을 pressN번 연속 넘어야 눌림 (살짝 스친 것은 무시)
-        if (++highCount[i] >= cfg.pressN) { down[i] = true; highCount[i] = 0; lowCount[i] = 0; changed = true; }
+        if (++highCount[i] >= cfg.pressN) { down[i] = true; downSince[i] = now; highCount[i] = 0; lowCount[i] = 0; changed = true; }
       } else {
         highCount[i] = 0;
         if (d > -cfg.tOn[i]) baseV[i] += d / 256;              // 빈 발판일 때만 영점을 천천히 따라감
