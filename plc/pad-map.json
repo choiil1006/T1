@@ -1,45 +1,78 @@
 {
-  "plcModel": "FX3U-32MT/ES (AC power, sink output)",
-  "note": "Pad -> PLC input mapping. Device names are the PLC's own labels (octal numbering: X7 is followed by X10). In design v4 the pad state reaches X10-X14 through the Pico (GPIO -> opto module), not directly from the switches. The game sends one byte over Web Serial to the Pico (step-five/js/plc.js): bits 0-2 = score level 0..5 -> X15..X17, bit 3 = combo lamp -> X0.",
+  "plcModel": "LS ELECTRIC XGB XBC-DR32H (AC power, DC24V input, relay output) - programmed with XG5000. Old Mitsubishi FX3U mapping kept below as mitsubishiFX3U.",
+  "note": "Pad -> PLC input mapping. XGB addresses are hex bit numbers: P00000~P0000F inputs, P00040~P0004F relay outputs. Pad state reaches the PLC through the Pico (GPIO -> opto module). The game sends one byte (0x80|value) over Web Serial to the Pico: bits 0-2 = score level 0..5, bit 3 = combo lamp.",
   "lanes": {
-    "DL": "X10",
-    "UL": "X11",
-    "CN": "X12",
-    "UR": "X13",
-    "DR": "X14"
+    "DL": "P00000",
+    "UL": "P00001",
+    "CN": "P00002",
+    "UR": "P00003",
+    "DR": "P00004"
   },
   "commands": {
-    "X15": "score level bit0 (value 1)",
-    "X16": "score level bit1 (value 2)",
-    "X17": "score level bit2 (value 4)",
-    "X0": "combo lamp on (yellow)"
+    "P00005": "score level bit0 (value 1)",
+    "P00006": "score level bit1 (value 2)",
+    "P00007": "score level bit2 (value 4)",
+    "P00008": "combo lamp on (yellow)"
   },
   "lights": {
     "padBlue": {
-      "DL": "Y10",
-      "UL": "Y11",
-      "CN": "Y12",
-      "UR": "Y13",
-      "DR": "Y14"
+      "DL": "P00040",
+      "UL": "P00041",
+      "CN": "P00042",
+      "UR": "P00043",
+      "DR": "P00044"
     },
-    "comboYellowRed": "Y15",
-    "comboYellowGreen": "Y16",
+    "comboYellowRed": "P00045",
+    "comboYellowGreen": "P00046",
     "scoreLamps": {
-      "1": "Y17",
-      "2": "Y7",
-      "3": "Y6",
-      "4": "Y5",
-      "5": "Y4"
+      "1": "P00047",
+      "2": "P00048",
+      "3": "P00049",
+      "4": "P0004A",
+      "5": "P0004B"
     }
   },
   "reserved": {
-    "inputs": "X1-X7",
-    "outputs": "Y0-Y3 pulse/direction for a possible motor"
+    "inputs": "P00009-P0000F",
+    "outputs": "P0004C-P0004F"
   },
   "picoPins": {
     "padInputs (HX711 DT/SCK)": "GP2-GP11",
-    "plcMirror": "GP12-GP16",
-    "scoreLevel": "GP17-GP19",
-    "combo": "GP20"
+    "plcMirror": "GP12-GP16 -> P00000-P00004",
+    "scoreLevel": "GP17-GP19 -> P00005-P00007",
+    "combo": "GP20 -> P00008"
+  },
+  "mitsubishiFX3U": {
+    "lanes": {
+      "DL": "X10",
+      "UL": "X11",
+      "CN": "X12",
+      "UR": "X13",
+      "DR": "X14"
+    },
+    "commands": {
+      "X15": "score level bit0 (value 1)",
+      "X16": "score level bit1 (value 2)",
+      "X17": "score level bit2 (value 4)",
+      "X0": "combo lamp on (yellow)"
+    },
+    "lights": {
+      "padBlue": {
+        "DL": "Y10",
+        "UL": "Y11",
+        "CN": "Y12",
+        "UR": "Y13",
+        "DR": "Y14"
+      },
+      "comboYellowRed": "Y15",
+      "comboYellowGreen": "Y16",
+      "scoreLamps": {
+        "1": "Y17",
+        "2": "Y7",
+        "3": "Y6",
+        "4": "Y5",
+        "5": "Y4"
+      }
+    }
   }
 }
