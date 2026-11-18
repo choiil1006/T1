@@ -1,6 +1,6 @@
 {
   "plcModel": "LS ELECTRIC XGB XBC-DR32H (AC power, DC24V input, relay output) - programmed with XG5000. Old Mitsubishi FX3U mapping kept below as mitsubishiFX3U.",
-  "note": "Pad -> PLC input mapping. XGB addresses are hex bit numbers: P00000~P0000F inputs, P00040~P0004F relay outputs. Pad state reaches the PLC through the Pico (GPIO -> opto module). The game sends one byte (0x80|value) over Web Serial to the Pico: bits 0-2 = score level 0..5, bit 3 = combo lamp.",
+  "note": "Pad -> PLC input mapping. XGB addresses are hex bit numbers: P00000~P0000F inputs, P00020~P0002F relay outputs. Pad state reaches the PLC through the Pico (GPIO -> opto module). The game sends one byte (0x80|value) over Web Serial to the Pico: bits 0-2 = score level 0..5, bit 3 = combo lamp.",
   "lanes": {
     "DL": "P00000",
     "UL": "P00001",
@@ -16,26 +16,26 @@
   },
   "lights": {
     "padBlue": {
-      "DL": "P00040",
-      "UL": "P00041",
-      "CN": "P00042",
-      "UR": "P00043",
-      "DR": "P00044"
+      "DL": "P00020",
+      "UL": "P00021",
+      "CN": "P00022",
+      "UR": "P00023",
+      "DR": "P00024"
     },
-    "comboYellowRed": "P00045",
-    "comboYellowGreen": "P00046",
+    "comboYellowRed": "P00025",
+    "comboYellowGreen": "P00026",
     "scoreLamps": {
-      "1": "P00048",
-      "2": "P00049",
-      "3": "P0004A",
-      "4": "P0004B",
-      "5": "P0004C"
+      "1": "P00028",
+      "2": "P00029",
+      "3": "P0002A",
+      "4": "P0002B",
+      "5": "P0002C"
     },
-    "stripPower": "LED strips are 5V USB RGB neon (common +): common -> 5V+, B -> pad output, R/G bundles -> P00045/P00046, output COM -> 5V 0V"
+    "stripPower": "LED strips are 5V USB RGB neon (common +): common -> 5V+, B -> pad output, R/G bundles -> P00025/P00026, output COM -> 5V 0V"
   },
   "reserved": {
     "inputs": "P00009-P0000F",
-    "outputs": "P00047, P0004D-P0004F"
+    "outputs": "P00027, P0002D-P0002F"
   },
   "picoPins": {
     "padInputs (HX711 DT/SCK)": "GP2-GP11",
@@ -75,5 +75,11 @@
         "5": "Y4"
       }
     }
+  },
+  "outputCommons": {
+    "COM0": "P00020-P00023 (5V LED)",
+    "COM1": "P00024-P00027 (5V LED)",
+    "COM2": "P00028-P0002B (score lamps)",
+    "COM3": "P0002C-P0002F (score lamp 5, spare)"
   }
 }

@@ -1,6 +1,8 @@
 ; LS ELECTRIC XGB XBC-DR32H ladder (XG5000, mnemonic / IL view)
 ; CPU type in XG5000: XGB-XBCH
-; Inputs  (DC24V, 16 pts): P00000~P0000F   Outputs (relay, 16 pts): P00040~P0004F
+; Inputs  (DC24V, 16 pts): P00000~P0000F   Outputs (relay, 16 pts): P00020~P0002F
+; Terminal labels on the unit: P20~P2F. COM0 = P20~P23, COM1 = P24~P27, COM2 = P28~P2B, COM3 = P2C~P2F
+; Relay rating: 2A per point, 5A per COM
 ;
 ; Inputs (from Pico through the opto module)
 ;   P00000 pad 1 DL (Pico GP12)   P00001 pad 2 UL (GP13)   P00002 pad 3 CN (GP14)
@@ -8,46 +10,46 @@
 ;   P00005 score bit0 (GP17)      P00006 score bit1 (GP18) P00007 score bit2 (GP19)
 ;   P00008 combo on   (GP20)
 ; Outputs
-;   P00040~P00044 pad 1~5 blue
-;   P00045 combo yellow - red channel of all 5 strips (parallel)
-;   P00046 combo yellow - green channel of all 5 strips (parallel)
-;   P00048~P0004C score lamps 1~5 (level N lights N lamps) - kept on their own COM group,
-;                 away from the 5V LED strips on P00040~P00046
-;   spare: inputs P00009~P0000F, outputs P00047, P0004D~P0004F
+;   P00020~P00024 pad 1~5 blue
+;   P00025 combo yellow - red channel of all 5 strips (parallel)
+;   P00026 combo yellow - green channel of all 5 strips (parallel)
+;   P00028~P0002C score lamps 1~5 (level N lights N lamps) - kept on their own COM group,
+;                 away from the 5V LED strips on P00020~P00026
+;   spare: inputs P00009~P0000F, outputs P00027, P0002D~P0002F
 
 ; --- pad blue ---
 LOAD  P00000
-OUT   P00040
+OUT   P00020
 LOAD  P00001
-OUT   P00041
+OUT   P00021
 LOAD  P00002
-OUT   P00042
+OUT   P00022
 LOAD  P00003
-OUT   P00043
+OUT   P00023
 LOAD  P00004
-OUT   P00044
+OUT   P00024
 
 ; --- combo yellow (red + green on every pad) ---
 LOAD  P00008
-OUT   P00045
-OUT   P00046
+OUT   P00025
+OUT   P00026
 
 ; --- score lamps: level = bit0*1 + bit1*2 + bit2*4 (0~5) ---
 LOAD  P00005
 OR    P00006
 OR    P00007
-OUT   P00048        ; level >= 1
+OUT   P00028        ; level >= 1
 LOAD  P00006
 OR    P00007
-OUT   P00049        ; level >= 2
+OUT   P00029        ; level >= 2
 LOAD  P00005
 AND   P00006
 OR    P00007
-OUT   P0004A        ; level >= 3
+OUT   P0002A        ; level >= 3
 LOAD  P00007
-OUT   P0004B        ; level >= 4
+OUT   P0002B        ; level >= 4
 LOAD  P00005
 OR    P00006
 AND   P00007
-OUT   P0004C        ; level >= 5
+OUT   P0002C        ; level >= 5
 END
