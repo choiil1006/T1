@@ -25,16 +25,17 @@
     "comboYellowRed": "P00045",
     "comboYellowGreen": "P00046",
     "scoreLamps": {
-      "1": "P00047",
-      "2": "P00048",
-      "3": "P00049",
-      "4": "P0004A",
-      "5": "P0004B"
-    }
+      "1": "P00048",
+      "2": "P00049",
+      "3": "P0004A",
+      "4": "P0004B",
+      "5": "P0004C"
+    },
+    "stripPower": "LED strips are 5V USB RGB neon (common +): common -> 5V+, B -> pad output, R/G bundles -> P00045/P00046, output COM -> 5V 0V"
   },
   "reserved": {
     "inputs": "P00009-P0000F",
-    "outputs": "P0004C-P0004F"
+    "outputs": "P00047, P0004D-P0004F"
   },
   "picoPins": {
     "padInputs (HX711 DT/SCK)": "GP2-GP11",

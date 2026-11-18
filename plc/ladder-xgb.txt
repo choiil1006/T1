@@ -11,8 +11,9 @@
 ;   P00040~P00044 pad 1~5 blue
 ;   P00045 combo yellow - red channel of all 5 strips (parallel)
 ;   P00046 combo yellow - green channel of all 5 strips (parallel)
-;   P00047~P0004B score lamps 1~5 (level N lights N lamps)
-;   spare: inputs P00009~P0000F, outputs P0004C~P0004F
+;   P00048~P0004C score lamps 1~5 (level N lights N lamps) - kept on their own COM group,
+;                 away from the 5V LED strips on P00040~P00046
+;   spare: inputs P00009~P0000F, outputs P00047, P0004D~P0004F
 
 ; --- pad blue ---
 LOAD  P00000
@@ -35,18 +36,18 @@ OUT   P00046
 LOAD  P00005
 OR    P00006
 OR    P00007
-OUT   P00047        ; level >= 1
+OUT   P00048        ; level >= 1
 LOAD  P00006
 OR    P00007
-OUT   P00048        ; level >= 2
+OUT   P00049        ; level >= 2
 LOAD  P00005
 AND   P00006
 OR    P00007
-OUT   P00049        ; level >= 3
+OUT   P0004A        ; level >= 3
 LOAD  P00007
-OUT   P0004A        ; level >= 4
+OUT   P0004B        ; level >= 4
 LOAD  P00005
 OR    P00006
 AND   P00007
-OUT   P0004B        ; level >= 5
+OUT   P0004C        ; level >= 5
 END
