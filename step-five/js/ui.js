@@ -440,6 +440,13 @@
     setDifficulty(DIFFS[next]);
   }
 
+  // EASY -> NORMAL -> HARD -> EASY
+  function cycleDifficulty() {
+    const i = DIFFS.indexOf(state.difficulty);
+    SF.sfx.playMenu("diff");
+    setDifficulty(DIFFS[(i + 1) % DIFFS.length]);
+  }
+
   function startSelected() {
     if (SF.$("startBtn").disabled) return;
     SF.sfx.unlock();
@@ -458,7 +465,8 @@
   }
 
   // a pad press while no song is running: arcade-style menu controls
-  //   song select:  ↙ previous song  ↘ next song  ↖ easier  ↗ harder  ⊙ start
+  //   song select:  ↙ previous song  ↘ next song  ⊙ random song
+  //                 ↖ next difficulty (HARD wraps to EASY)  ↗ start
   //   result:       ⊙ back to song select  ↗ play again
   function menuLane(lane) {
     SF.sfx.unlock();
@@ -466,9 +474,9 @@
     if (screen === "setup") {
       if (lane === "DL") moveSong(-1);
       else if (lane === "DR") moveSong(1);
-      else if (lane === "UL") stepDifficulty(-1);
-      else if (lane === "UR") stepDifficulty(1);
-      else if (lane === "CN") startSelected();
+      else if (lane === "CN") pickRandomSong();
+      else if (lane === "UL") cycleDifficulty();
+      else if (lane === "UR") startSelected();
     } else if (screen === "result") {
       if (performance.now() < resultReadyAt) return;
       if (lane === "CN") backToSelect();
