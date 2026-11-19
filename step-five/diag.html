@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리듬 에너지 진단</title>
+<style>
+  :root{color-scheme:dark;}
+  body{margin:0;padding:20px 16px 40px;background:#0b0b14;color:#e8e8f0;font:14px/1.55 system-ui,"Noto Sans KR",sans-serif;}
+  h1{font-size:19px;margin:0 0 4px;}
+  .sub{color:#8a8aa0;margin-bottom:16px;max-width:760px;}
+  .btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  button,label.btn{font:inherit;padding:9px 16px;background:#23233a;color:#e8e8f0;border:1px solid #3a3a58;cursor:pointer;font-weight:700;}
+  button.primary,label.btn.primary{background:#ffd542;color:#0b0b14;border-color:#ffd542;}
+  button:disabled{opacity:.45;cursor:default;}
+  #state{margin:6px 0 12px;color:#8fb4ff;min-height:20px;}
+  pre{white-space:pre-wrap;word-break:break-word;background:#11111c;border:1px solid #23233a;padding:14px;margin:0;
+    font:12.5px/1.6 ui-monospace,Consolas,monospace;max-width:960px;}
+  .ok{color:#39ff8a;} .bad{color:#ff6a6a;} .warn{color:#e0b34a;}
+  a{color:#8fb4ff;}
+</style>
+</head>
+<body>
+<h1>리듬 에너지 — 진단</h1>
+<div class="sub">곡이 안 읽히거나 소리가 안 나는 기기(라즈베리파이 등)에서 이 페이지를 열고, 문제 되는 MP3를 골라 검사하세요. 다 끝나면 <b>보고서 복사</b>를 눌러 결과를 전달해 주시면 됩니다. 검사는 이 기기 안에서만 이뤄지고 파일은 어디에도 올라가지 않습니다.</div>
+<div class="btns">
+  <label class="btn primary">MP3 골라서 검사<input type="file" id="pick" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.flac,.webm" multiple hidden></label>
+  <button id="libBtn">저장된 곡 전부 검사</button>
+  <button id="copyBtn">보고서 복사</button>
+  <a href="./" style="align-self:center;margin-left:6px;">← 게임으로</a>
+</div>
+<div id="state"></div>
+<pre id="report"></pre>
+
+<script src="js/constants.js"></script>
+<script src="js/state.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/audio-analysis.js"></script>
+<script src="js/player.js"></script>
+<script>
+(function () {
+  "use strict";
+  const out = document.getElementById("report");
+  const stateEl = document.getElementById("state");
+  const lines = [];
+  function log(text, cls) {
+    lines.push(text);
+    const span = document.createElement("span");
+    if (cls) span.className = cls;
+    span.textContent = text + "\n";
+    out.appendChild(span);
+  }
+  const ms = (t0) => Math.round(performance.now() - t0) + "ms";
+  const mb = (n) => (n / 1048576).toFixed(1) + "MB";
+  const errText = (e) => (e && e.name ? e.name : "Error") + (e && e.message ? ": " + e.message : "");
+  const heap = () => (performance.memory ? performance.memory.usedJSHeapSize : null);
+  const heapNote = (before) => { const h = heap(); return h == null || before == null ? "" : ` (JS 메모리 ${mb(before)} → ${mb(h)})`; };
+  const withTimeout = (p, msT, label) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(label + " 시간 초과(" + msT / 1000 + "초)")), msT))]);
+
+  async function environment() {
+    log("■ 환경");
+    log("시각: " + new Date().toLocaleString());
+    log("브라우저: " + navigator.userAgent);
+    log(`CPU 코어: ${navigator.hardwareConcurrency || "?"} · 기기 메모리(대략): ${navigator.deviceMemory ? navigator.deviceMemory + "GB" : "?"}` +
+        (performance.memory ? ` · JS 메모리 한도: ${mb(performance.memory.jsHeapSizeLimit)}` : ""));
+    log(`화면: ${screen.width}x${screen.height} @${devicePixelRatio}x`);
+    const a = document.createElement("audio");
+    const types = { "MP3": "audio/mpeg", "M4A/AAC": 'audio/mp4; codecs="mp4a.40.2"', "OGG": 'audio/ogg; codecs="vorbis"', "OPUS": 'audio/webm; codecs="opus"', "WAV": "audio/wav", "FLAC": "audio/flac" };
+    log("재생 지원: " + Object.entries(types).map(([k, t]) => `${k}=${a.canPlayType(t) || "no"}`).join(" · "), a.canPlayType("audio/mpeg") ? "" : "bad");
+    log("OfflineAudioContext: " + (window.OfflineAudioContext ? "있음" : "없음"), window.OfflineAudioContext ? "" : "bad");
+    try {
+      const ctx = SF.sfx.context();
+      log(`AudioContext: 상태=${ctx.state} · 샘플레이트=${ctx.sampleRate} · baseLatency=${ctx.baseLatency != null ? (ctx.baseLatency * 1000).toFixed(1) + "ms" : "?"} · outputLatency=${ctx.outputLatency != null ? (ctx.outputLatency * 1000).toFixed(1) + "ms" : "?"}`,
+          ctx.state === "running" ? "" : "warn");
+      if (ctx.state !== "running") log("  → 아직 화면을 누르지 않아 잠겨 있을 수 있어요. 버튼을 누르면 다시 확인합니다.", "warn");
+    } catch (e) { log("AudioContext 만들기 실패: " + errText(e) + " → 오디오 출력 장치/드라이버 문제", "bad"); }
+    try {
+      if (navigator.storage && navigator.storage.estimate) {
+        const est = await navigator.storage.estimate();
+        const persisted = navigator.storage.persisted ? await navigator.storage.persisted() : "?";
+        log(`저장공간: 사용 ${mb(est.usage || 0)} / 한도 ${mb(est.quota || 0)} · 영구 저장=${persisted}`);
+      }
+    } catch (e) { log("저장공간 확인 실패: " + errText(e), "warn"); }
+    log("USB 시리얼(로드셀): " + ("serial" in navigator ? "지원" : "미지원"));
+  }
+
+  function sniff(head) {
+    const at = (i, ...b) => b.every((x, k) => head[i + k] === x);
+    const s = String.fromCharCode(...head.slice(0, 16)).toLowerCase();
+    if (/^\s*(<!doctype|<html|<head|<\?xml|\{)/.test(s)) return "웹페이지/텍스트 (음악 아님)";
+    if (at(0, 0x49, 0x44, 0x33)) return "MP3 (ID3 태그 v2." + head[3] + ")";
+    if (head[0] === 0xff && (head[1] & 0xe0) === 0xe0) return "MP3/AAC 프레임";
+    if (at(4, 0x66, 0x74, 0x79, 0x70)) return "M4A/MP4";
+    if (at(0, 0x52, 0x49, 0x46, 0x46)) return "WAV(RIFF)";
+    if (at(0, 0x4f, 0x67, 0x67, 0x53)) return "OGG";
+    if (at(0, 0x1a, 0x45, 0xdf, 0xa3)) return "WebM/MKV";
+    if (at(0, 0x66, 0x4c, 0x61, 0x43)) return "FLAC";
+    return "알 수 없음";
+  }
+
+  async function testFile(file, label, full) {
+    log("");
+    log(`■ ${label}: ${file.name || "(이름 없음)"}`);
+    const head = new Uint8Array(await file.slice(0, 64).arrayBuffer());
+    log(`크기 ${mb(file.size)} · 브라우저가 알려준 형식 "${file.type || "(없음)"}" · 실제 내용 ${sniff(head)} · 앞부분 ${[...head.slice(0, 8)].map((b) => b.toString(16).padStart(2, "0")).join(" ")}`);
+
+    // 1. <audio> element (preview uses this)
+    let t0 = performance.now();
+    const url = URL.createObjectURL(file);
+    const el = new Audio();
+    el.preload = "metadata";
+    const r1 = await new Promise((res) => {
+      el.onloadedmetadata = () => res({ ok: true, d: el.duration });
+      el.onerror = () => res({ ok: false, code: el.error && el.error.code, msg: el.error && el.error.message });
+      setTimeout(() => res({ ok: false, msg: "시간 초과(10초)" }), 10000);
+      el.src = url;
+    });
+    el.removeAttribute("src"); el.load(); URL.revokeObjectURL(url);
+    log(r1.ok ? `1. 재생 요소(<audio>): OK · 길이 ${r1.d.toFixed(1)}초 · ${ms(t0)}` : `1. 재생 요소(<audio>): 실패 · 코드 ${r1.code || "-"} ${r1.msg || ""}`, r1.ok ? "ok" : "bad");
+
+    // 2. offline decode (song analysis uses this)
+    let h0 = heap(); t0 = performance.now();
+    let decoded = null;
+    try {
+      const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      decoded = await withTimeout(new OAC(1, 1, 44100).decodeAudioData(await file.arrayBuffer()), 60000, "디코딩");
+      log(`2. 분석용 디코딩(오프라인): OK · ${decoded.duration.toFixed(1)}초 · ${decoded.numberOfChannels}채널 · ${decoded.sampleRate}Hz · ${ms(t0)}${heapNote(h0)}`, "ok");
+    } catch (e) { log(`2. 분석용 디코딩(오프라인): 실패 · ${errText(e)} · ${ms(t0)}`, "bad"); }
+    decoded = null;
+
+    // 3. real-time context decode (the game's player uses this)
+    h0 = heap(); t0 = performance.now();
+    try {
+      const b = await withTimeout(SF.sfx.context().decodeAudioData(await file.arrayBuffer()), 60000, "디코딩");
+      log(`3. 게임용 디코딩(실시간 컨텍스트): OK · ${b.duration.toFixed(1)}초 · ${b.sampleRate}Hz · ${ms(t0)}${heapNote(h0)}`, "ok");
+    } catch (e) { log(`3. 게임용 디코딩(실시간 컨텍스트): 실패 · ${errText(e)} · ${ms(t0)}`, "bad"); }
+
+    if (!full) return;
+
+    // 4. BPM / highlight analysis (what happens on upload)
+    t0 = performance.now();
+    try {
+      const r = await withTimeout(SF.audioAnalysis.analyzeBPM(file), 90000, "분석");
+      log(`4. BPM 분석: OK · BPM ${r.bpm} · 하이라이트 ${r.highlightSec}초 · ${ms(t0)}`, "ok");
+    } catch (e) { log(`4. BPM 분석: 실패 · ${errText(e)} · ${ms(t0)}`, "bad"); }
+
+    // 5. game load (decode + chart features) and a short real playback
+    h0 = heap(); t0 = performance.now();
+    try {
+      const loaded = await withTimeout(SF.player.load("diag-" + Date.now(), file), 90000, "로딩");
+      log(`5. 게임 로딩(디코딩+채보 분석): OK · ${ms(t0)}${heapNote(h0)}`, "ok");
+      const ctx = SF.sfx.context();
+      try { await withTimeout(ctx.resume(), 1500, "오디오 시작"); } catch (e) { /* reported below */ }
+      if (ctx.state !== "running") {
+        log(`6. 재생 시계: 건너뜀 · 오디오가 '${ctx.state}' 상태 (화면을 누른 뒤 다시 검사하거나, 기기 소리 출력 설정 확인)`, "warn");
+      } else {
+        SF.player.play(Math.min(30, loaded.buffer.duration / 3));
+        await new Promise((r) => setTimeout(r, 400)); // past the start-up delay
+        const s0 = SF.player.time(), w0 = performance.now();
+        await new Promise((r) => setTimeout(r, 2000));
+        const ds = SF.player.time() - s0, dw = (performance.now() - w0) / 1000;
+        SF.player.stop();
+        const okClock = Math.abs(ds - dw) < 0.02;
+        log(`6. 재생 시계: 2초 동안 곡 시간 ${ds.toFixed(3)}초 진행 (실제 ${dw.toFixed(3)}초) · 출력 지연 ${(((ctx.outputLatency || 0) + (ctx.baseLatency || 0)) * 1000).toFixed(0)}ms`, okClock ? "ok" : "bad");
+        if (!okClock) log("  → 소리 출력 장치의 시계가 멈추거나 튑니다. 오디오 출력(HDMI/3.5mm) 설정 문제일 수 있어요.", "bad");
+      }
+    } catch (e) { log(`5. 게임 로딩: 실패 · ${errText(e)} · ${ms(t0)}`, "bad"); }
+    SF.player.stop();
+  }
+
+  let running = false;
+  async function guard(fn) {
+    if (running) return;
+    running = true;
+    document.querySelectorAll("button, #pick").forEach((b) => { b.disabled = true; });
+    try { await fn(); } catch (e) { log("검사 중 오류: " + errText(e), "bad"); }
+    running = false;
+    stateEl.textContent = "끝났어요. '보고서 복사'를 눌러 결과를 전달해 주세요.";
+    document.querySelectorAll("button, #pick").forEach((b) => { b.disabled = false; });
+  }
+
+  document.getElementById("pick").addEventListener("change", (e) => {
+    const files = [...e.target.files];
+    e.target.value = "";
+    SF.sfx.unlock();
+    guard(async () => {
+      for (let i = 0; i < files.length; i++) {
+        stateEl.textContent = `검사 중… (${i + 1}/${files.length}) 라즈베리파이에서는 한 곡에 수십 초 걸릴 수 있어요.`;
+        await testFile(files[i], `파일 ${i + 1}`, true);
+      }
+    });
+  });
+
+  document.getElementById("libBtn").addEventListener("click", () => {
+    SF.sfx.unlock();
+    guard(async () => {
+      const index = await SF.storage.getSongIndex();
+      log("");
+      log(`■ 저장된 곡 ${index.length}개`);
+      for (let i = 0; i < index.length; i++) {
+        stateEl.textContent = `저장된 곡 검사 중… (${i + 1}/${index.length})`;
+        const rec = await SF.storage.idbGet("song:" + index[i].id);
+        if (!rec || !rec.blob) { log(`저장된 곡 ${i + 1}: ${index[i].name} — 파일 데이터가 없어요 (저장소에서 사라짐)`, "bad"); continue; }
+        const f = rec.blob.name ? rec.blob : new File([rec.blob], rec.name || index[i].name);
+        await testFile(f, `저장된 곡 ${i + 1}`, false);
+      }
+    });
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    const text = lines.join("\n");
+    try { await navigator.clipboard.writeText(text); stateEl.textContent = "보고서를 복사했어요."; }
+    catch (e) {
+      const r = document.createRange(); r.selectNodeContents(out);
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      stateEl.textContent = "자동 복사가 막혀 있어요 — 선택된 보고서를 Ctrl+C로 복사해 주세요.";
+    }
+  });
+
+  window.addEventListener("pointerdown", () => SF.sfx.unlock(), { once: true, capture: true });
+  environment();
+})();
+</script>
+</body>
+</html>

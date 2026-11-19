@@ -80,13 +80,33 @@
     return Math.round(Math.max(0, Math.min(durationSec - PREVIEW_SEC, startSec)) * 100) / 100;
   }
 
-  async function decodeMono(file) {
+  // Decoding for analysis goes through an OfflineAudioContext: it never
+  // touches the sound card, so it works even where the audio output is
+  // missing or misconfigured (a common state on a Raspberry Pi) and needs
+  // no user interaction. A real-time context is only the fallback.
+  const ANALYSIS_RATE = 44100;
+  async function decodeAudio(file) {
+    const data = await file.arrayBuffer();
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (OAC) {
+      try { return await new OAC(1, 1, ANALYSIS_RATE).decodeAudioData(data.slice(0)); }
+      catch (err) { if (err && err.name === "EncodingError") throw err; /* else try the real-time path */ }
+    }
     const AC = window.AudioContext || window.webkitAudioContext;
     const ac = new AC();
-    try {
-      const audioBuffer = await ac.decodeAudioData(await file.arrayBuffer());
-      return { data: mixToMono(audioBuffer), sr: audioBuffer.sampleRate, duration: audioBuffer.duration };
-    } finally { ac.close(); }
+    try { return await ac.decodeAudioData(data); } finally { ac.close(); }
+  }
+
+  async function decodeMono(file) {
+    const audioBuffer = await decodeAudio(file);
+    return { data: mixToMono(audioBuffer), sr: audioBuffer.sampleRate, duration: audioBuffer.duration };
+  }
+
+  // decode failures that are about the FILE (unreadable data) vs. about the
+  // browser/device (out of memory, audio system unavailable…) — the second
+  // kind must not be reported as "your MP3 is broken"
+  function isFileProblem(err) {
+    return !!err && (err.name === "EncodingError" || /decode|unable to decode/i.test(err.message || ""));
   }
 
   // highlight only, for songs analyzed before highlights existed
@@ -220,5 +240,5 @@
     return "지원하지 않는 형식이거나 손상된 파일이에요. MP3로 변환해 주세요.";
   }
 
-  SF.audioAnalysis = { analyzeBPM, describeUnreadable, analyzeHighlight, findHighlight, computeFeatures, PREVIEW_SEC };
+  SF.audioAnalysis = { analyzeBPM, describeUnreadable, isFileProblem, decodeAudio, analyzeHighlight, findHighlight, computeFeatures, PREVIEW_SEC };
 })();

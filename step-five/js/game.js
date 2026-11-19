@@ -112,7 +112,8 @@
     }).catch((err) => {
       console.warn("song load failed", err);
       if (token === countdownToken) {
-        SF.ui.showToast(`"${songName}"을(를) 재생할 수 없습니다.`, { type: "error" });
+        const what = `${err && err.name ? err.name : "Error"}${err && err.message ? ": " + err.message : ""}`;
+        SF.ui.showToast(`"${songName}"을(를) 재생할 수 없습니다 (${what}). diag.html에서 원인을 확인할 수 있어요.`, { type: "error", duration: 9000 });
         quit();
       }
       return false;

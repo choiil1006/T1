@@ -527,9 +527,15 @@
       try {
         analysis = await SF.audioAnalysis.analyzeBPM(f);
       } catch (err) {
-        const why = await SF.audioAnalysis.describeUnreadable(f);
-        console.warn("upload: cannot decode", f.name, f.type, f.size, why, err);
-        showToast(`"${f.name}"을(를) 읽을 수 없습니다 — ${why}`, { type: "error", duration: 7000 });
+        console.warn("upload: cannot decode", f.name, f.type, f.size, err);
+        if (SF.audioAnalysis.isFileProblem(err)) {
+          const why = await SF.audioAnalysis.describeUnreadable(f);
+          showToast(`"${f.name}"을(를) 읽을 수 없습니다 — ${why}`, { type: "error", duration: 7000 });
+        } else {
+          // not the file's fault: memory, audio system, browser limits…
+          const what = `${err && err.name ? err.name : "Error"}${err && err.message ? ": " + err.message : ""}`;
+          showToast(`"${f.name}"을(를) 처리하는 중 브라우저 오류가 났어요 (${what}). 메모리 부족이나 오디오 장치 문제일 수 있어요 — diag.html에서 확인해 주세요.`, { type: "error", duration: 9000 });
+        }
         return;
       }
       // a few seconds of audio (a broken download, a ringtone clip) can't
