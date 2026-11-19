@@ -224,6 +224,19 @@ p.hint{font-size:12px;color:var(--sub);margin:10px 0 0;line-height:1.6;}
   background:#0a0a13;box-shadow:inset 0 0 0 1px var(--line2);padding:12px 14px;cursor:pointer;}
 #fileLabel span.fname{color:var(--sub);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;}
 #fileLabel:hover{box-shadow:inset 0 0 0 1px #5a5a8a;}
+#fileLabel.busy{pointer-events:none;opacity:.5;}
+#uploadStatus{font-size:12px;color:var(--cn);margin-top:8px;min-height:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#uploadStatus:empty{margin-top:0;}
+/* per-file results of the last import */
+#uploadReport{display:none;flex-direction:column;gap:4px;margin-top:10px;max-height:240px;overflow:auto;}
+.upRow{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:baseline;font-size:12px;
+  padding:5px 8px;background:rgba(255,255,255,.03);border-left:3px solid var(--line2);}
+.upRow b{font-family:var(--f-num);font-size:11px;white-space:nowrap;}
+.upRow span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.upRow small{grid-column:1 / -1;color:var(--sub);margin-top:2px;line-height:1.45;}
+.upRow.added,.upRow.replaced{border-left-color:var(--good);} .upRow.added b,.upRow.replaced b{color:var(--good);}
+.upRow.exists b{color:var(--sub);}
+.upRow.failed{border-left-color:var(--warn);} .upRow.failed b{color:var(--warn);}
 .offsetRow{display:flex;align-items:center;gap:10px;}
 .offsetRow button{width:52px;flex:none;padding:9px 0;font-size:16px;}
 #offsetInput{width:90px;background:#0a0a13;border:none;box-shadow:inset 0 0 0 1px var(--line2);color:var(--text);

@@ -512,106 +512,144 @@
 
   const MIN_SONG_SEC = 20;
 
+  // Brings one picked file into the library. Never touches the selection —
+  // the caller does that once at the end of a batch. Returns
+  // {status: "added"|"replaced"|"exists"|"failed", name, id?, bpm?, reason?}
+  async function importOneFile(picked) {
+    const name = picked.name;
+    // copy the bytes in now, while the file is certainly reachable — a file
+    // on a USB stick, phone or network folder may stop being readable later
+    let f;
+    try {
+      f = new File([await picked.arrayBuffer()], name, { type: picked.type || "audio/mpeg", lastModified: picked.lastModified });
+    } catch (err) {
+      console.warn("upload: cannot read file", name, err);
+      return { status: "failed", name, reason: `파일 내용을 읽을 수 없어요 (${err && err.name ? err.name : "Error"}). 내 컴퓨터의 다운로드/음악 폴더로 복사한 뒤 다시 올려 주세요.` };
+    }
+
+    // the same song again (often re-picked after thinking it failed): keep
+    // the one already there — unless the stored copy is broken/different
+    // (e.g. an empty file saved by an older version), which gets replaced
+    let replaceId = null;
+    const existing = songIndexCache.find((s) => s.name === name);
+    if (existing) {
+      const rec = await SF.storage.idbGet("song:" + existing.id);
+      if (rec && rec.blob && rec.blob.size > 0 && rec.blob.size === f.size) return { status: "exists", name, id: existing.id };
+      replaceId = existing.id;
+    }
+
+    // decode + analyze BEFORE adding it, so a file the browser can't read
+    // gets a clear reason instead of becoming a broken library entry
+    let analysis;
+    try {
+      analysis = await SF.audioAnalysis.analyzeBPM(f);
+    } catch (err) {
+      console.warn("upload: cannot decode", name, f.type, f.size, err);
+      if (SF.audioAnalysis.isFileProblem(err)) return { status: "failed", name, reason: await SF.audioAnalysis.describeUnreadable(f) };
+      // not the file's fault: memory, audio system, browser limits…
+      const what = `${err && err.name ? err.name : "Error"}${err && err.message ? ": " + err.message : ""}`;
+      return { status: "failed", name, reason: `처리 중 브라우저 오류 (${what}). 메모리 부족이나 오디오 장치 문제일 수 있어요 — diag.html에서 확인해 주세요.` };
+    }
+    // a few seconds of audio (a broken download, a ringtone clip) can't
+    // carry a chart: notes need a 4-beat lead-in and the last 3 s stay empty
+    if (analysis.durationSec < MIN_SONG_SEC) {
+      return { status: "failed", name, reason: `${Math.round(analysis.durationSec)}초밖에 안 돼요 — 다운로드가 중간에 끊긴 것 같아요.` };
+    }
+
+    let id;
+    try {
+      id = await SF.storage.addSongToLibrary(f);
+      await SF.storage.updateSongMeta(id, {
+        bpm: analysis.bpm, phaseOffsetMs: analysis.phaseMs, previewStart: analysis.highlightSec,
+        analyzed: true, useCustomChart: false, customChart: null,
+      });
+    } catch (err) {
+      console.warn("upload: save failed", err);
+      return { status: "failed", name, reason: "저장하지 못했어요 — 저장 공간이 부족하거나 브라우저가 저장을 막고 있어요(사생활 보호 모드 등)." };
+    }
+    // a broken copy with the same name is replaced by this good one
+    if (replaceId) {
+      try {
+        await SF.storage.deleteSongRecord(replaceId);
+        await SF.storage.setSongIndex((await SF.storage.getSongIndex()).filter((s) => s.id !== replaceId));
+      } catch (err) { console.warn("upload: removing the old copy failed", err); }
+    }
+    // keep the duplicate check current for the rest of this batch
+    songIndexCache = songIndexCache.filter((s) => s.id !== replaceId).concat([{ id, name, addedAt: Date.now() }]);
+    return { status: replaceId ? "replaced" : "added", name, id, bpm: analysis.bpm };
+  }
+
+  const STATUS_TEXT = { added: "추가", replaced: "망가진 기존 파일 교체", exists: "이미 있음", failed: "실패" };
+
+  function showUploadReport(results) {
+    const box = SF.$("uploadReport");
+    box.textContent = "";
+    results.forEach((r) => {
+      const row = document.createElement("div");
+      row.className = "upRow " + r.status;
+      const head = document.createElement("b");
+      head.textContent = `${STATUS_TEXT[r.status]}${r.bpm ? " · BPM " + r.bpm : ""}`;
+      const nm = document.createElement("span");
+      nm.textContent = r.name;
+      row.append(head, nm);
+      if (r.reason) { const why = document.createElement("small"); why.textContent = r.reason; row.appendChild(why); }
+      box.appendChild(row);
+    });
+    box.style.display = results.length ? "flex" : "none";
+  }
+
+  let importing = false;
+
   function initMusicUpload() {
     SF.$("audioFile").addEventListener("change", async (e) => {
-      const picked = e.target.files[0];
+      const files = [...e.target.files];
       // clear right away: picking the same file again (e.g. after a failed
       // attempt) must still fire "change"
       e.target.value = "";
-      if (!picked) return;
+      if (!files.length) return;
+      if (importing) { showToast("곡을 불러오는 중이에요. 끝난 뒤 다시 골라 주세요."); return; }
       SF.sfx.unlock();
-
-      // copy the bytes in now, while the file is certainly reachable — a file
-      // on a USB stick, phone or network folder may stop being readable later
-      let f;
-      try {
-        f = new File([await picked.arrayBuffer()], picked.name, { type: picked.type || "audio/mpeg", lastModified: picked.lastModified });
-      } catch (err) {
-        console.warn("upload: cannot read file", picked.name, err);
-        showToast(`"${picked.name}" 파일 내용을 읽을 수 없어요 (${err && err.name ? err.name : "Error"}). 내 컴퓨터의 다운로드/음악 폴더로 복사한 뒤 다시 올려 주세요.`, { type: "error", duration: 9000 });
-        return;
-      }
-
-      // the same song again (often re-picked after thinking it failed):
-      // select the one already there instead of adding a duplicate — unless
-      // the stored copy is broken/different (e.g. an empty file saved by an
-      // older version), in which case the new upload replaces it
-      let replaceId = null;
-      const existing = songIndexCache.find((s) => s.name === f.name);
-      if (existing) {
-        const rec = await SF.storage.idbGet("song:" + existing.id);
-        if (rec && rec.blob && rec.blob.size > 0 && rec.blob.size === f.size) {
-          await selectSong(existing.id);
-          scrollActiveSongIntoView(true);
-          showToast(`"${f.name}"은(는) 이미 목록에 있어서 그 곡을 선택했어요.`);
-          return;
-        }
-        replaceId = existing.id;
-      }
-
-      // decode + analyze BEFORE adding it, so a file the browser can't read
-      // gets a clear reason instead of becoming a broken library entry
-      showToast(`"${f.name}" 불러오는 중…`, { duration: 1800 });
-      let analysis;
-      try {
-        analysis = await SF.audioAnalysis.analyzeBPM(f);
-      } catch (err) {
-        console.warn("upload: cannot decode", f.name, f.type, f.size, err);
-        if (SF.audioAnalysis.isFileProblem(err)) {
-          const why = await SF.audioAnalysis.describeUnreadable(f);
-          showToast(`"${f.name}"을(를) 읽을 수 없습니다 — ${why}`, { type: "error", duration: 7000 });
-        } else {
-          // not the file's fault: memory, audio system, browser limits…
-          const what = `${err && err.name ? err.name : "Error"}${err && err.message ? ": " + err.message : ""}`;
-          showToast(`"${f.name}"을(를) 처리하는 중 브라우저 오류가 났어요 (${what}). 메모리 부족이나 오디오 장치 문제일 수 있어요 — diag.html에서 확인해 주세요.`, { type: "error", duration: 9000 });
-        }
-        return;
-      }
-      // a few seconds of audio (a broken download, a ringtone clip) can't
-      // carry a chart: notes need a 4-beat lead-in and the last 3 s stay empty
-      if (analysis.durationSec < MIN_SONG_SEC) {
-        showToast(`"${f.name}"은(는) ${Math.round(analysis.durationSec)}초밖에 안 돼요 — 다운로드가 중간에 끊긴 것 같아요. 다시 받아 주세요.`, { type: "error", duration: 7000 });
-        return;
-      }
-
-      let id;
-      try {
-        id = await SF.storage.addSongToLibrary(f);
-      } catch (err) {
-        console.warn("upload: save failed", err);
-        showToast("곡을 저장하지 못했습니다 — 저장 공간이 부족하거나 브라우저가 저장을 막고 있어요(사생활 보호 모드 등).", { type: "error", duration: 7000 });
-        return;
-      }
-      // a broken copy with the same name is replaced by this good one
-      if (replaceId) {
-        try {
-          await SF.storage.deleteSongRecord(replaceId);
-          await SF.storage.setSongIndex((await SF.storage.getSongIndex()).filter((s) => s.id !== replaceId));
-        } catch (err) { console.warn("upload: removing the old copy failed", err); }
-      }
-
+      importing = true;
+      const label = SF.$("fileLabel"), status = SF.$("uploadStatus");
+      label.classList.add("busy");
       SF.preview.stop();
-      if (state.audioURL) URL.revokeObjectURL(state.audioURL);
-      state.audioURL = URL.createObjectURL(f);
-      state.audioFile = f;
-      state.currentSongId = id;
-      SF.$("bpmInput").value = analysis.bpm;
-      state.phaseOffsetMs = analysis.phaseMs;
-      state.previewStartSec = analysis.highlightSec;
-      state.songAnalyzed = true;
-      SF.$("tapHint").textContent = "자동 측정됨";
-      setCurrentSongDisplay(f.name);
-      setStartEnabled(true);
-      // a freshly uploaded song starts with no custom chart of its own
-      state.useCustomChart = false;
-      state.customChart = null;
-      SF.editor.loadFromCustomChart(null);
-      await SF.storage.persistSongMeta();
+
+      const results = [];
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const msg = files.length > 1 ? `불러오는 중 ${i + 1}/${files.length} — ${files[i].name}` : `"${files[i].name}" 불러오는 중…`;
+          status.textContent = msg;
+          if (i === 0 || files.length === 1) showToast(files.length > 1 ? `${files.length}곡 불러오는 중… (설정 → 음악에서 진행 상황 확인)` : msg, { duration: 2000 });
+          results.push(await importOneFile(files[i]));
+        }
+      } finally {
+        importing = false;
+        label.classList.remove("busy");
+        status.textContent = "";
+      }
+
       await renderSongList();
-      renderBestPopup(true);
-      scrollActiveSongIntoView(true);
-      schedulePreview(0);
-      showToast(replaceId ? `"${f.name}"의 망가진 기존 파일을 새 파일로 바꿨어요 · BPM ${analysis.bpm}` : `"${f.name}" 추가됨 · BPM ${analysis.bpm}`);
+      showUploadReport(results);
+      const count = (s) => results.filter((r) => r.status === s).length;
+      const added = count("added") + count("replaced"), exists = count("exists"), failed = count("failed");
+
+      // select the last song that came in (or, if all were already there, the last of those)
+      const target = [...results].reverse().find((r) => r.status === "added" || r.status === "replaced") ||
+                     [...results].reverse().find((r) => r.status === "exists");
+      if (target) { await selectSong(target.id); scrollActiveSongIntoView(true); }
+
+      if (files.length === 1) {
+        const r = results[0];
+        if (r.status === "failed") showToast(`"${r.name}"을(를) 읽을 수 없습니다 — ${r.reason}`, { type: "error", duration: 9000 });
+        else if (r.status === "exists") showToast(`"${r.name}"은(는) 이미 목록에 있어서 그 곡을 선택했어요.`);
+        else if (r.status === "replaced") showToast(`"${r.name}"의 망가진 기존 파일을 새 파일로 바꿨어요 · BPM ${r.bpm}`);
+        else showToast(`"${r.name}" 추가됨 · BPM ${r.bpm}`);
+      } else {
+        const parts = [`${added}곡 추가`];
+        if (exists) parts.push(`${exists}곡 이미 있음`);
+        if (failed) parts.push(`${failed}곡 실패`);
+        showToast(parts.join(" · ") + (failed ? " — 실패 이유는 설정 → 음악에서 확인하세요." : ""), { type: failed ? "error" : "info", duration: failed ? 9000 : 4000 });
+      }
     });
   }
 
