@@ -1,0 +1,15 @@
+; LS ELECTRIC XGB XBC-DR32H - pad lights only (XG5000, mnemonic / IL view)
+; CPU type in XG5000: XGB-XBCH
+; Pad pressed (Pico GP12~16 -> opto -> P00000~P00004) lights that pad's LED (P00020~P00024).
+; Terminal labels: inputs P00~P04, outputs P20~P24. COM0 = P20~P23, COM1 = P24~P27 -> 5V SMPS 0V.
+LOAD  P00000
+OUT   P00020
+LOAD  P00001
+OUT   P00021
+LOAD  P00002
+OUT   P00022
+LOAD  P00003
+OUT   P00023
+LOAD  P00004
+OUT   P00024
+END
