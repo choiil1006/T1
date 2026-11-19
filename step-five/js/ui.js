@@ -601,7 +601,7 @@
   let importing = false;
 
   function initMusicUpload() {
-    SF.$("audioFile").addEventListener("change", async (e) => {
+    SF.$("audioFile").addEventListener("change", (e) => {
       const files = [...e.target.files];
       // clear right away: picking the same file again (e.g. after a failed
       // attempt) must still fire "change"
@@ -609,48 +609,121 @@
       if (!files.length) return;
       if (importing) { showToast("곡을 불러오는 중이에요. 끝난 뒤 다시 골라 주세요."); return; }
       SF.sfx.unlock();
-      importing = true;
-      const label = SF.$("fileLabel"), status = SF.$("uploadStatus");
-      label.classList.add("busy");
-      SF.preview.stop();
+      importFiles(files, { select: true, label: "" });
+    });
+  }
 
-      const results = [];
-      try {
-        for (let i = 0; i < files.length; i++) {
-          const msg = files.length > 1 ? `불러오는 중 ${i + 1}/${files.length} — ${files[i].name}` : `"${files[i].name}" 불러오는 중…`;
-          status.textContent = msg;
-          if (i === 0 || files.length === 1) showToast(files.length > 1 ? `${files.length}곡 불러오는 중… (설정 → 음악에서 진행 상황 확인)` : msg, { duration: 2000 });
-          results.push(await importOneFile(files[i]));
+  // Imports a list of Files, or {name, load: async () => File} items that are
+  // only fetched when their turn comes (the song folder). Shows progress
+  // under the picker, the per-file report, and a summary toast.
+  //   select: select the last song that came in (not for background syncs,
+  //           which must never change the song under a game that's running)
+  //   label:  prefix for the progress/summary text ("곡 폴더: ")
+  //   yieldToGame: wait while a song is being played (keeps play smooth on a Pi)
+  async function importFiles(items, { select = true, label = "", yieldToGame = false } = {}) {
+    importing = true;
+    const pickerLabel = SF.$("fileLabel"), status = SF.$("uploadStatus");
+    pickerLabel.classList.add("busy");
+    if (select) SF.preview.stop();
+
+    const results = [];
+    try {
+      for (let i = 0; i < items.length; i++) {
+        while (yieldToGame && state.running) await new Promise((r) => setTimeout(r, 1000));
+        const name = items[i].name;
+        const msg = items.length > 1 ? `${label}불러오는 중 ${i + 1}/${items.length} — ${name}` : `${label}"${name}" 불러오는 중…`;
+        status.textContent = msg;
+        if (i === 0) showToast(items.length > 1 ? `${label}${items.length}곡 불러오는 중… (설정 → 음악에서 진행 상황 확인)` : msg, { duration: 2000 });
+        let file = items[i];
+        if (typeof file.load === "function") {
+          try { file = await file.load(); }
+          catch (err) { results.push({ status: "failed", name, reason: `곡 폴더에서 가져오지 못했어요 (${err && err.message ? err.message : err})` }); continue; }
         }
-      } finally {
-        importing = false;
-        label.classList.remove("busy");
-        status.textContent = "";
+        results.push(await importOneFile(file));
       }
+    } finally {
+      importing = false;
+      pickerLabel.classList.remove("busy");
+      status.textContent = "";
+    }
 
-      await renderSongList();
-      showUploadReport(results);
-      const count = (s) => results.filter((r) => r.status === s).length;
-      const added = count("added") + count("replaced"), exists = count("exists"), failed = count("failed");
+    await renderSongList();
+    showUploadReport(results);
+    const count = (s) => results.filter((r) => r.status === s).length;
+    const added = count("added") + count("replaced"), exists = count("exists"), failed = count("failed");
 
-      // select the last song that came in (or, if all were already there, the last of those)
+    // select the last song that came in (or, if all were already there, the last of those)
+    if (select && !state.running) {
       const target = [...results].reverse().find((r) => r.status === "added" || r.status === "replaced") ||
                      [...results].reverse().find((r) => r.status === "exists");
       if (target) { await selectSong(target.id); scrollActiveSongIntoView(true); }
+    }
 
-      if (files.length === 1) {
-        const r = results[0];
-        if (r.status === "failed") showToast(`"${r.name}"을(를) 읽을 수 없습니다 — ${r.reason}`, { type: "error", duration: 9000 });
-        else if (r.status === "exists") showToast(`"${r.name}"은(는) 이미 목록에 있어서 그 곡을 선택했어요.`);
-        else if (r.status === "replaced") showToast(`"${r.name}"의 망가진 기존 파일을 새 파일로 바꿨어요 · BPM ${r.bpm}`);
-        else showToast(`"${r.name}" 추가됨 · BPM ${r.bpm}`);
-      } else {
-        const parts = [`${added}곡 추가`];
-        if (exists) parts.push(`${exists}곡 이미 있음`);
-        if (failed) parts.push(`${failed}곡 실패`);
-        showToast(parts.join(" · ") + (failed ? " — 실패 이유는 설정 → 음악에서 확인하세요." : ""), { type: failed ? "error" : "info", duration: failed ? 9000 : 4000 });
-      }
-    });
+    if (items.length === 1 && !label) {
+      const r = results[0];
+      if (r.status === "failed") showToast(`"${r.name}"을(를) 읽을 수 없습니다 — ${r.reason}`, { type: "error", duration: 9000 });
+      else if (r.status === "exists") showToast(`"${r.name}"은(는) 이미 목록에 있어서 그 곡을 선택했어요.`);
+      else if (r.status === "replaced") showToast(`"${r.name}"의 망가진 기존 파일을 새 파일로 바꿨어요 · BPM ${r.bpm}`);
+      else showToast(`"${r.name}" 추가됨 · BPM ${r.bpm}`);
+    } else {
+      const parts = [`${label}${added}곡 추가`];
+      if (exists) parts.push(`${exists}곡 이미 있음`);
+      if (failed) parts.push(`${failed}곡 실패`);
+      showToast(parts.join(" · ") + (failed ? " — 실패 이유는 설정 → 음악에서 확인하세요." : ""), { type: failed ? "error" : "info", duration: failed ? 9000 : 4000 });
+    }
+    return results;
+  }
+
+  // ---- song folder (game served by pi/server.py on the Raspberry Pi) ----
+  // The server lists a folder of audio files at songs/index.json. On every
+  // start (and from Settings) any file there that isn't in the library yet —
+  // same name and size — is fetched and imported like a normal upload. When
+  // the game runs elsewhere (GitHub Pages, a plain file server) that address
+  // doesn't exist and this stays silent.
+  let folderInfo = null; // {folder, count, checkedAt} once a folder server answered
+
+  function renderFolderCard() {
+    const card = SF.$("songFolderCard");
+    if (!folderInfo) { card.style.display = "none"; return; }
+    card.style.display = "block";
+    SF.$("songFolderPath").textContent = folderInfo.folder || "songs";
+    SF.$("songFolderStatus").textContent =
+      `폴더에 ${folderInfo.count}곡 · 마지막 확인 ${new Date(folderInfo.checkedAt).toLocaleTimeString()}`;
+  }
+
+  async function syncSongFolder({ manual = false } = {}) {
+    if (importing) { if (manual) showToast("곡을 불러오는 중이에요. 끝난 뒤 다시 눌러 주세요."); return; }
+    let data;
+    try {
+      const res = await fetch("songs/index.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      data = await res.json();
+      if (!data || !Array.isArray(data.songs)) throw new Error("bad index");
+    } catch (err) {
+      if (manual) showToast("곡 폴더를 찾을 수 없어요 — 라즈베리파이의 게임 서버(pi/server.py)로 켰을 때만 동작해요.", { type: "error", duration: 7000 });
+      return;
+    }
+    folderInfo = { folder: data.folder, count: data.songs.length, checkedAt: Date.now() };
+    renderFolderCard();
+
+    // what the library already has, by name -> stored size
+    const have = new Map();
+    for (const s of await SF.storage.getSongIndex()) {
+      const rec = await SF.storage.idbGet("song:" + s.id);
+      have.set(s.name.normalize("NFC"), rec && rec.blob ? rec.blob.size : 0);
+    }
+    const todo = data.songs.filter((s) => have.get(String(s.name).normalize("NFC")) !== s.size);
+    if (!todo.length) { if (manual) showToast(`곡 폴더에 새 곡이 없어요 (${data.songs.length}곡 모두 목록에 있음).`); return; }
+
+    await importFiles(todo.map((s) => ({
+      name: s.name,
+      load: async () => {
+        const res = await fetch(s.url, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const blob = await res.blob();
+        return new File([blob], s.name, { type: blob.type || "audio/mpeg", lastModified: s.mtime || Date.now() });
+      },
+    })), { select: false, label: "곡 폴더: ", yieldToGame: true });
   }
 
   // runs the moment a song becomes current and hasn't been analyzed before —
@@ -765,11 +838,21 @@
         if (target) { await selectSong(target.id); scrollActiveSongIntoView(false); }
       }
     } catch (err) { /* ignore */ }
+
+    // new songs dropped into the Pi's song folder come in on every start
+    try {
+      await syncSongFolder();
+      if (!state.currentSongId && !state.running) {
+        const list = visibleSongs();
+        if (list.length) { await selectSong(list[0].id); scrollActiveSongIntoView(false); }
+      }
+    } catch (err) { console.warn("song folder sync failed", err); }
   }
 
   function initSettingsScreen() {
     SF.$("openSettingsBtn").addEventListener("click", () => { SF.sfx.unlock(); SF.sfx.playMenu("select"); showScreen("settings"); });
     SF.$("settingsBackBtn").addEventListener("click", backToSelect);
+    SF.$("songFolderSyncBtn").addEventListener("click", () => syncSongFolder({ manual: true }));
   }
 
   function init() {

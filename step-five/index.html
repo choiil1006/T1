@@ -99,6 +99,14 @@
         <p class="hint">불러온 곡은 이 브라우저에 저장되어 곡 선택 화면에 나타납니다. 곡이 안 읽히거나 소리가 안 나면 <a href="diag.html" style="color:var(--ul);">진단 페이지</a>에서 원인을 확인할 수 있어요.</p>
       </section>
 
+      <section class="cut panel card" id="songFolderCard" style="display:none;">
+        <div class="panelHead"><span class="panelTag">SONG FOLDER</span><span class="panelSub">곡 폴더</span></div>
+        <div class="folderPath" id="songFolderPath">songs</div>
+        <div id="songFolderStatus" class="hint"></div>
+        <button class="btn" id="songFolderSyncBtn" style="width:100%;">곡 폴더 다시 읽기</button>
+        <p class="hint">이 폴더에 MP3를 복사해 넣으면 게임을 켤 때마다 새 곡이 자동으로 추가돼요. 지금 바로 넣으려면 위 버튼을 누르세요.</p>
+      </section>
+
       <section class="cut panel card" id="songManageCard" style="display:none;">
         <div class="panelHead"><span class="panelTag">LIBRARY</span><span class="panelSub">저장된 곡 관리</span></div>
         <div id="songManageContainer"></div>
