@@ -31,7 +31,7 @@
       "4": "P0002B",
       "5": "P0002C"
     },
-    "stripPower": "LED strips are 5V USB RGB neon (common +): common -> 5V+, B -> pad output, R/G bundles -> P00025/P00026, output COM -> 5V 0V"
+    "stripPower": "Pad LED strips: 24V RGB, common +24V. +24V -> separate 24V SMPS +V, B -> P00020~P00024 (pad lights only) , output COM0/COM1 -> 24V SMPS 0V. Do not power strips from the PLC 24V service output (0.4A)."
   },
   "reserved": {
     "inputs": "P00009-P0000F",
