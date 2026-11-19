@@ -103,7 +103,16 @@
     log("");
     log(`■ ${label}: ${file.name || "(이름 없음)"}`);
     const head = new Uint8Array(await file.slice(0, 64).arrayBuffer());
-    log(`크기 ${mb(file.size)} · 브라우저가 알려준 형식 "${file.type || "(없음)"}" · 실제 내용 ${sniff(head)} · 앞부분 ${[...head.slice(0, 8)].map((b) => b.toString(16).padStart(2, "0")).join(" ")}`);
+    log(`크기 ${file.size.toLocaleString()}바이트 · 브라우저가 알려준 형식 "${file.type || "(없음)"}" · 실제 내용 ${sniff(head)} · 앞부분 ${[...head.slice(0, 8)].map((b) => b.toString(16).padStart(2, "0")).join(" ") || "(없음)"}`);
+    // a 0-byte File for a file that isn't empty means the browser couldn't open it;
+    // a zero/missing modification time points the same way, and non-ASCII names on
+    // USB sticks are a classic cause on Linux (file name character-set mismatch)
+    const nonAscii = /[^\x20-\x7e]/.test(file.name || "");
+    log(`수정 시각 ${file.lastModified ? new Date(file.lastModified).toLocaleString() : "(없음)"} · 이름에 한글/특수문자 ${nonAscii ? "있음" : "없음"}`, file.size ? "" : "warn");
+    if (!file.size) {
+      log("  → 브라우저가 파일을 0바이트로 받았어요. 파일 관리자에서 크기가 정상이면, 브라우저가 그 위치나 이름의 파일을 열지 못한 것입니다.", "bad");
+      log("    ① 홈 폴더(다운로드/음악)로 복사 → ② 이름을 영문으로 바꿔서 다시 검사해 보세요. 어느 단계에서 되는지가 원인입니다.", "bad");
+    }
 
     // 1. <audio> element (preview uses this)
     let t0 = performance.now();
