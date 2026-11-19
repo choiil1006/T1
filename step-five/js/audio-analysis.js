@@ -223,7 +223,10 @@
   // bytes actually are (the extension often lies: downloaders save web
   // pages or other formats under ".mp3")
   async function describeUnreadable(file) {
-    if (!file.size) return "빈 파일이에요 (0바이트). 다시 다운로드해 주세요.";
+    if (!file.size) {
+      return "브라우저가 이 파일을 0바이트(빈 파일)로 받았어요. 파일이 실제로 비어 있거나(복사·다운로드가 덜 됨), USB·휴대폰·네트워크 폴더처럼 브라우저가 내용을 못 읽는 위치에 있는 경우예요. " +
+        "파일 관리자에서 크기를 확인하고, 내 컴퓨터의 다운로드/음악 폴더로 복사한 뒤 다시 올려 주세요.";
+    }
     const head = new Uint8Array(await file.slice(0, 64).arrayBuffer());
     const ascii = String.fromCharCode(...head).toLowerCase();
     const at = (i, ...bytes) => bytes.every((b, k) => head[i + k] === b);
