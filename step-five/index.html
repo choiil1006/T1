@@ -126,6 +126,18 @@
       </section>
 
       <section class="cut panel card">
+        <div class="panelHead"><span class="panelTag">AUTO</span><span class="panelSub">자동 레인</span></div>
+        <div id="autoLaneBox" style="display:flex;flex-wrap:wrap;gap:8px 16px;">
+          <label><input type="checkbox" data-auto-lane="DL"> ↙ 좌하</label>
+          <label><input type="checkbox" data-auto-lane="UL"> ↖ 좌상</label>
+          <label><input type="checkbox" data-auto-lane="CN"> ⊙ 가운데</label>
+          <label><input type="checkbox" data-auto-lane="UR"> ↗ 우상</label>
+          <label><input type="checkbox" data-auto-lane="DR"> ↘ 우하</label>
+        </div>
+        <p class="hint">체크한 칸은 게임 중에 자동으로 눌려요(항상 PERFECT). 고장난 발판용 — 그 칸의 실제 입력은 무시됩니다.</p>
+      </section>
+
+      <section class="cut panel card">
         <div class="panelHead"><span class="panelTag">LOAD CELL</span><span class="panelSub">로드셀 영점</span></div>
         <div class="lcRow">
           <button class="btn" id="lcConnectBtn">보드 연결</button>

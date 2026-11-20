@@ -792,6 +792,19 @@
     });
   }
 
+  function initAutoLanes() {
+    document.querySelectorAll("[data-auto-lane]").forEach((box) => {
+      const lane = box.dataset.autoLane;
+      box.checked = !!(state.autoLanes && state.autoLanes[lane]);
+      if (box.dataset.bound) return;
+      box.dataset.bound = "1";
+      box.addEventListener("change", () => {
+        state.autoLanes = Object.assign({}, state.autoLanes, { [lane]: box.checked });
+        SF.storage.persistGlobalSettings();
+      });
+    });
+  }
+
   function initStartAndResultButtons() {
     SF.$("startBtn").addEventListener("click", startSelected);
     SF.$("resumeBtn").addEventListener("click", SF.game.togglePause);
@@ -824,8 +837,13 @@
           state.syncOffsetMs = settings.syncOffsetMs;
           SF.$("offsetInput").value = state.syncOffsetMs;
         }
+        if (settings.autoLanes) {
+          state.autoLanes = Object.assign({ DL: false, UL: false, CN: false, UR: false, DR: false }, settings.autoLanes);
+        }
       }
     } catch (err) { /* ignore */ }
+
+    initAutoLanes();
 
     await renderSongList();
 

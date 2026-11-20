@@ -267,11 +267,27 @@
       const appearAt = note.time - approach;
       if (now < appearAt) break; // sorted by time: nothing later is on screen yet
 
+      // auto lane (설정 3 · 자동 레인): the game hits this lane's notes itself,
+      // PERFECT exactly on time — for a pad whose sensor is broken
+      if (isAuto(note.lane) && !note.hit && now >= note.time) {
+        flashReceptor(note.lane);
+        note.hit = true;
+        if (note.hold) {
+          note.holdState = "holding"; note.headGrade = "perfect"; note.releasedAt = null;
+          registerJudgement("perfect", note.lane);
+        } else {
+          note.judged = true;
+          if (note.el) { note.el.classList.add("hitpop"); const el = note.el; note.el = null; setTimeout(() => el.remove(), 200); }
+          registerJudgement("perfect", note.lane);
+          continue;
+        }
+      }
+
       // hold notes already being held: check for completion or early release
       if (note.hold && note.holdState === "holding") {
         const HOLD_TAIL_GRACE = 150; // releasing slightly early near the very end still counts
         const nearEnd = now >= note.holdEnd - HOLD_TAIL_GRACE;
-        if (state.laneHeld[note.lane]) {
+        if (state.laneHeld[note.lane] || isAuto(note.lane)) {
           note.releasedAt = null;
           if (now >= note.holdEnd - 1) { finalizeHold(note, true); continue; }
         } else if (nearEnd) {
@@ -389,8 +405,11 @@
     registerJudgement(success ? (note.headGrade || "great") : "miss", note.lane);
   }
 
+  function isAuto(lane) { return !!(state.autoLanes && state.autoLanes[lane]); }
+
   function handleHit(lane) {
     if (!state.running || state.paused) return;
+    if (isAuto(lane)) return; // auto lane: the (broken) pad's presses are ignored
     const notes = state.notes;
     // ignore repeated/auto-repeat presses while a hold in this lane is actively being held
     for (let i = liveFrom; i < notes.length; i++) {

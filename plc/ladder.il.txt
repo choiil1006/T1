@@ -1,0 +1,42 @@
+; FX3U-32MT/ES ladder (instruction list). Octal device numbers.
+; Inputs : X10-X14 pad pressed (from Pico), X15-X17 score level (1,2,4), X0 combo on
+; Outputs: Y10-Y14 pad blue, Y15 + Y16 combo yellow (red+green, shared by all pads),
+;          Y17,Y7,Y6,Y5,Y4 score lamps 1..5
+
+; --- pad blue ---
+LD  X010
+OUT Y010
+LD  X011
+OUT Y011
+LD  X012
+OUT Y012
+LD  X013
+OUT Y013
+LD  X014
+OUT Y014
+
+; --- combo yellow (red + green on every pad) ---
+LD  X000
+OUT Y015
+LD  X000
+OUT Y016
+
+; --- score lamps: level N lights N lamps ---
+LD  X015
+OR  X016
+OR  X017
+OUT Y017    ; level >= 1
+LD  X016
+OR  X017
+OUT Y007    ; level >= 2
+LD  X015
+AND X016
+OR  X017
+OUT Y006    ; level >= 3
+LD  X017
+OUT Y005    ; level >= 4
+LD  X015
+OR  X016
+AND X017
+OUT Y004    ; level >= 5
+END

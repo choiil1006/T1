@@ -1,0 +1,159 @@
+// 펌프 발판 v4 (로드셀 방식) - Pico 펌웨어 초안 (실기 미검증)
+// 보드: Raspberry Pi Pico (Arduino-Pico 코어), Tools > USB Stack > Adafruit TinyUSB
+//
+// 하는 일
+//  1) HX711 5개(발판당 로드셀 4개)를 읽어 밟힘/뗌을 판정 → USB 키보드(넘패드 1·7·5·9·3)
+//  2) 같은 상태를 옵토 모듈로 PLC 입력 X10~X14에 복사(GP12~GP16)
+//  3) USB 시리얼 명령(게임이 보냄): 바이트 1개, 0~15
+//       하위 3비트 = 점수 단계 0~5 → GP17~GP19 → PLC X15~X17 (옵토 모듈 1)
+//       비트 3     = 콤보 노랑 켜짐   → GP20       → PLC X0        (옵토 모듈 2)
+//     'd' = 원시값 출력 켜고 끄기, 'z' = 영점 다시 잡기
+//     (시리얼 모니터에서 엔터를 치면 바이트 10이 가서 단계 2 + 콤보가 켜집니다. 시험 중에만 주의)
+//
+// 핀 (v3 설계도와 같음)
+//  좌하 DT2/SCK3, 좌상 DT4/SCK5, 중앙 DT6/SCK7, 우상 DT8/SCK9, 우하 DT10/SCK11. HX711 전원은 3V3(36번).
+//
+// 주의
+//  - HX711은 RATE 핀을 80SPS로 개조한 상태를 가정합니다(안 하면 10SPS라 너무 느립니다).
+//  - 값이 처음 들어올 때(부팅, 선 재연결, 'z') 샘플 16개로 영점을 잡습니다. 그동안 발판 위에 아무것도 올리지 마세요.
+//    (10SPS면 약 1.6초, 80SPS면 약 0.2초) 값이 1초 넘게 끊겼다가 다시 들어오면 영점을 자동으로 다시 잡습니다.
+//  - T_ON, T_OFF는 시작값입니다. 'd'로 원시값을 보며 발판에 맞게 고치세요.
+//  - ACTIVE 비트마스크: 연결한 발판만 켭니다. 발판 1장만 시험할 때는 0b00001(좌하), 5장이 모두 연결되면 0b11111.
+//    (연결 안 된 채널은 읽지 않으므로 오입력이 생기지 않습니다.)
+//  - INVERT: 눌렀을 때 값이 음수로 가는 발판은 해당 칸을 true로 바꾸면 됩니다.
+//  - 'r'을 보내면 채널별 초당 샘플 수를 출력합니다. 80SPS 개조가 되어 있으면 약 80, 안 되어 있으면 약 10입니다.
+#include <Adafruit_TinyUSB.h>
+
+const uint8_t DT[5]  = {2, 4, 6, 8, 10};
+const uint8_t SCK_[5] = {3, 5, 7, 9, 11};
+const uint8_t MIR[5] = {12, 13, 14, 15, 16};      // → PLC X10~X14
+const uint8_t CMD[4] = {17, 18, 19, 20};          // → PLC X15, X16, X17, X0
+const uint8_t ACTIVE = 0b00001;                  // 비트 i = 발판 i 연결됨 (0 좌하, 1 좌상, 2 중앙, 3 우상, 4 우하)
+const uint8_t KEY[5] = {HID_KEY_KEYPAD_1, HID_KEY_KEYPAD_7, HID_KEY_KEYPAD_5, HID_KEY_KEYPAD_9, HID_KEY_KEYPAD_3};
+
+// 눌렀을 때 'd' 값이 음수로 가는 발판은 true로 바꾸세요 (선을 바꾸지 않고 방향만 뒤집음)
+const bool    INVERT[5] = {false, false, false, false, false};   // 좌하, 좌상, 중앙, 우상, 우하
+
+const int32_t T_ON  = 3000;   // 영점 대비 이만큼 커지면 눌림 (대략 2kg 수준, 실측 필요)
+const int32_t T_OFF = 1500;   // 이 밑으로 2번 연속 내려오면 뗌
+const uint8_t RELEASE_SAMPLES = 2;
+
+uint8_t const desc_hid_report[] = { TUD_HID_REPORT_DESC_KEYBOARD() };
+Adafruit_USBD_HID usb_hid;
+
+int32_t baseV[5];
+bool    down[5]    = {false, false, false, false, false};
+uint8_t lowCount[5] = {0, 0, 0, 0, 0};
+bool    dbg = false;
+int32_t lastRaw[5];
+uint32_t sampleCnt[5] = {0, 0, 0, 0, 0};
+uint32_t spsStart = 0;
+
+int32_t readHX(uint8_t dt, uint8_t sck) {
+  uint32_t v = 0;
+  noInterrupts();
+  for (uint8_t i = 0; i < 24; i++) {
+    digitalWrite(sck, HIGH); delayMicroseconds(1);
+    v = (v << 1) | (digitalRead(dt) ? 1 : 0);
+    digitalWrite(sck, LOW);  delayMicroseconds(1);
+  }
+  digitalWrite(sck, HIGH); delayMicroseconds(1); digitalWrite(sck, LOW);  // 25번째 펄스: 채널 A, 이득 128
+  interrupts();
+  if (v & 0x800000) v |= 0xFF000000;
+  return (int32_t)v;
+}
+
+int32_t readPad(uint8_t i) {
+  int32_t v = readHX(DT[i], SCK_[i]);
+  return INVERT[i] ? -v : v;
+}
+
+void sendReport() {
+  uint8_t keys[6] = {0, 0, 0, 0, 0, 0};
+  uint8_t n = 0;
+  for (uint8_t i = 0; i < 5; i++) if (down[i]) keys[n++] = KEY[i];
+  while (!usb_hid.ready()) delayMicroseconds(50);
+  usb_hid.keyboardReport(0, 0, keys);
+}
+
+// 영점 잡기: 발판마다 처음 들어오는 16개 샘플의 평균을 영점으로 씁니다.
+// HX711이 늦게 깨어나거나 선을 다시 꽂아도, 값이 들어오기 시작할 때 자동으로 영점을 잡습니다.
+const uint8_t ZERO_N = 16;
+bool    zeroed[5] = {false, false, false, false, false};
+int64_t zSum[5];
+uint8_t zCnt[5];
+uint32_t lastSample[5] = {0, 0, 0, 0, 0};
+
+void zeroAll() {
+  for (uint8_t i = 0; i < 5; i++) {
+    zeroed[i] = false; zSum[i] = 0; zCnt[i] = 0;
+    if (down[i]) { down[i] = false; lowCount[i] = 0; }
+  }
+  sendReport();
+  for (uint8_t i = 0; i < 5; i++) digitalWrite(MIR[i], LOW);
+}
+
+void setup() {
+  for (uint8_t i = 0; i < 5; i++) {
+    pinMode(DT[i], INPUT_PULLUP); pinMode(SCK_[i], OUTPUT); digitalWrite(SCK_[i], LOW);
+    pinMode(MIR[i], OUTPUT); digitalWrite(MIR[i], LOW);
+  }
+  for (uint8_t i = 0; i < 4; i++) { pinMode(CMD[i], OUTPUT); digitalWrite(CMD[i], LOW); }
+  Serial.begin(115200);
+  usb_hid.setPollInterval(1);
+  usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
+  usb_hid.begin();
+  while (!TinyUSBDevice.mounted()) delay(1);
+  delay(500);
+  zeroAll();                                               // 실제 영점은 loop()에서 첫 샘플 16개로 잡힘
+}
+
+void loop() {
+  bool changed = false;
+  for (uint8_t i = 0; i < 5; i++) {
+    if (!((ACTIVE >> i) & 1)) continue;                      // 연결 안 된 발판은 건너뜀
+    if (digitalRead(DT[i]) != LOW) continue;                 // 아직 새 값 없음
+    int32_t raw = readPad(i);
+    lastRaw[i] = raw; sampleCnt[i]++;
+    uint32_t now = millis();
+    if (now - lastSample[i] > 1000) { zeroed[i] = false; zSum[i] = 0; zCnt[i] = 0; }   // 1초 이상 끊겼다가 다시 들어오면 영점 다시
+    lastSample[i] = now;
+    if (!zeroed[i]) {                                        // 영점 잡는 중: 판정하지 않음
+      if (down[i]) { down[i] = false; lowCount[i] = 0; changed = true; }
+      zSum[i] += raw;
+      if (++zCnt[i] >= ZERO_N) { baseV[i] = (int32_t)(zSum[i] / zCnt[i]); zeroed[i] = true; }
+      continue;
+    }
+    int32_t d = raw - baseV[i];
+    if (!down[i]) {
+      if (d >= T_ON) { down[i] = true; lowCount[i] = 0; changed = true; }   // 눌림: 첫 샘플에서 바로
+      else if (d > -T_ON) baseV[i] += d / 256;                               // 빈 발판일 때만 영점을 천천히 따라감
+    } else {
+      if (d < T_OFF) { if (++lowCount[i] >= RELEASE_SAMPLES) { down[i] = false; changed = true; } }
+      else lowCount[i] = 0;
+    }
+  }
+  for (uint8_t i = 0; i < 5; i++) {                         // 선이 빠져서 값이 안 들어오면 키를 놓음
+    if (down[i] && millis() - lastSample[i] > 300) { down[i] = false; lowCount[i] = 0; changed = true; }
+  }
+  if (changed) {
+    sendReport();
+    for (uint8_t i = 0; i < 5; i++) digitalWrite(MIR[i], down[i] ? HIGH : LOW);
+  }
+  while (Serial.available()) {
+    uint8_t b = Serial.read();
+    if (b < 16 || (b >= 0x80 && b <= 0x8F)) { for (uint8_t i = 0; i < 4; i++) digitalWrite(CMD[i], (b >> i) & 1 ? HIGH : LOW); }
+    else if (b == 'd') dbg = !dbg;
+    else if (b == 'z') zeroAll();
+    else if (b == 'r') {                                     // 초당 샘플 수
+      uint32_t dtms = millis() - spsStart; if (!dtms) dtms = 1;
+      for (uint8_t i = 0; i < 5; i++) { Serial.print((sampleCnt[i] * 1000UL) / dtms); Serial.print(i < 4 ? ',' : '\n'); sampleCnt[i] = 0; }
+      spsStart = millis();
+    }
+  }
+  static uint32_t lastPrint = 0;
+  if (dbg && millis() - lastPrint > 50) {
+    lastPrint = millis();
+    for (uint8_t i = 0; i < 5; i++) { Serial.print(zeroed[i] ? lastRaw[i] - baseV[i] : 0); Serial.print(i < 4 ? ',' : '\n'); }
+  }
+}
