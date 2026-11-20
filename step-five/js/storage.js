@@ -50,21 +50,26 @@
   }
 
   async function addSongToLibrary(file) {
+    // ask the browser not to evict the library when disk runs low (granted
+    // silently in Chromium for sites in use; asked here, on a user action,
+    // so browsers that prompt don't do it on page load)
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* ignore */ }
+    // throws if the song couldn't be stored (quota, private browsing…) so
+    // the caller can say so — a swallowed failure here used to leave the
+    // song selected on screen but missing from the list
     const id = "s" + Date.now() + Math.random().toString(36).slice(2, 7);
-    try {
-      await idbSet("song:" + id, { blob: file, name: file.name });
-      const index = await getSongIndex();
-      index.push({ id, name: file.name, addedAt: Date.now() });
-      await setSongIndex(index);
-      await idbSet("lastSelectedId", id);
-    } catch (err) { console.warn("song save failed", err); }
+    await idbSet("song:" + id, { blob: file, name: file.name });
+    const index = await getSongIndex();
+    index.push({ id, name: file.name, addedAt: Date.now() });
+    await idbSet("songIndex", index);
+    await idbSet("lastSelectedId", id);
     return id;
   }
 
   async function persistGlobalSettings() {
     const s = SF.state;
     try {
-      await idbSet("settings", { difficulty: s.difficulty, mapping: s.mapping, syncOffsetMs: s.syncOffsetMs, plcComboOn: s.plcComboOn, autoLanes: s.autoLanes });
+      await idbSet("settings", { difficulty: s.difficulty, mapping: s.mapping, syncOffsetMs: s.syncOffsetMs, autoLanes: s.autoLanes });
     } catch (err) { console.warn("settings save failed", err); }
   }
 
@@ -82,8 +87,19 @@
         useCustomChart: s.useCustomChart,
         customChart: s.customChart,
         analyzed: !!s.songAnalyzed,
+        previewStart: s.previewStartSec,
       });
     } catch (err) { console.warn("song meta save failed", err); }
+  }
+
+  // merge fields into one song's stored meta — for results that finish
+  // after the user may have moved on to another song (unlike
+  // persistSongMeta, which writes whatever song is current)
+  async function updateSongMeta(id, patch) {
+    try {
+      const meta = (await idbGet("songMeta:" + id)) || {};
+      await idbSet("songMeta:" + id, { ...meta, ...patch });
+    } catch (err) { console.warn("song meta update failed", err); }
   }
 
   async function getSongMeta(id) {
@@ -115,6 +131,20 @@
     return { isNewBest, best: scores[difficulty] };
   }
 
+  // records are only comparable on the same chart: when the generator's
+  // output changes (SF.CHART_VERSION), every stored best is cleared once.
+  // Returns true if any records were actually deleted.
+  async function resetScoresIfChartChanged() {
+    const stored = await idbGet("chartVersion");
+    if (stored === SF.CHART_VERSION) return false;
+    let cleared = false;
+    for (const s of await getSongIndex()) {
+      if (await idbGet("scores:" + s.id)) { await idbDelete("scores:" + s.id); cleared = true; }
+    }
+    await idbSet("chartVersion", SF.CHART_VERSION);
+    return cleared;
+  }
+
   async function migrateLegacySingleSong() {
     // migrate the old single-song scheme (from an earlier version) into the library, once
     try {
@@ -141,8 +171,8 @@
     idbGet, idbSet, idbDelete,
     getSongIndex, setSongIndex, addSongToLibrary,
     persistGlobalSettings, loadGlobalSettings,
-    persistSongMeta, getSongMeta, deleteSongRecord,
-    getHighScores, reportScore,
+    persistSongMeta, updateSongMeta, getSongMeta, deleteSongRecord,
+    getHighScores, reportScore, resetScoresIfChartChanged,
     migrateLegacySingleSong,
   };
 })();

@@ -3,18 +3,16 @@
   "use strict";
 
   SF.state = {
-    audioURL: null, audioFile: null, audioEl: null, bpm: 120, difficulty: "normal",
-    phaseOffsetMs: 0, currentSongId: null,
+    audioURL: null, audioFile: null, bpm: 120, difficulty: "normal",
+    phaseOffsetMs: 0, currentSongId: null, currentSongName: "",
     songAnalyzed: false, // has automatic BPM/onset analysis already run for the current song?
+    previewStartSec: null, // where the current song's highlight starts (song select preview); null = not known yet
 
     // signed ms: how far the perceived beat lags the audio element's reported
     // currentTime (positive = your speakers/headphones are late). Judge time
     // is corrected by subtracting this, so hits land right instead of always
     // reading as early or late for a given setup.
     syncOffsetMs: 0,
-
-    // combo count at which the PLC combo (yellow) light turns on; 0 = never
-    plcComboOn: 30,
 
     // lanes the game plays by itself (every note hit PERFECT on time) —
     // for a pad whose sensor is broken. Set in 설정 3 (자동 레인).
@@ -34,7 +32,7 @@
     // SF.MAX_SCORE[difficulty]; rawScore is the unscaled running total and
     // maxRawScore what a flawless run of the current chart would total
     score: 0, rawScore: 0, maxRawScore: 0, combo: 0, maxCombo: 0,
-    counts: { perfect: 0, great: 0, good: 0, bad: 0, miss: 0, empty: 0 },
+    counts: { perfect: 0, great: 0, good: 0, bad: 0, miss: 0 },
     totalJudged: 0,
     running: false, paused: false,
     rafId: null,
@@ -43,11 +41,6 @@
     customChart: null,
     edRecording: false,
     laneHeld: { DL: false, UL: false, CN: false, UR: false, DR: false },
-
-    // populated only after "파일 분석으로 자동 측정" runs; lets chart
-    // generation bias note density toward the song's real onsets instead of
-    // being fully random. Not persisted — it's cheap to recompute.
-    onset: null, // {envelope:Float32Array, fps:number, max:number}
   };
 
   SF.screens = {}; // filled in by ui.js once the DOM is ready

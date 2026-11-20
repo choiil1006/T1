@@ -1,7 +1,7 @@
 // Automatic BPM + phase detection from the uploaded audio file itself (via
-// onset autocorrelation), run automatically whenever a song is selected. It
-// also hands back the onset envelope, which chart-generator.js uses to bias
-// note placement toward the song's real beats.
+// onset autocorrelation), run automatically whenever a song is selected, plus
+// the per-band onset features chart-generator.js builds charts from
+// (computed from the decoded song each time it's played — see player.js).
 (function () {
   "use strict";
 
@@ -13,17 +13,18 @@
     return out;
   }
 
-  async function analyzeBPM(file) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    const ac = new AC();
-    const arrayBuffer = await file.arrayBuffer();
-    const audioBuffer = await ac.decodeAudioData(arrayBuffer);
-    const data = mixToMono(audioBuffer);
-    const sr = audioBuffer.sampleRate;
+  const FPS = 100;
 
-    // 1) energy envelope at ~100 fps
-    const fps = 100;
-    const hop = Math.round(sr / fps);
+  // RMS energy per frame (FPS frames/sec) -> onset strength = positive rise
+  function onsetFromEnergy(energy) {
+    const onset = new Float32Array(energy.length);
+    for (let i = 1; i < energy.length; i++) onset[i] = Math.max(0, energy[i] - energy[i - 1]);
+    return onset;
+  }
+
+  // RMS loudness per ~10 ms frame
+  function energyEnvelope(data, sr) {
+    const hop = Math.round(sr / FPS);
     const frames = Math.floor(data.length / hop);
     const energy = new Float32Array(frames);
     for (let i = 0; i < frames; i++) {
@@ -32,13 +33,144 @@
       for (let j = start; j < end; j++) { const v = data[j]; sum += v * v; }
       energy[i] = Math.sqrt(sum / hop);
     }
-    // 2) onset strength = positive energy rise
-    const onset = new Float32Array(frames);
-    let onsetMax = 0;
-    for (let i = 1; i < frames; i++) {
-      onset[i] = Math.max(0, energy[i] - energy[i - 1]);
-      if (onset[i] > onsetMax) onsetMax = onset[i];
+    return energy;
+  }
+
+  function fullBandOnset(data, sr) {
+    return onsetFromEnergy(energyEnvelope(data, sr));
+  }
+
+  const PREVIEW_SEC = 15;
+
+  // Where the song's highlight (usually the chorus) starts, in seconds: the
+  // loudest/busiest PREVIEW_SEC stretch, pulled back to where that loud part
+  // begins, then snapped to a bar line so the preview starts on the beat.
+  // The intro (first 10%) and the very end are skipped.
+  function findHighlight(energy, onset, fps, durationSec, bpm, phaseMs) {
+    if (durationSec < PREVIEW_SEC + 10) return 0;
+    const blockSec = 0.5, per = Math.max(1, Math.round(fps * blockSec));
+    const nb = Math.floor(energy.length / per);
+    const blocks = new Float64Array(nb);
+    for (let b = 0; b < nb; b++) {
+      let e = 0, o = 0;
+      for (let i = b * per; i < (b + 1) * per; i++) { e += energy[i]; o += onset[i]; }
+      blocks[b] = e / per + (o / per) * 4; // loud AND busy beats loud-but-flat
     }
+    const prefix = new Float64Array(nb + 1);
+    for (let b = 0; b < nb; b++) prefix[b + 1] = prefix[b] + blocks[b];
+    const w = Math.round(PREVIEW_SEC / blockSec);
+    const lo = Math.floor((durationSec * 0.1) / blockSec);
+    const hi = Math.floor((durationSec - PREVIEW_SEC - 3) / blockSec);
+    if (hi <= lo) return Math.max(0, Math.min(durationSec * 0.3, durationSec - PREVIEW_SEC));
+    let best = lo, bestSum = -1;
+    for (let s = lo; s <= hi; s++) {
+      const sum = prefix[s + w] - prefix[s];
+      if (sum > bestSum) { bestSum = sum; best = s; }
+    }
+    // the loudest window often starts mid-chorus: back up (up to 8 s) while
+    // the music is still about as loud, to catch the start of that section
+    const thr = 0.8 * (bestSum / w);
+    let s = best;
+    while (s > lo && s > best - 16 && blocks[s - 1] >= thr) s--;
+    let startSec = s * blockSec;
+    if (bpm > 0) {
+      const bar = (4 * 60) / bpm, ph = (phaseMs || 0) / 1000;
+      startSec = ph + Math.round((startSec - ph) / bar) * bar;
+    }
+    return Math.round(Math.max(0, Math.min(durationSec - PREVIEW_SEC, startSec)) * 100) / 100;
+  }
+
+  // Decoding for analysis goes through an OfflineAudioContext: it never
+  // touches the sound card, so it works even where the audio output is
+  // missing or misconfigured (a common state on a Raspberry Pi) and needs
+  // no user interaction. A real-time context is only the fallback.
+  const ANALYSIS_RATE = 44100;
+  async function decodeAudio(file) {
+    const data = await file.arrayBuffer();
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (OAC) {
+      try { return await new OAC(1, 1, ANALYSIS_RATE).decodeAudioData(data.slice(0)); }
+      catch (err) { if (err && err.name === "EncodingError") throw err; /* else try the real-time path */ }
+    }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ac = new AC();
+    try { return await ac.decodeAudioData(data); } finally { ac.close(); }
+  }
+
+  async function decodeMono(file) {
+    const audioBuffer = await decodeAudio(file);
+    return { data: mixToMono(audioBuffer), sr: audioBuffer.sampleRate, duration: audioBuffer.duration };
+  }
+
+  // decode failures that are about the FILE (unreadable data) vs. about the
+  // browser/device (out of memory, audio system unavailable…) — the second
+  // kind must not be reported as "your MP3 is broken"
+  function isFileProblem(err) {
+    return !!err && (err.name === "EncodingError" || /decode|unable to decode/i.test(err.message || ""));
+  }
+
+  // highlight only, for songs analyzed before highlights existed
+  async function analyzeHighlight(file, bpm, phaseMs) {
+    const { data, sr, duration } = await decodeMono(file);
+    const fps = sr / Math.round(sr / FPS);
+    const energy = energyEnvelope(data, sr);
+    return findHighlight(energy, onsetFromEnergy(energy), fps, duration, bpm, phaseMs);
+  }
+
+  // scale to [0,1] by a high percentile rather than the single loudest
+  // frame, so one spike doesn't flatten the rest of the song
+  function normalize(arr) {
+    const sorted = Array.from(arr).filter((v) => v > 0).sort((a, b) => a - b);
+    const ref = sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.99))] : 1;
+    const out = new Float32Array(arr.length);
+    const k = 1 / Math.max(1e-9, ref);
+    for (let i = 0; i < arr.length; i++) out[i] = Math.min(1, arr[i] * k);
+    return out;
+  }
+
+  // what the chart generator reads: onset strength for the whole mix, the
+  // low end (kick/bass, < ~150 Hz) and the top end (snare/hats, > ~3 kHz),
+  // each [0,1] at FPS frames per second. Low/high come from cheap one-pole
+  // filters — plenty to tell "a kick hit" from "a hi-hat tick".
+  function computeFeatures(audioBuffer) {
+    const data = mixToMono(audioBuffer);
+    const sr = audioBuffer.sampleRate;
+    const hop = Math.round(sr / FPS);
+    const frames = Math.floor(data.length / hop);
+    const aLow = 1 - Math.exp(-2 * Math.PI * 150 / sr);
+    const aHigh = 1 - Math.exp(-2 * Math.PI * 3000 / sr);
+    const eLow = new Float32Array(frames), eHigh = new Float32Array(frames);
+    let lp1 = 0, lp2 = 0, lpH = 0;
+    for (let i = 0; i < frames; i++) {
+      let sL = 0, sH = 0;
+      const start = i * hop, end = start + hop;
+      for (let j = start; j < end; j++) {
+        const x = data[j];
+        lp1 += aLow * (x - lp1);
+        lp2 += aLow * (lp1 - lp2);
+        lpH += aHigh * (x - lpH);
+        const h = x - lpH;
+        sL += lp2 * lp2; sH += h * h;
+      }
+      eLow[i] = Math.sqrt(sL / hop);
+      eHigh[i] = Math.sqrt(sH / hop);
+    }
+    return {
+      fps: sr / hop, // exact frame rate (hop is rounded, e.g. 221 samples at 22.05 kHz)
+      full: normalize(fullBandOnset(data, sr)),
+      low: normalize(onsetFromEnergy(eLow)),
+      high: normalize(onsetFromEnergy(eHigh)),
+    };
+  }
+
+  async function analyzeBPM(file) {
+    const { data, sr, duration } = await decodeMono(file);
+
+    // 1-2) onset strength (positive rise of the ~100 fps energy envelope)
+    const fps = sr / Math.round(sr / FPS); // exactly 100 at 44.1/48 kHz
+    const energy = energyEnvelope(data, sr);
+    const onset = onsetFromEnergy(energy);
+    const frames = onset.length;
 
     // 3) autocorrelation over plausible tempo range (60-200 BPM), weighted by
     //    a tempo prior to avoid octave errors. Plain unweighted autocorrelation
@@ -83,53 +215,33 @@
     }
     const phaseMs = (bestPhase / fps) * 1000;
 
-    ac.close();
-    return { bpm, phaseMs, onset: { envelope: onset, fps, max: onsetMax || 1 } };
+    const highlightSec = findHighlight(energy, onset, fps, duration, bpm, phaseMs);
+    return { bpm, phaseMs, highlightSec, durationSec: duration };
   }
 
-  // strength in [0,1] of the song's onset envelope near time `ms`; 0.5 (flat)
-  // if no analysis has been run for the current audio.
-  function onsetStrengthAt(ms) {
-    const o = SF.state.onset;
-    if (!o) return 0.5;
-    const idx = Math.round((ms / 1000) * o.fps);
-    if (idx < 0 || idx >= o.envelope.length) return 0;
-    return Math.min(1, o.envelope[idx] / o.max);
-  }
-
-  // the tallest onset value within +-halfWindowMs of `ms` — used for
-  // "is there really a hit near this beat-grid slot" checks, which is more
-  // forgiving of small phase/quantization error than sampling one instant
-  function onsetPeakNear(ms, halfWindowMs) {
-    const o = SF.state.onset;
-    if (!o) return 0.5;
-    const half = Math.max(1, Math.round((halfWindowMs / 1000) * o.fps));
-    const center = Math.round((ms / 1000) * o.fps);
-    let peak = 0;
-    for (let i = center - half; i <= center + half; i++) {
-      if (i < 0 || i >= o.envelope.length) continue;
-      const v = o.envelope[i] / o.max;
-      if (v > peak) peak = v;
+  // a short, human reason why `file` couldn't be decoded, from what its
+  // bytes actually are (the extension often lies: downloaders save web
+  // pages or other formats under ".mp3")
+  async function describeUnreadable(file) {
+    if (!file.size) {
+      return "브라우저가 이 파일을 0바이트(빈 파일)로 받았어요. 파일이 실제로 비어 있거나(복사·다운로드가 덜 됨), USB·휴대폰·네트워크 폴더처럼 브라우저가 내용을 못 읽는 위치에 있는 경우예요. " +
+        "파일 관리자에서 크기를 확인하고, 내 컴퓨터의 다운로드/음악 폴더로 복사한 뒤 다시 올려 주세요.";
     }
-    return Math.min(1, peak);
-  }
-
-  // the average onset strength over a wide window around `ms` (several
-  // seconds) — a smoothed read of "how busy is this section of the song",
-  // for verse/chorus-scale density decisions rather than single-beat ones
-  function onsetWindowAvg(ms, windowMs) {
-    const o = SF.state.onset;
-    if (!o) return 0.5;
-    const half = Math.max(1, Math.round((windowMs / 2 / 1000) * o.fps));
-    const center = Math.round((ms / 1000) * o.fps);
-    let sum = 0, count = 0;
-    for (let i = center - half; i <= center + half; i++) {
-      if (i < 0 || i >= o.envelope.length) continue;
-      sum += o.envelope[i] / o.max;
-      count++;
+    const head = new Uint8Array(await file.slice(0, 64).arrayBuffer());
+    const ascii = String.fromCharCode(...head).toLowerCase();
+    const at = (i, ...bytes) => bytes.every((b, k) => head[i + k] === b);
+    if (/^\s*(<!doctype|<html|<head|<\?xml|\{)/.test(ascii)) return "음악이 아니라 웹페이지/텍스트 파일이에요. 다운로드가 제대로 안 된 것 같아요 — 다시 받아 주세요.";
+    if (at(4, 0x66, 0x74, 0x79, 0x70)) return "이름은 MP3지만 실제로는 M4A/MP4 파일인데, 이 브라우저가 해당 코덱을 지원하지 않아요. Chrome에서 열거나 MP3로 변환해 주세요.";
+    if (at(0, 0x1a, 0x45, 0xdf, 0xa3)) return "실제로는 WebM/MKV 파일인데 이 브라우저에서 해독하지 못했어요. MP3로 변환해 주세요.";
+    if (at(0, 0x4f, 0x67, 0x67, 0x53)) return "실제로는 OGG 파일인데 이 브라우저에서 해독하지 못했어요. MP3로 변환해 주세요.";
+    if (at(0, 0x30, 0x26, 0xb2, 0x75)) return "실제로는 WMA 파일이에요 — 브라우저가 지원하지 않는 형식이라 MP3로 변환해 주세요.";
+    if (at(0, 0x49, 0x44, 0x33) || (head[0] === 0xff && (head[1] & 0xe0) === 0xe0)) {
+      return file.size < 100 * 1024
+        ? "MP3지만 너무 작아요 — 다운로드가 중간에 끊긴 것 같아요."
+        : "MP3 파일이지만 손상됐거나 일부가 잘려 있어요. 다시 받아 주세요.";
     }
-    return count > 0 ? sum / count : 0;
+    return "지원하지 않는 형식이거나 손상된 파일이에요. MP3로 변환해 주세요.";
   }
 
-  SF.audioAnalysis = { analyzeBPM, onsetStrengthAt, onsetPeakNear, onsetWindowAvg };
+  SF.audioAnalysis = { analyzeBPM, describeUnreadable, isFileProblem, decodeAudio, analyzeHighlight, findHighlight, computeFeatures, PREVIEW_SEC };
 })();
