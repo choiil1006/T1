@@ -255,6 +255,18 @@
     renderBestPopup(false);
   }
 
+  // 설정 3: 자동 레인 체크박스 (broken pad -> the game hits that lane by itself)
+  function initAutoLanes() {
+    document.querySelectorAll("[data-auto-lane]").forEach((cb) => {
+      const lane = cb.dataset.autoLane;
+      cb.checked = !!(state.autoLanes && state.autoLanes[lane]);
+      cb.addEventListener("change", () => {
+        state.autoLanes = Object.assign({}, state.autoLanes, { [lane]: cb.checked });
+        SF.storage.persistGlobalSettings();
+      });
+    });
+  }
+
   function initMusicUpload() {
     SF.$("audioFile").addEventListener("change", async (e) => {
       const f = e.target.files[0];
@@ -363,12 +375,17 @@
           state.plcComboOn = settings.plcComboOn;
           if (SF.$("plcComboInput")) SF.$("plcComboInput").value = state.plcComboOn;
         }
+        if (settings.autoLanes && typeof settings.autoLanes === "object") {
+          state.autoLanes = Object.assign({ DL: false, UL: false, CN: false, UR: false, DR: false }, settings.autoLanes);
+        }
         if (typeof settings.syncOffsetMs === "number") {
           state.syncOffsetMs = settings.syncOffsetMs;
           SF.$("offsetInput").value = state.syncOffsetMs;
         }
       }
     } catch (err) { /* ignore */ }
+
+    initAutoLanes();
 
     await renderSongList();
 

@@ -99,6 +99,14 @@
         <div class="padSlot" data-lane="UR"><div class="lbl">UP-RIGHT</div><div class="key">Num9</div></div>
         <div class="padSlot" data-lane="DR"><div class="lbl">DOWN-RIGHT</div><div class="key">Num3</div></div>
       </div>
+      <div id="autoLaneBox" style="margin-top:12px;padding:10px;border:1px dashed var(--sub);border-radius:8px;font-size:13px;">
+        <div style="margin-bottom:6px;"><b>자동 레인</b> <span style="color:var(--sub);">센서가 고장 난 발판은 체크하면 게임이 대신 PERFECT로 쳐 줍니다 (그 발판 입력은 무시)</span></div>
+        <label><input type="checkbox" data-auto-lane="DL"> 좌하</label>
+        <label style="margin-left:10px;"><input type="checkbox" data-auto-lane="UL"> 좌상</label>
+        <label style="margin-left:10px;"><input type="checkbox" data-auto-lane="CN"> 중앙</label>
+        <label style="margin-left:10px;"><input type="checkbox" data-auto-lane="UR"> 우상</label>
+        <label style="margin-left:10px;"><input type="checkbox" data-auto-lane="DR"> 우하</label>
+      </div>
       <div id="padStatus">각 칸을 클릭한 뒤, 해당 발판을 밟거나 키를 누르면 자동 등록됩니다. (게임패드로 연결된 발판 자동 인식, 화면의 레인을 직접 클릭/터치해도 플레이할 수 있어요)</div>
     </div>
 

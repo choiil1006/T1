@@ -16,6 +16,10 @@
     // combo count at which the PLC combo (yellow) light turns on; 0 = never
     plcComboOn: 30,
 
+    // lanes the game plays by itself (every note hit PERFECT on time) —
+    // for a pad whose sensor is broken. Set in 설정 3 (자동 레인).
+    autoLanes: { DL: false, UL: false, CN: false, UR: true, DR: false },
+
     mapping: { // default keyboard mapping via numpad geometry
       DL: { type: "key", code: "Numpad1", label: "Num1" },
       UL: { type: "key", code: "Numpad7", label: "Num7" },

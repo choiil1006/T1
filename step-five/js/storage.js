@@ -64,7 +64,7 @@
   async function persistGlobalSettings() {
     const s = SF.state;
     try {
-      await idbSet("settings", { difficulty: s.difficulty, mapping: s.mapping, syncOffsetMs: s.syncOffsetMs, plcComboOn: s.plcComboOn });
+      await idbSet("settings", { difficulty: s.difficulty, mapping: s.mapping, syncOffsetMs: s.syncOffsetMs, plcComboOn: s.plcComboOn, autoLanes: s.autoLanes });
     } catch (err) { console.warn("settings save failed", err); }
   }
 
